@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 28
+Total Python files: 41
 
 ## Table of Contents
 
@@ -45,9 +45,16 @@ Total Python files: 28
 │   ├── interfaces
 │   │   └── __init__.py
 │   ├── registry
-│   │   └── __init__.py
-│   └── events
-│       └── __init__.py
+│   │   ├── __init__.py
+│   │   ├── dependency_tracker.py
+│   │   ├── component_registry.py
+│   │   └── interface_registry.py
+│   ├── events
+│   │   ├── __init__.py
+│   │   ├── event_types.py
+│   │   ├── event_subscribers.py
+│   │   └── event_bus.py
+│   └── __init__.py
 ├── tests
 │   ├── unit
 │   │   ├── core
@@ -57,11 +64,18 @@ Total Python files: 28
 │   │   └── models
 │   │       └── __init__.py
 │   ├── integration
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   ├── test_event_bus.py
+│   │   ├── test_component_registry.py
+│   │   ├── test_component_registry_async.py
+│   │   └── test_component_registry_Simple.py
 │   ├── ui
 │   │   └── __init__.py
-│   └── fixtures
-│       └── __init__.py
+│   ├── fixtures
+│   │   └── __init__.py
+│   ├── examples
+│   │   └── event_bus_example.py
+│   └── __init__.py
 ├── docs
 │   ├── architecture
 
@@ -100,6 +114,39 @@ Total Python files: 28
 
 ## Key Files
 
+### integrations\events\event_types.py
+
+Event type definitions for the AeroLearn AI event system.
+
+This module defines the event classes and types used throughout the system for
+inter-compon...
+
+- Classes: 12
+- Functions: 0
+- Dependency Score: 52.00
+
+### integrations\registry\component_registry.py
+
+Component registry for the AeroLearn AI system.
+
+This module provides a centralized registry for all system components,
+tracking their lifecycle, depe...
+
+- Classes: 6
+- Functions: 0
+- Dependency Score: 45.00
+
+### integrations\registry\interface_registry.py
+
+Interface registry for the AeroLearn AI system.
+
+This module provides a registry for component interfaces, ensuring components
+properly implement requ...
+
+- Classes: 5
+- Functions: 1
+- Dependency Score: 33.00
+
 ### code_summarizer.py
 
 CodeSummarizer: A tool to create concise summaries of Python codebases
@@ -112,105 +159,276 @@ This script:
 - Functions: 1
 - Dependency Score: 23.00
 
-### untitled3.py
+### integrations\events\event_subscribers.py
 
-- Classes: 0
-- Functions: 4
-- Dependency Score: 4.00
+Event subscriber definitions and management for the AeroLearn AI event system.
 
-### app\main.py
+This module provides the base classes and utilities for components to ...
 
-Main entry point for the AeroLearn AI application.
+- Classes: 3
+- Functions: 0
+- Dependency Score: 22.00
 
-- Classes: 0
+### integrations\events\event_bus.py
+
+Event bus implementation for the AeroLearn AI event system.
+
+This module provides the central event bus for inter-component communication,
+implementin...
+
+- Classes: 1
+- Functions: 0
+- Dependency Score: 20.00
+
+### integrations\registry\dependency_tracker.py
+
+Dependency tracking for the AeroLearn AI component system.
+
+This module provides utilities for tracking, validating, and visualizing
+component depende...
+
+- Classes: 2
+- Functions: 0
+- Dependency Score: 18.00
+
+### tests\examples\event_bus_example.py
+
+Example usage of the event bus system.
+
+This script demonstrates how to set up and use the event bus for
+inter-component communication in the AeroLear...
+
+- Classes: 3
+- Functions: 0
+- Dependency Score: 12.00
+
+### tests\integration\test_component_registry.py
+
+Revised Component Registry tests for Spyder - adapted to your implementation.
+
+- Classes: 2
 - Functions: 1
-- Dependency Score: 1.00
+- Dependency Score: 11.00
 
-### app\__init__.py
+### tests\integration\test_component_registry_async.py
 
-AeroLearn AI - Aerospace Engineering Education Platform
-Version: 0.1.0
-Created: 2025-04-24
+Modified Component Registry tests for Spyder that patch event creation.
 
-An AI-first education system for Aerospace Engineering tha...
-
-- Classes: 0
+- Classes: 2
 - Functions: 0
-- Dependency Score: 0.00
-
-### app\core\auth\__init__.py
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-- Classes: 0
-- Functions: 0
-- Dependency Score: 0.00
-
-### app\core\db\__init__.py
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-- Classes: 0
-- Functions: 0
-- Dependency Score: 0.00
-
-### app\core\drive\__init__.py
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-- Classes: 0
-- Functions: 0
-- Dependency Score: 0.00
-
-### app\core\ai\__init__.py
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-- Classes: 0
-- Functions: 0
-- Dependency Score: 0.00
-
-### app\ui\common\__init__.py
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-- Classes: 0
-- Functions: 0
-- Dependency Score: 0.00
-
-### app\ui\professor\__init__.py
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-- Classes: 0
-- Functions: 0
-- Dependency Score: 0.00
+- Dependency Score: 10.00
 
 ## Dependencies
 
 Key file relationships (files with most dependencies):
 
+- **tests\examples\event_bus_example.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py, integrations\events\event_subscribers.py
+- **tests\integration\test_component_registry.py** depends on: integrations\events\event_bus.py, integrations\registry\dependency_tracker.py, integrations\registry\interface_registry.py, integrations\registry\component_registry.py
+- **tests\integration\test_component_registry_async.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
 
 
 ## Detailed Code Analysis
+
+### integrations\events\event_types.py
+
+**Description:**
+
+Event type definitions for the AeroLearn AI event system.
+
+This module defines the event classes and types used throughout the system for
+inter-component communication. It provides a type-safe way to define and handle events.
+
+**Classes:**
+
+- `EventPriority`
+ (inherits from: enum.IntEnum)
+
+
+  Event priority levels for determining handling order.
+
+- `EventCategory`
+ (inherits from: enum.Enum)
+
+
+  Categories for grouping related events.
+
+- `Event`
+
+
+  Base class for all events in the system.
+
+  Methods: `serialize()`, `deserialize()`
+
+- `SystemEvent`
+ (inherits from: Event)
+
+
+  System-level events related to application lifecycle and operations.
+
+  Methods: `__init__()`
+
+- `ContentEvent`
+ (inherits from: Event)
+
+
+  Events related to educational content operations.
+
+  Methods: `__init__()`
+
+- `UserEvent`
+ (inherits from: Event)
+
+
+  Events related to user actions and profile changes.
+
+  Methods: `__init__()`
+
+- `AIEvent`
+ (inherits from: Event)
+
+
+  Events related to AI operations and intelligence.
+
+  Methods: `__init__()`
+
+- `UIEvent`
+ (inherits from: Event)
+
+
+  Events related to user interface interactions.
+
+  Methods: `__init__()`
+
+- `SystemEventType`
+
+
+  Common system event type constants.
+
+- `ContentEventType`
+
+
+  Common content event type constants.
+
+- `UserEventType`
+
+
+  Common user event type constants.
+
+- `AIEventType`
+
+
+  Common AI event type constants.
+
+
+
+### integrations\registry\component_registry.py
+
+**Description:**
+
+Component registry for the AeroLearn AI system.
+
+This module provides a centralized registry for all system components,
+tracking their lifecycle, dependencies, and version information.
+
+**Classes:**
+
+- `ComponentRegisteredEvent`
+ (inherits from: Event)
+
+
+  Event fired when a component is registered.
+
+  Methods: `__init__()`
+
+- `ComponentUnregisteredEvent`
+ (inherits from: Event)
+
+
+  Event fired when a component is unregistered.
+
+  Methods: `__init__()`
+
+- `ComponentStateChangedEvent`
+ (inherits from: Event)
+
+
+  Event fired when a component's state changes.
+
+  Methods: `__init__()`
+
+- `ComponentState`
+
+
+  Enum-like class for component lifecycle states.
+
+- `Component`
+
+
+  Base class for all registrable components in the system.
+
+  Methods: `__init__()`, `declare_dependency()`, `require_interface()`, `provide_interface()`
+
+- `ComponentRegistry`
+
+
+  Central registry for AeroLearn AI system components.
+
+  Methods: `__new__()`, `__init__()`, `register_component()`, `unregister_component()`, `get_component()`, ... (6 more)
+
+
+
+### integrations\registry\interface_registry.py
+
+**Description:**
+
+Interface registry for the AeroLearn AI system.
+
+This module provides a registry for component interfaces, ensuring components
+properly implement required interfaces and allowing for interface discovery.
+
+**Classes:**
+
+- `InterfaceDefinitionError`
+ (inherits from: Exception)
+
+
+  Exception raised when an interface is improperly defined.
+
+- `InterfaceImplementationError`
+ (inherits from: Exception)
+
+
+  Exception raised when an interface is improperly implemented.
+
+- `Interface`
+
+
+  Base class for all interfaces in the system.
+
+  Methods: `get_interface_name()`, `get_interface_version()`, `get_required_methods()`, `validate_implementation()`
+
+- `InterfaceRegisteredEvent`
+ (inherits from: Event)
+
+
+  Event fired when an interface is registered.
+
+  Methods: `__init__()`
+
+- `InterfaceRegistry`
+
+
+  Registry for interfaces in the system.
+
+  Methods: `__new__()`, `__init__()`, `register_interface()`, `get_interface()`, `get_interface_version()`, ... (4 more)
+
+**Functions:**
+
+- `implements(interface_cls)`
+
+  Decorator to mark a class as implementing an interface.
+
+
 
 ### code_summarizer.py
 
@@ -243,6 +461,206 @@ This script:
 
 
 
+### integrations\events\event_subscribers.py
+
+**Description:**
+
+Event subscriber definitions and management for the AeroLearn AI event system.
+
+This module provides the base classes and utilities for components to subscribe to
+and handle events from the event bus.
+
+**Classes:**
+
+- `EventFilter`
+
+
+  Filter for matching events based on various criteria.
+
+  Methods: `__init__()`, `matches()`
+
+- `EventSubscriber`
+ (inherits from: abc.ABC)
+
+
+  Base class for components that subscribe to events.
+
+  Methods: `__init__()`, `add_filter()`, `remove_all_filters()`, `is_interested_in()`
+
+- `CallbackEventSubscriber`
+ (inherits from: EventSubscriber)
+
+
+  Event subscriber that delegates to a callback function.
+
+  Methods: `__init__()`
+
+
+
+### integrations\events\event_bus.py
+
+**Description:**
+
+Event bus implementation for the AeroLearn AI event system.
+
+This module provides the central event bus for inter-component communication,
+implementing the publisher-subscriber pattern with advanced event filtering
+and asynchronous event handling.
+
+**Classes:**
+
+- `EventBus`
+
+
+  Central event bus for the AeroLearn AI system.
+
+  Methods: `__new__()`, `__init__()`, `register_subscriber()`, `unregister_subscriber()`, `get_stats()`, ... (3 more)
+
+
+
+### integrations\registry\dependency_tracker.py
+
+**Description:**
+
+Dependency tracking for the AeroLearn AI component system.
+
+This module provides utilities for tracking, validating, and visualizing
+component dependencies and ensuring proper component initialization order.
+
+**Classes:**
+
+- `CircularDependencyError`
+ (inherits from: Exception)
+
+
+  Exception raised when a circular dependency is detected.
+
+- `DependencyTracker`
+
+
+  Utility for tracking and analyzing dependencies between components.
+
+  Methods: `__init__()`, `validate_dependencies()`, `detect_circular_dependencies()`, `get_initialization_order()`, `get_dependency_tree()`, ... (4 more)
+
+
+
+### tests\examples\event_bus_example.py
+
+**Description:**
+
+Example usage of the event bus system.
+
+This script demonstrates how to set up and use the event bus for
+inter-component communication in the AeroLearn AI system.
+
+**Classes:**
+
+- `SystemComponent`
+ (inherits from: EventSubscriber)
+
+
+  Example system component that publishes and subscribes to events.
+
+  Methods: `__init__()`
+
+- `ContentManager`
+ (inherits from: EventSubscriber)
+
+
+  Example content manager component.
+
+  Methods: `__init__()`
+
+- `UserManager`
+ (inherits from: EventSubscriber)
+
+
+  Example user manager component.
+
+  Methods: `__init__()`
+
+
+
+### tests\integration\test_component_registry.py
+
+**Description:**
+
+Revised Component Registry tests for Spyder - adapted to your implementation.
+
+**Classes:**
+
+- `TestComponentRegistry`
+
+
+  Test wrapper for ComponentRegistry that disables event publishing.
+
+  Methods: `__init__()`, `__getattr__()`, `restore()`
+
+- `TestComponent`
+ (inherits from: Component)
+
+
+  Basic test component for registry tests.
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `improved_register_component(component)`
+
+  Register component directly with all necessary bookkeeping.
+
+
+
+### tests\integration\test_component_registry_async.py
+
+**Description:**
+
+Modified Component Registry tests for Spyder that patch event creation.
+
+**Classes:**
+
+- `TestComponent`
+ (inherits from: Component)
+
+
+  Test component for registry tests.
+
+  Methods: `__init__()`
+
+- `TestComponentRegistry`
+
+
+  Test wrapper for ComponentRegistry that disables event publishing.
+
+  Methods: `__init__()`, `__getattr__()`, `restore()`
+
+
+
+### tests\integration\test_component_registry_Simple.py
+
+**Description:**
+
+Simplified Spyder-compatible tests for the Component Registry system without events.
+
+**Classes:**
+
+- `TestComponent`
+ (inherits from: Component)
+
+
+  Test component for registry tests.
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `safe_call(obj, primary_method, fallback_method)`
+
+  Call primary_method if it exists, otherwise try fallback_method
+
+
+
 ### untitled3.py
 
 **Functions:**
@@ -260,6 +678,27 @@ This script:
   Create a Python __init__.py file.
 
 - `generate_project_structure()`
+
+
+
+### tests\integration\test_event_bus.py
+
+**Description:**
+
+Integration test for the event bus system.
+
+This module tests the event bus functionality to ensure events are correctly
+published and subscribers receive the events they are interested in.
+
+**Classes:**
+
+- `TestEventSubscriber`
+ (inherits from: EventSubscriber)
+
+
+  Test event subscriber that records received events.
+
+  Methods: `__init__()`
 
 
 
@@ -412,6 +851,17 @@ This module is part of the AeroLearn AI project.
 
 
 
+### integrations\__init__.py
+
+**Description:**
+
+AeroLearn AI - Aerospace Engineering Education Platform
+Created: 2025-04-24
+
+This module is part of the AeroLearn AI project.
+
+
+
 ### integrations\interfaces\__init__.py
 
 **Description:**
@@ -435,6 +885,17 @@ This module is part of the AeroLearn AI project.
 
 
 ### integrations\events\__init__.py
+
+**Description:**
+
+AeroLearn AI - Aerospace Engineering Education Platform
+Created: 2025-04-24
+
+This module is part of the AeroLearn AI project.
+
+
+
+### tests\__init__.py
 
 **Description:**
 
@@ -547,132 +1008,73 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional architectural analysis sections to enhance the summary:
+Here's the additional architectural analysis to enhance the summary:
 
-+++ Architecture Enhancement Sections +++
++++ Architectural Analysis +++
 
-### High-Level Architectural Overview
-**Three-Tier Structure:**
-1. **Presentation Layer (UI):**
-   - PyQt6-based GUI (app/ui)
-   - Role-specific modules (professor/common)
-   - MainWindow class as central hub
+1. High-Level Architectural Overview:
+The system follows an event-driven architecture with registry-based component management. Core pillars:
+- Event Bus (Pub/Sub): Central nervous system using EventBus for async communication
+- Component Registry: Singleton managing component lifecycle/dependencies
+- Interface Registry: Enforces interface contracts between components
+- Dependency Tracker: Maintains dependency graph for initialization order
 
-2. **Business Logic Layer:**
-   - Core services (auth, db, drive, ai)
-   - AuthenticationService handling security
-   - ConfigLoader for environment management
+Key Data Flow:
+Components ↔ Registry ↔ Event Bus ↔ Subscribers  
+DependencyTracker → ComponentRegistry → InterfaceRegistry
 
-3. **Data Layer:**
-   - Database abstractions (core/db)
-   - File storage integration (core/drive)
-   - AI model management (core/ai)
+2. Identified Design Patterns:
+- Singleton: ComponentRegistry, InterfaceRegistry, EventBus
+- Publisher-Subscriber: EventBus with EventSubscriber hierarchy
+- Registry: Component/interface registration pattern
+- Factory: Component registration with version validation
+- Decorator: @implements for interface validation
+- Observer: Event filtering system in EventSubscriber
+- Strategy: Different event handling priorities
+- Graph: DependencyTracker uses networkx for topological sorting
 
-**Key Architectural Characteristics:**
-- Plugin-style module initialization
-- Environment-aware configuration (dotenv)
-- Parallel processing in code analysis (ThreadPoolExecutor)
-- Strict separation of educational domains (UI modules)
+3. Refactoring Opportunities:
+- Registry Duplication: Component/Interface registries could inherit from BaseRegistry
+- Event Inheritance: SystemEvent/ContentEvent share identical __init__ - suggest Event factory
+- Thread Safety: Mix of threading/asyncio in ComponentRegistry - recommend unified concurrency model
+- Interface Validation: Could leverage Python Protocols for static checking
+- Dependency Visualization: Add graph export hooks in DependencyTracker
+- Testability: Introduce mocking framework for registry tests
+- Event Serialization: Add protobuf/JSON schema validation in Event.serialize()
 
-### Identified Design Patterns
-1. **CodeSummarizer Patterns:**
-   - Template Method (run() sequence)
-   - Visitor Pattern (AST traversal methods)
-   - Facade (unified interface for code analysis)
+4. Critical Path Analysis:
+Key Path 1: Component Registration
+Component → Registry.register() → DependencyValidation → StateChangeEvent → EventBus
 
-2. **Core Application Patterns:**
-   - Singleton (Configuration loading)
-   - Observer (UI event handling implied)
-   - Strategy (AuthenticationService extensibility)
+Key Path 2: Event Publishing
+EventSource → EventBus.publish() → FilterMatching → AsyncHandlerExecution
 
-3. **Structural Patterns:**
-   - Composite (Directory structure representation)
-   - Decorator (DeepSeek API enhancement)
-   - Factory (__init__ patterns in core modules)
+Key Path 3: Dependency Resolution
+DependencyTracker → ComponentGraph → TopologicalSort → InitOrderValidation
 
-### Refactoring Recommendations
-**Priority 1 Improvements:**
-1. CodeSummarizer:
-   - Extract AST traversal logic to separate Visitor classes
-   - Implement proper async I/O instead of thread pooling
-   - Add abstract base classes for analysis components
+5. Class/Module Relationships:
 
-2. Core Application:
-   - Convert empty __init__.py to namespace modules
-   - Introduce dependency injection framework
-   - Add type hints to all public methods
-
-**Technical Debt Opportunities:**
-- Replace generic "untitled3.py" with meaningful name
-- Standardize docstring formats across modules
-- Implement caching layer for DeepSeek API calls
-- Add validation Pydantic models for config data
-
-### Critical Path Analysis
-**Application Startup Sequence:**
-1. config_loader → Environment variables
-2. AuthenticationService → User session
-3. MainWindow initialization → UI components
-4. Core service connections (db, drive, ai)
-
-**Code Analysis Critical Path:**
 ```mermaid
 graph TD
-    A[File Discovery] --> B[AST Parsing]
-    B --> C[Import Resolution]
-    C --> D[Dependency Graphing]
-    D --> E[Complexity Analysis]
-    E --> F[API Enhancement]
-    F --> G[Markdown Generation]
+    CR[ComponentRegistry] -- manages --> Component
+    CR -- publishes --> EB[EventBus]
+    IR[InterfaceRegistry] -- validates --> Interface
+    Component -- implements --> Interface
+    DT[DependencyTracker] -- analyzes --> CR
+    EB -- notifies --> ES[EventSubscriber]
+    ES -- filters --> Event
+    Event -- categorized --> EventCategory
+    Event -- prioritized --> EventPriority
+    CodeSummarizer -- scans --> Component
+    CodeSummarizer -- documents --> Interface
 ```
 
-### Class/Module Relationships
-**CodeSummarizer Ecosystem:**
-```mermaid
-classDiagram
-    CodeSummarizer --> ThreadPoolExecutor
-    CodeSummarizer --> AST
-    CodeSummarizer ..> DeepSeekAPI
-    Colors <-- CodeSummarizer
-    CodeSummarizer --> FileProcessor
-    CodeSummarizer --> DependencyAnalyzer
-    
-    class FileProcessor {
-        +process_file()
-        +extract_entities()
-    }
-    
-    class DependencyAnalyzer {
-        +build_graph()
-        +identify_key_nodes()
-    }
-```
+Key Relationships:
+- ComponentRegistry ↔ InterfaceRegistry: Bidirectional interface validation
+- EventBus ↔ ComponentRegistry: Circular dependency for system events
+- DependencyTracker → networkx: External graph library dependency
+- Component ←┐ Interface: Multiple implementation relationships
+    └───────────┘
+- EventSubscriber ← CallbackSubscriber: Inheritance with specialization
 
-**Core Application Relationships:**
-```mermaid
-graph TD
-    main.py --> MainWindow
-    main.py --> AuthenticationService
-    AuthenticationService --> db/__init__.py
-    MainWindow --> ui/common/__init__.py
-    ui/common/__init__.py --> core/ai/__init__.py
-    core/drive/__init__.py --> resources/templates
-```
-
-**Cross-Module Dependencies:**
-1. Core Services:
-   - auth → db → drive → ai
-   - All core modules depend on utils.config_loader
-
-2. UI Layer:
-   - Professor UI → Common UI → Core AI
-   - MainWindow mediates all UI ↔ Core communication
-
-3. Infrastructure:
-   - code_summarizer.py independent of app/
-   - untitled3.py contains generic utilities
-   - All modules depend on app/__init__ for config
-
-+++ End of Enhancement Sections +++
-
-These sections should be added under a new "Architectural Insights" heading in the existing summary, before the Detailed Code Analysis section. The diagrams can be implemented as MermaidJS blocks in markdown.
+This architecture enables loose coupling between components while maintaining strong contracts through interfaces. The event-driven model supports scalable distributed processing crucial for AI workflows.
