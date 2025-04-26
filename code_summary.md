@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 60
+Total Python files: 74
 
 ## Table of Contents
 
@@ -18,13 +18,22 @@ Total Python files: 60
 │   ├── core
 │   │   ├── auth
 │   │   │   ├── __init__.py
-│   │   │   └── credential_manager.py
+│   │   │   ├── credential_manager.py
+│   │   │   ├── user_profile.py
+│   │   │   ├── authentication.py
+│   │   │   ├── session.py
+│   │   │   ├── authorization.py
+│   │   │   └── permission_registry.py
 │   │   ├── db
 │   │   │   └── __init__.py
 │   │   ├── drive
 │   │   │   └── __init__.py
-│   │   └── ai
-│   │       └── __init__.py
+│   │   ├── ai
+│   │   │   └── __init__.py
+│   │   └── api
+│   │       ├── api_client.py
+│   │       ├── deepseek_client.py
+│   │       └── google_drive_client.py
 │   ├── ui
 │   │   ├── common
 │   │   │   └── __init__.py
@@ -69,6 +78,11 @@ Total Python files: 60
 ├── tests
 │   ├── unit
 │   │   ├── core
+│   │   │   ├── auth
+│   │   │   │   ├── test_authentication.py
+│   │   │   │   └── test_authorization.py
+│   │   │   ├── api
+│   │   │   │   └── test_api_clients.py
 │   │   │   ├── __init__.py
 │   │   │   └── test_integration_health.py
 │   │   ├── ui
@@ -88,7 +102,10 @@ Total Python files: 60
 │   │   ├── test_component_registry.py
 │   │   ├── test_component_registry_async.py
 │   │   ├── test_component_registry_Simple.py
-│   │   └── test_monitoring.py
+│   │   ├── test_monitoring.py
+│   │   ├── test_health_metrics.py
+│   │   ├── test_component_status.py
+│   │   └── test_auth_event_bus.py
 │   ├── ui
 │   │   └── __init__.py
 │   ├── fixtures
@@ -134,6 +151,8 @@ Total Python files: 60
 
 │       └── defaults
 
+├── .qodo
+
 ├── untitled3.py
 ├── code_summarizer.py
 └── setup.py
@@ -150,7 +169,7 @@ inter-compon...
 
 - Classes: 12
 - Functions: 0
-- Dependency Score: 64.00
+- Dependency Score: 70.00
 
 ### integrations\registry\component_registry.py
 
@@ -205,7 +224,18 @@ data str...
 
 - Classes: 7
 - Functions: 0
-- Dependency Score: 49.00
+- Dependency Score: 52.00
+
+### integrations\monitoring\component_status.py
+
+Component status tracking for the AeroLearn AI system.
+
+This module provides components for tracking and visualizing the status
+of system components, ...
+
+- Classes: 6
+- Functions: 0
+- Dependency Score: 48.00
 
 ### tests\integration\interfaces\test_ai_interface.py
 
@@ -217,17 +247,6 @@ AIModelProviderInterface, ContentAna...
 - Classes: 10
 - Functions: 0
 - Dependency Score: 48.00
-
-### integrations\monitoring\component_status.py
-
-Component status tracking for the AeroLearn AI system.
-
-This module provides components for tracking and visualizing the status
-of system components, ...
-
-- Classes: 6
-- Functions: 0
-- Dependency Score: 45.00
 
 ### tests\integration\interfaces\test_storage_interface.py
 
@@ -255,10 +274,10 @@ storage pr...
 
 Key file relationships (files with most dependencies):
 
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
-- **integrations\monitoring\integration_health.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **integrations\monitoring\component_status.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **tests\integration\interfaces\test_ai_interface.py** depends on: integrations\interfaces\base_interface.py, integrations\interfaces\ai_interface.py
-- **integrations\monitoring\component_status.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
 - **tests\integration\interfaces\test_storage_interface.py** depends on: integrations\interfaces\base_interface.py, integrations\interfaces\storage_interface.py
 
 
@@ -737,6 +756,64 @@ data structures for monitoring the health of system integrations.
 
 
 
+### integrations\monitoring\component_status.py
+
+**Description:**
+
+Component status tracking for the AeroLearn AI system.
+
+This module provides components for tracking and visualizing the status
+of system components, including lifecycle state changes, health status,
+and operational capability.
+
+**Classes:**
+
+- `StatusSeverity`
+ (inherits from: Enum)
+
+
+  Severity levels for component status changes.
+
+- `StatusChangeEvent`
+ (inherits from: Event)
+
+
+  Event fired when a component's status changes.
+
+  Methods: `__init__()`, `to_dict()`
+
+- `ComponentStatusProvider`
+ (inherits from: ABC)
+
+
+  Interface for components that provide status information.
+
+  Methods: `get_component_state()`, `get_status_details()`
+
+- `ComponentStatus`
+
+
+  Represents the status of a component at a specific point in time.
+
+  Methods: `__init__()`, `to_dict()`
+
+- `StatusHistoryEntry`
+
+
+  A historical status entry for a component.
+
+  Methods: `__init__()`, `to_dict()`
+
+- `ComponentStatusTracker`
+ (inherits from: Component)
+
+
+  System for tracking component status changes over time.
+
+  Methods: `__init__()`, `register_status_provider()`, `unregister_status_provider()`, `update_component_status()`, `update_all_statuses()`, ... (8 more)
+
+
+
 ### tests\integration\interfaces\test_ai_interface.py
 
 **Description:**
@@ -817,64 +894,6 @@ AIModelProviderInterface, ContentAnalysisInterface, and others.
   Tests for the register_ai_interfaces function.
 
   Methods: `test_register_ai_interfaces()`, `test_individual_interface_registrations()`
-
-
-
-### integrations\monitoring\component_status.py
-
-**Description:**
-
-Component status tracking for the AeroLearn AI system.
-
-This module provides components for tracking and visualizing the status
-of system components, including lifecycle state changes, health status,
-and operational capability.
-
-**Classes:**
-
-- `StatusSeverity`
- (inherits from: Enum)
-
-
-  Severity levels for component status changes.
-
-- `StatusChangeEvent`
- (inherits from: Event)
-
-
-  Event fired when a component's status changes.
-
-  Methods: `__init__()`, `to_dict()`
-
-- `ComponentStatusProvider`
- (inherits from: ABC)
-
-
-  Interface for components that provide status information.
-
-  Methods: `get_component_state()`, `get_status_details()`
-
-- `ComponentStatus`
-
-
-  Represents the status of a component at a specific point in time.
-
-  Methods: `__init__()`, `to_dict()`
-
-- `StatusHistoryEntry`
-
-
-  A historical status entry for a component.
-
-  Methods: `__init__()`, `to_dict()`
-
-- `ComponentStatusTracker`
- (inherits from: Component)
-
-
-  System for tracking component status changes over time.
-
-  Methods: `__init__()`, `register_status_provider()`, `unregister_status_provider()`, `update_component_status()`, `update_all_statuses()`, ... (8 more)
 
 
 
@@ -1237,6 +1256,92 @@ providers, content retrieval, and content processing components.
 
 
 
+### app\core\api\api_client.py
+
+**Classes:**
+
+- `APIClientError`
+ (inherits from: Exception)
+
+
+  Base exception for API client errors.
+
+- `RateLimitExceeded`
+ (inherits from: APIClientError)
+
+
+  Raised when API rate limits are exceeded.
+
+- `APIClient`
+
+
+  Abstract base API client.
+
+  Methods: `__init__()`, `authenticate()`, `rate_limited()`, `get_cache()`, `set_cache()`, ... (3 more)
+
+- `DeepSeekAPIError`
+ (inherits from: APIClientError)
+
+
+- `DeepSeekClient`
+ (inherits from: APIClient)
+
+
+  Concrete API client for DeepSeek services.
+
+  Methods: `__init__()`, `authenticate()`, `_do_request()`
+
+- `GoogleDriveAPIError`
+ (inherits from: APIClientError)
+
+
+- `GoogleDriveClient`
+ (inherits from: APIClient)
+
+
+  Concrete API client for Google Drive services.
+
+  Methods: `__init__()`, `authenticate()`, `_do_request()`
+
+
+
+### app\core\auth\authorization.py
+
+**Classes:**
+
+- `Permission`
+
+
+  Represents a single permission string, such as 'content.edit' or 'user.manage'.
+
+  Methods: `__init__()`, `__str__()`, `__eq__()`, `__hash__()`
+
+- `Role`
+
+
+  Represents a user role (e.g., student, professor, admin), with a set of permissions.
+
+  Methods: `__init__()`, `all_permissions()`, `add_permission()`, `add_parent()`
+
+- `UserPermissions`
+
+
+  Assigns roles and direct permissions to users (by user_id).
+
+  Methods: `__init__()`, `assign_role()`, `remove_role()`, `assign_permission()`, `remove_permission()`, ... (3 more)
+
+- `PermissionError`
+ (inherits from: Exception)
+
+
+**Functions:**
+
+- `require_permission(permission)`
+
+  Decorator for functions/methods to enforce the required permission.
+
+
+
 ### integrations\registry\interface_registry.py
 
 **Description:**
@@ -1287,6 +1392,63 @@ properly implement required interfaces and allowing for interface discovery.
 - `implements(interface_cls)`
 
   Decorator to mark a class as implementing an interface.
+
+
+
+### integrations\events\event_bus.py
+
+**Description:**
+
+Event bus implementation for the AeroLearn AI event system.
+
+This module provides the central event bus for inter-component communication,
+implementing the publisher-subscriber pattern with advanced event filtering
+and asynchronous event handling.
+
+**Classes:**
+
+- `EventBus`
+
+
+  Central event bus for the AeroLearn AI system.
+
+  Methods: `__new__()`, `__init__()`, `register_subscriber()`, `unregister_subscriber()`, `get_stats()`, ... (3 more)
+
+
+
+### integrations\events\event_subscribers.py
+
+**Description:**
+
+Event subscriber definitions and management for the AeroLearn AI event system.
+
+This module provides the base classes and utilities for components to subscribe to
+and handle events from the event bus.
+
+**Classes:**
+
+- `EventFilter`
+
+
+  Filter for matching events based on various criteria.
+
+  Methods: `__init__()`, `matches()`
+
+- `EventSubscriber`
+ (inherits from: abc.ABC)
+
+
+  Base class for components that subscribe to events.
+
+  Methods: `__init__()`, `add_filter()`, `remove_all_filters()`, `is_interested_in()`
+
+- `CallbackEventSubscriber`
+ (inherits from: EventSubscriber)
+
+
+  Event subscriber that delegates to a callback function.
+
+  Methods: `__init__()`
 
 
 
@@ -1350,60 +1512,46 @@ This script:
 
 
 
-### integrations\events\event_bus.py
-
-**Description:**
-
-Event bus implementation for the AeroLearn AI event system.
-
-This module provides the central event bus for inter-component communication,
-implementing the publisher-subscriber pattern with advanced event filtering
-and asynchronous event handling.
+### app\core\auth\authentication.py
 
 **Classes:**
 
-- `EventBus`
+- `AuthEvent`
+ (inherits from: Event)
 
 
-  Central event bus for the AeroLearn AI system.
-
-  Methods: `__new__()`, `__init__()`, `register_subscriber()`, `unregister_subscriber()`, `get_stats()`, ... (3 more)
-
-
-
-### integrations\events\event_subscribers.py
-
-**Description:**
-
-Event subscriber definitions and management for the AeroLearn AI event system.
-
-This module provides the base classes and utilities for components to subscribe to
-and handle events from the event bus.
-
-**Classes:**
-
-- `EventFilter`
-
-
-  Filter for matching events based on various criteria.
-
-  Methods: `__init__()`, `matches()`
-
-- `EventSubscriber`
- (inherits from: abc.ABC)
-
-
-  Base class for components that subscribe to events.
-
-  Methods: `__init__()`, `add_filter()`, `remove_all_filters()`, `is_interested_in()`
-
-- `CallbackEventSubscriber`
- (inherits from: EventSubscriber)
-
-
-  Event subscriber that delegates to a callback function.
+  Event representing authentication-related changes (login, logout, failure).
 
   Methods: `__init__()`
+
+- `AuthenticationProvider`
+ (inherits from: ABC)
+
+
+  Interface for authentication providers.
+
+  Methods: `authenticate()`
+
+- `LocalAuthenticationProvider`
+ (inherits from: AuthenticationProvider)
+
+
+  Simple authentication provider with in-memory user verification and event emission.
+
+  Methods: `__init__()`, `authenticate()`, `logout()`
+
+
+
+### app\core\auth\user_profile.py
+
+**Classes:**
+
+- `UserProfile`
+
+
+  Represents the user's profile and identity attributes.
+
+  Methods: `__init__()`, `to_dict()`, `from_dict()`
 
 
 
@@ -1433,6 +1581,38 @@ component dependencies and ensuring proper component initialization order.
 
 
 
+### app\core\auth\session.py
+
+**Classes:**
+
+- `Session`
+
+
+  Represents an authenticated session.
+
+  Methods: `__init__()`, `is_active()`, `touch()`
+
+- `SessionManager`
+
+
+  Handles session creation, validation, and expiration.
+
+  Methods: `__init__()`, `create_session()`, `get_session()`, `invalidate_session()`, `cleanup_expired()`
+
+
+
+### tests\unit\test_credential_manager.py
+
+**Classes:**
+
+- `TestCredentialManager`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `setUp()`, `tearDown()`, `_cleanup_files()`, `test_store_and_retrieve_credential()`, `test_encryption_at_rest()`, ... (7 more)
+
+
+
 ### app\utils\crypto.py
 
 **Classes:**
@@ -1444,6 +1624,51 @@ component dependencies and ensuring proper component initialization order.
 
 
 
+### tests\unit\core\auth\test_authentication.py
+
+**Classes:**
+
+- `DummyEventBus`
+
+
+  Methods: `__init__()`
+
+- `TestAuthenticationProviderAndSession`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `setUp()`, `test_login_success_event_emission()`, `test_login_failure_event_emission()`, `test_session_creation_and_expiry()`, `test_logout_event_emission()`, ... (2 more)
+
+
+
+### tests\integration\test_component_status.py
+
+**Classes:**
+
+- `DummyComponentState`
+ (inherits from: Enum)
+
+
+- `DummyProvider`
+ (inherits from: ComponentStatusProvider)
+
+
+  Methods: `__init__()`, `get_component_state()`, `get_status_details()`
+
+**Functions:**
+
+- `test_register_status_provider_and_update()`
+
+- `test_state_change_records_history_and_severity()`
+
+- `test_history_limit_and_filter()`
+
+- `test_dependency_tracking_and_warnings()`
+
+- `test_status_summary()`
+
+
+
 ### app\core\auth\credential_manager.py
 
 **Classes:**
@@ -1452,6 +1677,42 @@ component dependencies and ensuring proper component initialization order.
 
 
   Methods: `__init__()`, `_load_or_generate_salt()`, `store_credential()`, `retrieve_credential()`, `_load_credentials()`, ... (1 more)
+
+
+
+### app\core\api\deepseek_client.py
+
+**Classes:**
+
+- `DeepSeekAPIError`
+ (inherits from: APIClientError)
+
+
+- `DeepSeekClient`
+ (inherits from: APIClient)
+
+
+  Concrete API client for DeepSeek services.
+
+  Methods: `__init__()`, `authenticate()`, `_do_request()`
+
+
+
+### app\core\api\google_drive_client.py
+
+**Classes:**
+
+- `GoogleDriveAPIError`
+ (inherits from: APIClientError)
+
+
+- `GoogleDriveClient`
+ (inherits from: APIClient)
+
+
+  Concrete API client for Google Drive services.
+
+  Methods: `__init__()`, `authenticate()`, `_do_request()`
 
 
 
@@ -1469,7 +1730,7 @@ This module tests the health metric collection functionality including:
 
 **Classes:**
 
-- `TestHealthMetrics`
+- `TestHealthMonitoring`
  (inherits from: unittest.TestCase)
 
 
@@ -1547,6 +1808,68 @@ Revised Component Registry tests for Spyder - adapted to your implementation.
 
 
 
+### tests\integration\test_health_metrics.py
+
+**Classes:**
+
+- `DummyHealthProvider`
+ (inherits from: HealthProvider)
+
+
+  Methods: `__init__()`, `get_health_metrics()`, `get_health_status()`
+
+**Functions:**
+
+- `test_register_and_collect_metrics()`
+
+- `test_status_transition_on_metric_thresholds()`
+
+- `test_collect_metrics_error_handling()`
+
+- `test_aggregation_and_history()`
+
+- `test_health_status_cache()`
+
+
+
+### tests\unit\core\auth\test_authorization.py
+
+**Classes:**
+
+- `TestAuthorizationAndPermissions`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `setUp()`, `test_permission_and_role_equality()`, `test_role_permission_inheritance()`, `test_user_role_assignment_and_permission_check()`, `test_dynamic_permission_assignment_and_removal()`, ... (2 more)
+
+
+
+### tests\unit\core\api\test_api_clients.py
+
+**Functions:**
+
+- `test_deepseek_authentication()`
+
+- `test_google_drive_authentication()`
+
+- `test_deepseek_success_request_is_cached()`
+
+- `test_google_drive_success_request_is_cached()`
+
+- `test_deepseek_error_handling()`
+
+- `test_google_drive_error_handling()`
+
+- `test_deepseek_rate_limit()`
+
+- `test_google_drive_rate_limit()`
+
+- `test_rate_limit_resets_after_period()`
+
+- `test_clearing_cache()`
+
+
+
 ### tests\integration\test_component_registry_async.py
 
 **Description:**
@@ -1572,15 +1895,35 @@ Modified Component Registry tests for Spyder that patch event creation.
 
 
 
-### tests\unit\test_credential_manager.py
+### tests\integration\test_auth_event_bus.py
 
 **Classes:**
 
-- `TestCredentialManager`
- (inherits from: unittest.TestCase)
+- `AuthEventRecorder`
+ (inherits from: EventSubscriber)
 
 
-  Methods: `setUp()`, `tearDown()`, `test_store_and_retrieve_credential()`
+  Methods: `__init__()`
+
+- `AsyncTestCase`
+ (inherits from: unittest.IsolatedAsyncioTestCase)
+
+
+- `TestAuthEventBusIntegration`
+ (inherits from: AsyncTestCase)
+
+
+
+
+### app\core\auth\permission_registry.py
+
+**Functions:**
+
+- `assign_user_role(user_id, role_name)`
+
+- `assign_user_permission(user_id, permission)`
+
+- `get_user_permissions(user_id)`
 
 
 
@@ -1982,109 +2325,3 @@ Created: 2025-04-24
 This module is part of the AeroLearn AI project.
 
 
-
-
-## AI-Enhanced Analysis
-
-Here's the enhanced analysis to add to the summary:
-
-## Architectural Addendum
-
-### 1. High-Level Architectural Overview
-The system follows an event-driven architecture with modular component design. Core architectural components:
-
-- **Event Bus**: Message backbone using hierarchical event types (SystemEvent, AIEvent, etc.)
-- **Component Registry**: Singleton service managing component lifecycle (registration, dependencies, interface resolution)
-- **Interface System**: Contract-first design with runtime validation (BaseInterface -> AIInterface/StorageInterface)
-- **Monitoring Triad**: TransactionLogger, IntegrationHealth, and ComponentStatus form observability framework
-- **Vertical Integration**: Clear separation between core systems (registry), interfaces, events, and monitoring
-
-Key architectural flows:
-1. Component registration -> Dependency resolution -> Interface binding
-2. Event emission -> Bus routing -> Handler execution -> Transaction logging
-3. Health monitoring -> Status propagation -> Event triggering -> Registry updates
-
-### 2. Identified Design Patterns
-
-| Pattern | Implementation | Example Files |
-|---------|----------------|---------------|
-| Singleton | ComponentRegistry double-checked locking | component_registry.py |
-| Observer | EventBus subscription model | event_bus.py |
-| Factory | Event class deserialization | event_types.py |
-| Decorator | InterfaceMethod signature validation | base_interface.py |
-| Strategy | Interface implementations (AI/storage) | ai_interface.py, storage_interface.py |
-| State | ComponentState transitions | component_status.py |
-
-### 3. Refactoring Opportunities
-
-**Event System**
-- Add EventFactory for deserialization polymorphism
-- Implement event versioning in SystemEvent hierarchy
-- Introduce event schema validation layer
-
-**Component Registry**
-- Replace singleton with dependency injection
-- Add component dependency resolution graph algorithms
-- Implement version compatibility matrix
-
-**Monitoring**
-- Add circular buffer for transaction storage
-- Implement retention policies for health metrics
-- Introduce async metrics collection
-
-**Interfaces**
-- Add interface version compatibility checks
-- Implement interface capability discovery
-- Create interface dependency resolver
-
-### 4. Critical Path Analysis
-
-**System Initialization Critical Path:**
-1. ComponentRegistry instantiation
-2. BaseInterface registration
-3. EventBus initialization
-4. Core components registration (TransactionLogger, IntegrationHealth)
-5. Interface implementations loading
-
-**Key Execution Path:**
-AI Request Flow:
-```
-AIInterface -> EventBus -> TransactionLogger 
--> ComponentRegistry (resolve model) 
--> AIModelProvider -> Response 
--> TransactionLogger (complete) 
--> IntegrationHealth (update metrics)
-```
-
-### 5. Class Relationships
-
-```mermaid
-graph TD
-    Event[Event] -->|inherits| SystemEvent
-    Event -->|inherits| AIEvent
-    Event -->|inherits| ContentEvent
-    
-    ComponentRegistry --> Component
-    Component -->|depends| BaseInterface
-    BaseInterface -->|implemented by| AIInterface
-    BaseInterface -->|implemented by| StorageInterface
-    
-    TransactionLogger -->|uses| Component
-    TransactionLogger -->|emits| TransactionEvent
-    IntegrationHealth -->|monitors| ComponentStatus
-    ComponentStatus -->|notifies| StatusChangeEvent
-    
-    AIInterface -->|requires| AIModelProvider
-    StorageInterface -->|requires| StorageProvider
-    
-    EventBus -->|routes| Event
-    EventBus -->|notifies| EventSubscribers
-```
-
-**Key Module Dependencies:**
-- All interfaces depend on base_interface
-- Monitoring system depends on events and registry
-- Component implementations depend on registry and interfaces
-- Test suites mirror production module structure
-
-This architecture enables pluggable components while maintaining strong contracts through the interface system. The event-driven design facilitates loose coupling, with the monitoring triad providing operational visibility across all components.
