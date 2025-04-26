@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 101
+Total Python files: 110
 
 ## Table of Contents
 
@@ -52,7 +52,10 @@ Total Python files: 101
 │   │   │   ├── test_component_architecture.py
 │   │   │   ├── component_registry.py
 │   │   │   ├── main_window.py
-│   │   │   └── navigation.py
+│   │   │   ├── navigation.py
+│   │   │   ├── form_controls.py
+│   │   │   ├── content_browser.py
+│   │   │   └── content_preview.py
 │   │   ├── professor
 │   │   │   └── __init__.py
 │   │   ├── student
@@ -129,11 +132,17 @@ Total Python files: 101
 │   │   ├── test_auth_event_bus.py
 │   │   ├── test_db_integration.py
 │   │   ├── test_phase1_foundation.py
-│   │   └── phase1_foundation_patch.py
+│   │   ├── phase1_foundation_patch.py
+│   │   ├── component_harness.py
+│   │   ├── test_framework.py
+│   │   ├── test_auth_integration.py
+│   │   ├── test_storage_integration.py
+│   │   └── test_ui_integration.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
-│   │   └── test_main_window.py
+│   │   ├── test_main_window.py
+│   │   └── test_common_ui_controls.py
 │   ├── fixtures
 │   │   └── __init__.py
 │   ├── examples
@@ -232,6 +241,17 @@ making it easier t...
 - Functions: 0
 - Dependency Score: 62.00
 
+### integrations\events\event_bus.py
+
+Event bus implementation for the AeroLearn AI event system.
+
+This module provides the central event bus for inter-component communication,
+implementin...
+
+- Classes: 1
+- Functions: 0
+- Dependency Score: 61.00
+
 ### integrations\monitoring\integration_health.py
 
 Integration health monitoring for the AeroLearn AI system.
@@ -260,17 +280,6 @@ Schema configuration for AeroLearn AI
 Defines SQLAlchemy declarative base and example table definitions for testing relationships.
 
 - Classes: 11
-- Functions: 0
-- Dependency Score: 54.00
-
-### integrations\events\event_bus.py
-
-Event bus implementation for the AeroLearn AI event system.
-
-This module provides the central event bus for inter-component communication,
-implementin...
-
-- Classes: 1
 - Functions: 0
 - Dependency Score: 54.00
 
@@ -303,7 +312,7 @@ Key file relationships (files with most dependencies):
 - **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **integrations\monitoring\component_status.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
-- **tests\integration\interfaces\test_ai_interface.py** depends on: integrations\interfaces\ai_interface.py, integrations\interfaces\base_interface.py
+- **tests\integration\interfaces\test_ai_interface.py** depends on: integrations\interfaces\base_interface.py, integrations\interfaces\ai_interface.py
 
 
 ## Detailed Code Analysis
@@ -609,6 +618,27 @@ making it easier to trace operations as they flow through different parts of the
 
 
 
+### integrations\events\event_bus.py
+
+**Description:**
+
+Event bus implementation for the AeroLearn AI event system.
+
+This module provides the central event bus for inter-component communication,
+implementing the publisher-subscriber pattern with event filtering
+and persistence for critical events.
+
+**Classes:**
+
+- `EventBus`
+
+
+  Central event bus for the AeroLearn AI system.
+
+  Methods: `get()`, `__new__()`, `__init__()`, `register_subscriber()`, `unregister_subscriber()`, ... (8 more)
+
+
+
 ### integrations\monitoring\integration_health.py
 
 **Description:**
@@ -846,27 +876,6 @@ Defines SQLAlchemy declarative base and example table definitions for testing re
 
 
 
-### integrations\events\event_bus.py
-
-**Description:**
-
-Event bus implementation for the AeroLearn AI event system.
-
-This module provides the central event bus for inter-component communication,
-implementing the publisher-subscriber pattern with event filtering
-and persistence for critical events.
-
-**Classes:**
-
-- `EventBus`
-
-
-  Central event bus for the AeroLearn AI system.
-
-  Methods: `get()`, `__new__()`, `__init__()`, `subscribe()`, `unsubscribe()`, ... (7 more)
-
-
-
 ### integrations\monitoring\component_status.py
 
 **Description:**
@@ -1005,6 +1014,137 @@ AIModelProviderInterface, ContentAnalysisInterface, and others.
   Tests for the register_ai_interfaces function.
 
   Methods: `test_register_ai_interfaces()`, `test_individual_interface_registrations()`
+
+
+
+### integrations\events\event_subscribers.py
+
+**Description:**
+
+Event subscriber definitions and management for the AeroLearn AI event system.
+
+This module provides the base classes and utilities for components to subscribe to
+and handle events from the event bus. It also defines the EventFilter interface for selective event handling.
+
+**Classes:**
+
+- `EventFilter`
+
+
+  EventFilter selects which events a subscriber is interested in 
+
+  Methods: `__init__()`, `matches()`, `filter()`
+
+- `AcceptAllEventFilter`
+ (inherits from: EventFilter)
+
+
+  Default event filter that accepts all events.
+
+  Methods: `__init__()`, `matches()`, `filter()`
+
+- `CompositeEventFilter`
+ (inherits from: EventFilter)
+
+
+  Accepts events if any of the provided filters accept them.
+
+  Methods: `__init__()`, `matches()`, `filter()`
+
+- `EventSubscriber`
+
+
+  Abstract base class for components that subscribe to events from the EventBus.
+
+  Methods: `__init__()`, `add_filter()`, `on_event()`, `event_filter()`
+
+- `LoggingEventSubscriber`
+ (inherits from: EventSubscriber)
+
+
+  Example event subscriber that logs all received events.
+
+  Methods: `__init__()`, `on_event()`
+
+- `CallbackEventSubscriber`
+ (inherits from: EventSubscriber)
+
+
+  Event subscriber that uses a provided callback function for event processing.
+
+  Methods: `__init__()`, `on_event()`
+
+
+
+### app\ui\common\form_controls.py
+
+**Description:**
+
+AeroLearn AI — Standardized UI Form Controls module
+
+This module provides reusable, themed UI form controls for the desktop UI. 
+Designed to be used with a UI toolkit such as PyQt5/PySide2 (Qt), though logic is separated
+for backend/UI framework independence and testability.
+
+Includes:
+- TextInputControl (single-line)
+- PasswordInputControl
+- MultiLineTextControl
+- DropdownControl
+- CheckboxControl
+
+Implements:
+- Input validation
+- Error/validation message display
+- Event emission (value changed, validation status)
+- Theme/style compatibility
+- Basic accessibility support
+
+Integration: Hooks into EventBus system for notification and validation events.
+
+**Classes:**
+
+- `BaseFormControl`
+ (inherits from: QWidget)
+
+
+  Abstract base for AeroLearn form controls.
+
+  Methods: `__init__()`, `_setup_ui()`, `_connect_events()`, `get_value()`, `set_value()`, ... (1 more)
+
+- `TextInputControl`
+ (inherits from: BaseFormControl)
+
+
+  Methods: `_setup_ui()`, `_connect_events()`, `get_value()`, `set_value()`
+
+- `PasswordInputControl`
+ (inherits from: TextInputControl)
+
+
+  Methods: `_setup_ui()`
+
+- `MultiLineTextControl`
+ (inherits from: BaseFormControl)
+
+
+  Methods: `_setup_ui()`, `_connect_events()`, `get_value()`, `set_value()`
+
+- `DropdownControl`
+ (inherits from: BaseFormControl)
+
+
+  Methods: `__init__()`, `_setup_ui()`, `_connect_events()`, `get_value()`, `set_value()`
+
+- `CheckboxControl`
+ (inherits from: BaseFormControl)
+
+
+  Methods: `_setup_ui()`, `_connect_events()`, `get_value()`, `set_value()`
+
+**Functions:**
+
+- `create_test_form()`
 
 
 
@@ -1290,57 +1430,6 @@ ContentProviderInterface, ContentSearchInterface, and others.
 
 
 
-### integrations\events\event_subscribers.py
-
-**Description:**
-
-Event subscriber definitions and management for the AeroLearn AI event system.
-
-This module provides the base classes and utilities for components to subscribe to
-and handle events from the event bus. It also defines the EventFilter interface for selective event handling.
-
-**Classes:**
-
-- `EventFilter`
-
-
-  EventFilter selects which events a subscriber is interested in 
-
-  Methods: `__init__()`, `matches()`, `filter()`
-
-- `AcceptAllEventFilter`
- (inherits from: EventFilter)
-
-
-  Default event filter that accepts all events.
-
-  Methods: `__init__()`, `matches()`, `filter()`
-
-- `EventSubscriber`
-
-
-  Abstract base class for components that subscribe to events from the EventBus.
-
-  Methods: `on_event()`, `event_filter()`
-
-- `LoggingEventSubscriber`
- (inherits from: EventSubscriber)
-
-
-  Example event subscriber that logs all received events.
-
-  Methods: `__init__()`, `on_event()`
-
-- `CallbackEventSubscriber`
- (inherits from: EventSubscriber)
-
-
-  Event subscriber that uses a provided callback function for event processing.
-
-  Methods: `__init__()`, `on_event()`, `event_filter()`
-
-
-
 ### integrations\interfaces\content_interface.py
 
 **Description:**
@@ -1597,6 +1686,40 @@ properly implement required interfaces and allowing for interface discovery.
 
 
 
+### tests\integration\component_harness.py
+
+**Description:**
+
+Integration Test Harness, Mock Component System, and Event Capture Utility
+Location: tests/integration/component_harness.py
+
+This module provides the foundational tools required to do component-based integration testing in AeroLearn AI.
+
+**Classes:**
+
+- `ComponentTestHarness`
+
+
+  Generic test harness for initializing, managing, and verifying system component behavior in integration tests.
+
+  Methods: `__init__()`, `register_component()`, `init_all()`, `start_all()`, `stop_all()`, ... (1 more)
+
+- `MockComponent`
+
+
+  Example mock component for use in harness-based tests.
+
+  Methods: `__init__()`, `init()`, `start()`, `stop()`, `handle_event()`
+
+- `EventCaptureUtility`
+
+
+  Utility for subscribing to global events (such as via event bus)
+
+  Methods: `__init__()`, `subscribe()`, `unsubscribe()`, `clear()`, `get_events()`, ... (1 more)
+
+
+
 ### app\ui\common\component_base.py
 
 **Classes:**
@@ -1636,6 +1759,50 @@ components to ensure they work together correctly.
   Test cases for the monitoring system components.
 
   Methods: `setUp()`, `test_health_metrics_collection()`, `test_health_status_changes()`, `test_overall_system_health()`, `test_component_status_tracking()`, ... (6 more)
+
+
+
+### tests\integration\test_ui_integration.py
+
+**Description:**
+
+UI Component Integration Tests
+
+These tests target integration between UI components and their data providers,
+event bus interactions, and support for end-to-end and performance scenarios.
+
+Assumptions:
+- UI components expose load_content, update_data, and subscribe_to_events
+- EventBus used for event-driven updates
+
+**Classes:**
+
+- `FakeContentProvider`
+
+
+  Methods: `__init__()`, `get_content()`, `list_content()`
+
+- `DummyUIComponent`
+
+
+  Methods: `__init__()`, `load_content()`, `update_data()`, `subscribe_to_events()`
+
+- `SimpleEventBus`
+
+
+  Methods: `__init__()`, `publish()`, `on()`
+
+**Functions:**
+
+- `ui_integration_env()`
+
+- `test_ui_loads_content_and_triggers_event(ui_integration_env)`
+
+- `test_ui_update_triggers_event(ui_integration_env)`
+
+- `test_end_to_end_ui_to_data_workflow(ui_integration_env)`
+
+- `test_ui_event_handler_performance(ui_integration_env)`
 
 
 
@@ -1751,6 +1918,97 @@ Local Cache System for AeroLearn AI
   Local cache storage supporting offline operation and prioritization.
 
   Methods: `__new__()`, `__init__()`, `set()`, `get()`, `delete()`, ... (5 more)
+
+
+
+### tests\integration\test_auth_integration.py
+
+**Description:**
+
+Authentication Integration Tests
+
+These tests verify the integration between authentication, session management, event bus, 
+and the permission/role system. They include E2E flows and event verification for multi-role scenarios.
+
+Assumptions:
+- Auth system exposes: authenticate_user, create_session, get_user_profile, logout_user
+- EventBus is set up and events are fired for auth state changes
+- User/role data is pre-populated or mocked as necessary
+
+**Classes:**
+
+- `DummyAuth`
+
+
+  Methods: `authenticate_user()`, `create_session()`, `get_user_profile()`
+
+- `FakeEventBus`
+
+
+  Methods: `__init__()`, `publish()`, `clear()`
+
+**Functions:**
+
+- `event_bus()`
+
+- `auth_system(event_bus)`
+
+- `test_authenticate_multiple_roles(auth_system, event_bus)`
+
+- `test_invalid_authentication_fires_event(auth_system, event_bus)`
+
+- `test_session_created_on_auth(auth_system)`
+
+- `test_logout_event_firing(auth_system, event_bus)`
+
+- `test_user_profile_retrieval()`
+
+- `test_auth_end_to_end_workflow(auth_system, event_bus)`
+
+- `test_performance_multiple_auth(auth_system)`
+
+
+
+### tests\integration\test_storage_integration.py
+
+**Description:**
+
+Storage System Integration Tests
+
+These tests validate the storage layer's integration with local and cloud backends,
+including end-to-end workflows and performance measurement.
+
+Assumptions:
+- Storage interface exposes: upload_file, download_file, delete_file, list_files
+- There is a unified abstraction for local/cloud, selectable by config or function arg
+
+**Classes:**
+
+- `DummyLocalStorage`
+
+
+  Methods: `upload_file()`, `download_file()`, `delete_file()`, `list_files()`
+
+- `DummyCloudStorage`
+
+
+  Methods: `upload_file()`, `download_file()`, `delete_file()`, `list_files()`
+
+**Functions:**
+
+- `reset_storage()`
+
+- `storage_system(request)`
+
+- `test_file_upload_and_download(storage_system)`
+
+- `test_file_delete_and_list(storage_system)`
+
+- `test_cross_backend_integrity()`
+
+- `test_end_to_end_storage_workflow(storage_system)`
+
+- `test_storage_performance_upload(storage_system)`
 
 
 
@@ -1940,6 +2198,54 @@ Edit DB_URL in schema.py as required for different environments.
 
 
   Methods: `setUp()`, `tearDown()`, `_cleanup_files()`, `test_store_and_retrieve_credential()`, `test_encryption_at_rest()`, ... (7 more)
+
+
+
+### tests\integration\test_framework.py
+
+**Description:**
+
+Integration Test Framework for the AeroLearn Project
+Location: tests/integration/test_framework.py
+
+Includes:
+- Interface compliance validation for components.
+- Test scenario builder.
+- Pytest-discoverable integration test functions.
+
+**Classes:**
+
+- `InterfaceComplianceTest`
+
+
+  Validates that a component implements the required interface contract
+
+  Methods: `__init__()`, `validate()`
+
+- `TestScenarioBuilder`
+
+
+  Builds and runs structured integration test scenarios.
+
+  Methods: `__init__()`, `add_step()`, `run()`
+
+**Functions:**
+
+- `test_component_lifecycle()`
+
+  Test: Component harness initializes, starts and tears down components.
+
+- `test_event_capture_utility()`
+
+  Test: EventCaptureUtility captures events via dummy event bus.
+
+- `test_interface_compliance()`
+
+  Test: InterfaceComplianceTest properly checks interface contract.
+
+- `test_scenario_builder_runall()`
+
+  Test: TestScenarioBuilder properly runs a sample scenario.
 
 
 
@@ -2163,6 +2469,39 @@ Covers ORM integration, validation, serialization, and event emission.
 
 
 
+### app\ui\common\content_preview.py
+
+**Description:**
+
+AeroLearn AI — Content Preview Component
+
+This module provides the ContentPreview UI widget for displaying quick previews of content
+selected in the browser. Handles text, images, PDF, video, and provides graceful fallback.
+
+Features:
+- Preview for multiple file/content types (text, image, PDF, etc)
+- Dynamic selection of preview provider based on detected content type
+- "Open with" actions allowing content launch in associated editors/viewers
+- Drag-and-drop integration for UI/file sharing
+- Preview loading errors are handled and surfaced to user via notification
+- Notification system for preview/interaction feedback
+
+**Classes:**
+
+- `ContentPreview`
+ (inherits from: QWidget)
+
+
+  ContentPreview widget for dynamically showing the preview of content item/file.
+
+  Methods: `__init__()`, `_setup_ui()`, `preview_content()`, `_show_text_preview()`, `_show_image_preview()`, ... (3 more)
+
+**Functions:**
+
+- `create_test_content_preview()`
+
+
+
 ### tests\unit\core\test_integration_health.py
 
 **Description:**
@@ -2184,6 +2523,53 @@ This module tests the health metric collection functionality including:
   Test suite for the health metric collection system.
 
   Methods: `setUp()`, `tearDown()`, `test_metric_registration()`, `test_metric_update()`, `test_counter_metric()`, ... (4 more)
+
+
+
+### tests\ui\test_common_ui_controls.py
+
+**Description:**
+
+Test Suite for AeroLearn Common UI Controls (Task 4.3)
+
+Covers:
+- Form controls: validation, value change, error display
+- Content browser: item listing, search, selection, drag event
+- Content preview: file/type-based preview, error, notification
+- Notification signal aggregation
+- Simulated drag-and-drop (programmatic, for basic verification)
+- Hooks for manual interaction
+
+Requirements: PyQt5 or PySide2, minimal test assets (text/image files for preview step)
+
+To run:
+$ python tests/ui/test_common_ui_controls.py
+
+Note: Because most UI verification requires human observation (and/or QtTest for full automation), this provides BOTH interactive UI and signal logging for confirmation.
+
+**Classes:**
+
+- `NotificationManager`
+ (inherits from: QWidget)
+
+
+  Simple notification logger for UI tests.
+
+  Methods: `__init__()`, `notify()`
+
+- `TestMainWindow`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `submit_form()`
+
+**Functions:**
+
+- `main()`
+
+- `test_pyqt5_installed()`
+
+  Minimal test to show that the UI test suite is present and PyQt5 is importable.
 
 
 
@@ -2381,6 +2767,44 @@ Uses events to notify about operations and errors. Metadata updates handled via 
 
 
   Methods: `__init__()`, `upload()`, `download()`, `delete()`
+
+
+
+### app\ui\common\content_browser.py
+
+**Description:**
+
+AeroLearn AI - Content Browser Component
+
+This module provides the ContentBrowser UI widget for displaying lists and trees of
+content items (documents, lessons, media, etc.), supporting filtering, search, selection,
+and drag-and-drop integration.
+
+Intended for use with a Qt UI stack (PyQt/PySide), but logic is separable.
+
+Features:
+- List and tree mode for content
+- Icons/thumbnails per type
+- Text search/filter
+- Selection events (single, multiple)
+- Drag-and-drop support (signals/hooks)
+- EventBus integration for content selection
+
+Extensible to work with actual content models/data sources.
+
+**Classes:**
+
+- `ContentBrowser`
+ (inherits from: QWidget)
+
+
+  Widget to browse, search, and select content items.
+
+  Methods: `__init__()`, `_setup_ui()`, `_populate()`, `_filter_content()`, `_item_selected()`, ... (1 more)
+
+**Functions:**
+
+- `create_test_content_browser()`
 
 
 
@@ -2623,6 +3047,27 @@ Manages metadata for files and directories, including custom tags, versioning, a
 
 
 
+### tests\integration\test_event_bus.py
+
+**Description:**
+
+Integration test for the event bus system.
+
+This module tests the event bus functionality to ensure events are correctly
+published, subscribers receive the correct events, filters work, and concurrent/event thread safety is maintained.
+
+**Classes:**
+
+- `TestEventSubscriber`
+ (inherits from: EventSubscriber)
+
+
+  Test subscriber that records received events for verification.
+
+  Methods: `__init__()`, `reset()`
+
+
+
 ### tests\integration\test_component_registry_Simple.py
 
 **Description:**
@@ -2686,27 +3131,6 @@ Run as:
   Create a Python __init__.py file.
 
 - `generate_project_structure()`
-
-
-
-### tests\integration\test_event_bus.py
-
-**Description:**
-
-Integration test for the event bus system.
-
-This module tests the event bus functionality to ensure events are correctly
-published and subscribers receive the events they are interested in.
-
-**Classes:**
-
-- `TestEventSubscriber`
- (inherits from: EventSubscriber)
-
-
-  Test event subscriber that records received events.
-
-  Methods: `__init__()`
 
 
 
