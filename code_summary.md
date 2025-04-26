@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 74
+Total Python files: 101
 
 ## Table of Contents
 
@@ -25,9 +25,20 @@ Total Python files: 74
 │   │   │   ├── authorization.py
 │   │   │   └── permission_registry.py
 │   │   ├── db
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   ├── db_client.py
+│   │   │   ├── schema.py
+│   │   │   ├── migrations.py
+│   │   │   ├── event_hooks.py
+│   │   │   ├── db_events.py
+│   │   │   ├── local_cache.py
+│   │   │   └── sync_manager.py
 │   │   ├── drive
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   ├── file_operations.py
+│   │   │   ├── folder_structure.py
+│   │   │   ├── metadata.py
+│   │   │   └── sync_manager.py
 │   │   ├── ai
 │   │   │   └── __init__.py
 │   │   └── api
@@ -36,7 +47,12 @@ Total Python files: 74
 │   │       └── google_drive_client.py
 │   ├── ui
 │   │   ├── common
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   ├── component_base.py
+│   │   │   ├── test_component_architecture.py
+│   │   │   ├── component_registry.py
+│   │   │   ├── main_window.py
+│   │   │   └── navigation.py
 │   │   ├── professor
 │   │   │   └── __init__.py
 │   │   ├── student
@@ -44,7 +60,11 @@ Total Python files: 74
 │   │   └── admin
 │   │       └── __init__.py
 │   ├── models
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   │   ├── course.py
+│   │   ├── content.py
+│   │   └── assessment.py
 │   ├── utils
 │   │   ├── __init__.py
 │   │   └── crypto.py
@@ -90,7 +110,8 @@ Total Python files: 74
 │   │   ├── models
 │   │   │   └── __init__.py
 │   │   ├── test_crypto.py
-│   │   └── test_credential_manager.py
+│   │   ├── test_credential_manager.py
+│   │   └── test_local_cache_and_sync.py
 │   ├── integration
 │   │   ├── interfaces
 │   │   │   ├── test_base_interface.py
@@ -105,13 +126,20 @@ Total Python files: 74
 │   │   ├── test_monitoring.py
 │   │   ├── test_health_metrics.py
 │   │   ├── test_component_status.py
-│   │   └── test_auth_event_bus.py
+│   │   ├── test_auth_event_bus.py
+│   │   ├── test_db_integration.py
+│   │   ├── test_phase1_foundation.py
+│   │   └── phase1_foundation_patch.py
 │   ├── ui
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   ├── test_component_architecture.py
+│   │   └── test_main_window.py
 │   ├── fixtures
 │   │   └── __init__.py
 │   ├── examples
 │   │   └── event_bus_example.py
+│   ├── models
+│   │   └── test_models.py
 │   └── __init__.py
 ├── docs
 │   ├── architecture
@@ -167,9 +195,9 @@ Event type definitions for the AeroLearn AI event system.
 This module defines the event classes and types used throughout the system for
 inter-compon...
 
-- Classes: 12
+- Classes: 13
 - Functions: 0
-- Dependency Score: 70.00
+- Dependency Score: 91.00
 
 ### integrations\registry\component_registry.py
 
@@ -180,7 +208,7 @@ tracking their lifecycle, depe...
 
 - Classes: 6
 - Functions: 0
-- Dependency Score: 63.00
+- Dependency Score: 71.00
 
 ### integrations\interfaces\base_interface.py
 
@@ -191,7 +219,7 @@ registra...
 
 - Classes: 10
 - Functions: 1
-- Dependency Score: 60.00
+- Dependency Score: 63.00
 
 ### integrations\monitoring\transaction_logger.py
 
@@ -201,6 +229,17 @@ This module provides tools for tracking and logging cross-component transactions
 making it easier t...
 
 - Classes: 6
+- Functions: 0
+- Dependency Score: 62.00
+
+### integrations\monitoring\integration_health.py
+
+Integration health monitoring for the AeroLearn AI system.
+
+This module provides health metric collection, status tracking, and visualization
+data str...
+
+- Classes: 7
 - Functions: 0
 - Dependency Score: 57.00
 
@@ -215,16 +254,25 @@ content ...
 - Functions: 1
 - Dependency Score: 56.00
 
-### integrations\monitoring\integration_health.py
+### app\core\db\schema.py
 
-Integration health monitoring for the AeroLearn AI system.
+Schema configuration for AeroLearn AI
+Defines SQLAlchemy declarative base and example table definitions for testing relationships.
 
-This module provides health metric collection, status tracking, and visualization
-data str...
-
-- Classes: 7
+- Classes: 11
 - Functions: 0
-- Dependency Score: 52.00
+- Dependency Score: 54.00
+
+### integrations\events\event_bus.py
+
+Event bus implementation for the AeroLearn AI event system.
+
+This module provides the central event bus for inter-component communication,
+implementin...
+
+- Classes: 1
+- Functions: 0
+- Dependency Score: 54.00
 
 ### integrations\monitoring\component_status.py
 
@@ -235,7 +283,7 @@ of system components, ...
 
 - Classes: 6
 - Functions: 0
-- Dependency Score: 48.00
+- Dependency Score: 53.00
 
 ### tests\integration\interfaces\test_ai_interface.py
 
@@ -248,28 +296,6 @@ AIModelProviderInterface, ContentAna...
 - Functions: 0
 - Dependency Score: 48.00
 
-### tests\integration\interfaces\test_storage_interface.py
-
-Unit tests for the storage interface contracts.
-
-This module tests the functionality of the storage-related interfaces like
-StorageProviderInterface, ...
-
-- Classes: 9
-- Functions: 0
-- Dependency Score: 43.00
-
-### integrations\interfaces\storage_interface.py
-
-Storage interface contracts for the AeroLearn AI system.
-
-This module defines the interfaces for storage systems, including local and cloud
-storage pr...
-
-- Classes: 11
-- Functions: 0
-- Dependency Score: 42.00
-
 ## Dependencies
 
 Key file relationships (files with most dependencies):
@@ -277,8 +303,7 @@ Key file relationships (files with most dependencies):
 - **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **integrations\monitoring\component_status.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
-- **tests\integration\interfaces\test_ai_interface.py** depends on: integrations\interfaces\base_interface.py, integrations\interfaces\ai_interface.py
-- **tests\integration\interfaces\test_storage_interface.py** depends on: integrations\interfaces\base_interface.py, integrations\interfaces\storage_interface.py
+- **tests\integration\interfaces\test_ai_interface.py** depends on: integrations\interfaces\ai_interface.py, integrations\interfaces\base_interface.py
 
 
 ## Detailed Code Analysis
@@ -292,7 +317,17 @@ Event type definitions for the AeroLearn AI event system.
 This module defines the event classes and types used throughout the system for
 inter-component communication. It provides a type-safe way to define and handle events.
 
+Event types can be accessed either through the EventType enum (for type checking and IDE support)
+or through the category-specific classes (SystemEventType, ContentEventType, etc.) for
+organizational clarity.
+
 **Classes:**
+
+- `EventType`
+ (inherits from: enum.Enum)
+
+
+  General event type enumeration for core system/event bus usage.
 
 - `EventPriority`
  (inherits from: enum.IntEnum)
@@ -420,14 +455,14 @@ tracking their lifecycle, dependencies, and version information.
 
   Base class for all registrable components in the system.
 
-  Methods: `__init__()`, `declare_dependency()`, `require_interface()`, `provide_interface()`
+  Methods: `__init__()`, `__getitem__()`, `__iter__()`, `items()`, `declare_dependency()`, ... (2 more)
 
 - `ComponentRegistry`
 
 
   Central registry for AeroLearn AI system components.
 
-  Methods: `__new__()`, `__init__()`, `register_component()`, `unregister_component()`, `get_component()`, ... (6 more)
+  Methods: `__new__()`, `__init__()`, `register_component()`, `register_component_instance()`, `unregister_component()`, ... (8 more)
 
 
 
@@ -570,7 +605,69 @@ making it easier to trace operations as they flow through different parts of the
 
   System for logging and tracking cross-component transactions.
 
-  Methods: `__init__()`, `create_transaction()`, `update_transaction()`, `get_transaction()`, `get_transactions_by_parent()`, ... (12 more)
+  Methods: `__init__()`, `create_transaction()`, `update_transaction()`, `get_transaction()`, `get_transactions_by_parent()`, ... (14 more)
+
+
+
+### integrations\monitoring\integration_health.py
+
+**Description:**
+
+Integration health monitoring for the AeroLearn AI system.
+
+This module provides health metric collection, status tracking, and visualization
+data structures for monitoring the health of system integrations.
+
+**Classes:**
+
+- `HealthStatus`
+ (inherits from: Enum)
+
+
+  Health status levels for components and integrations.
+
+- `HealthMetricType`
+ (inherits from: Enum)
+
+
+  Types of health metrics that can be collected.
+
+- `HealthMetric`
+
+
+  A single health metric measurement.
+
+  Methods: `__init__()`, `get_status()`, `to_dict()`
+
+- `HealthEvent`
+ (inherits from: Event)
+
+
+  Event fired when a significant health status change occurs.
+
+  Methods: `__init__()`
+
+- `HealthProvider`
+ (inherits from: ABC)
+
+
+  Interface for components that provide health information.
+
+  Methods: `get_health_metrics()`, `get_health_status()`
+
+- `IntegrationHealthError`
+ (inherits from: Exception)
+
+
+  Exception raised for errors in the integration health system.
+
+- `IntegrationHealth`
+ (inherits from: Component)
+
+
+  Central system for tracking integration health across components.
+
+  Methods: `__init__()`, `register_health_provider()`, `unregister_health_provider()`, `collect_metrics()`, `_update_metrics()`, ... (10 more)
 
 
 
@@ -694,65 +791,79 @@ content analysis, question answering, and recommendation systems.
 
 
 
-### integrations\monitoring\integration_health.py
+### app\core\db\schema.py
 
 **Description:**
 
-Integration health monitoring for the AeroLearn AI system.
-
-This module provides health metric collection, status tracking, and visualization
-data structures for monitoring the health of system integrations.
+Schema configuration for AeroLearn AI
+Defines SQLAlchemy declarative base and example table definitions for testing relationships.
 
 **Classes:**
 
-- `HealthStatus`
- (inherits from: Enum)
+- `User`
+ (inherits from: Base)
 
 
-  Health status levels for components and integrations.
-
-- `HealthMetricType`
- (inherits from: Enum)
+- `UserProfile`
+ (inherits from: Base)
 
 
-  Types of health metrics that can be collected.
-
-- `HealthMetric`
-
-
-  A single health metric measurement.
-
-  Methods: `__init__()`, `get_status()`, `to_dict()`
-
-- `HealthEvent`
- (inherits from: Event)
+- `Topic`
+ (inherits from: Base)
 
 
-  Event fired when a significant health status change occurs.
-
-  Methods: `__init__()`
-
-- `HealthProvider`
- (inherits from: ABC)
+- `Module`
+ (inherits from: Base)
 
 
-  Interface for components that provide health information.
-
-  Methods: `get_health_metrics()`, `get_health_status()`
-
-- `IntegrationHealthError`
- (inherits from: Exception)
+- `Lesson`
+ (inherits from: Base)
 
 
-  Exception raised for errors in the integration health system.
-
-- `IntegrationHealth`
- (inherits from: Component)
+- `Quiz`
+ (inherits from: Base)
 
 
-  Central system for tracking integration health across components.
+- `Question`
+ (inherits from: Base)
 
-  Methods: `__init__()`, `register_health_provider()`, `unregister_health_provider()`, `collect_metrics()`, `_update_metrics()`, ... (8 more)
+
+- `Answer`
+ (inherits from: Base)
+
+
+- `LearningPath`
+ (inherits from: Base)
+
+
+- `PathModule`
+ (inherits from: Base)
+
+
+- `ProgressRecord`
+ (inherits from: Base)
+
+
+
+
+### integrations\events\event_bus.py
+
+**Description:**
+
+Event bus implementation for the AeroLearn AI event system.
+
+This module provides the central event bus for inter-component communication,
+implementing the publisher-subscriber pattern with event filtering
+and persistence for critical events.
+
+**Classes:**
+
+- `EventBus`
+
+
+  Central event bus for the AeroLearn AI system.
+
+  Methods: `get()`, `__new__()`, `__init__()`, `subscribe()`, `unsubscribe()`, ... (7 more)
 
 
 
@@ -795,7 +906,7 @@ and operational capability.
 
   Represents the status of a component at a specific point in time.
 
-  Methods: `__init__()`, `to_dict()`
+  Methods: `__init__()`, `to_dict()`, `set_status()`, `get_status()`
 
 - `StatusHistoryEntry`
 
@@ -1179,6 +1290,57 @@ ContentProviderInterface, ContentSearchInterface, and others.
 
 
 
+### integrations\events\event_subscribers.py
+
+**Description:**
+
+Event subscriber definitions and management for the AeroLearn AI event system.
+
+This module provides the base classes and utilities for components to subscribe to
+and handle events from the event bus. It also defines the EventFilter interface for selective event handling.
+
+**Classes:**
+
+- `EventFilter`
+
+
+  EventFilter selects which events a subscriber is interested in 
+
+  Methods: `__init__()`, `matches()`, `filter()`
+
+- `AcceptAllEventFilter`
+ (inherits from: EventFilter)
+
+
+  Default event filter that accepts all events.
+
+  Methods: `__init__()`, `matches()`, `filter()`
+
+- `EventSubscriber`
+
+
+  Abstract base class for components that subscribe to events from the EventBus.
+
+  Methods: `on_event()`, `event_filter()`
+
+- `LoggingEventSubscriber`
+ (inherits from: EventSubscriber)
+
+
+  Example event subscriber that logs all received events.
+
+  Methods: `__init__()`, `on_event()`
+
+- `CallbackEventSubscriber`
+ (inherits from: EventSubscriber)
+
+
+  Event subscriber that uses a provided callback function for event processing.
+
+  Methods: `__init__()`, `on_event()`, `event_filter()`
+
+
+
 ### integrations\interfaces\content_interface.py
 
 **Description:**
@@ -1305,6 +1467,46 @@ providers, content retrieval, and content processing components.
 
 
 
+### app\models\content.py
+
+**Description:**
+
+Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
+
+Location: app/models/content.py
+Depends on: app/core/db/schema.py, integrations/events/event_bus.py
+
+Handles Topic, Module, Lesson, Quiz logic; validation, serialization, and event integration.
+
+**Classes:**
+
+- `TopicModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `ModuleModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `LessonModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `QuizModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `QuestionModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+
+
 ### app\core\auth\authorization.py
 
 **Classes:**
@@ -1395,60 +1597,16 @@ properly implement required interfaces and allowing for interface discovery.
 
 
 
-### integrations\events\event_bus.py
-
-**Description:**
-
-Event bus implementation for the AeroLearn AI event system.
-
-This module provides the central event bus for inter-component communication,
-implementing the publisher-subscriber pattern with advanced event filtering
-and asynchronous event handling.
+### app\ui\common\component_base.py
 
 **Classes:**
 
-- `EventBus`
+- `BaseComponent`
 
 
-  Central event bus for the AeroLearn AI system.
+  Base class for all UI components.
 
-  Methods: `__new__()`, `__init__()`, `register_subscriber()`, `unregister_subscriber()`, `get_stats()`, ... (3 more)
-
-
-
-### integrations\events\event_subscribers.py
-
-**Description:**
-
-Event subscriber definitions and management for the AeroLearn AI event system.
-
-This module provides the base classes and utilities for components to subscribe to
-and handle events from the event bus.
-
-**Classes:**
-
-- `EventFilter`
-
-
-  Filter for matching events based on various criteria.
-
-  Methods: `__init__()`, `matches()`
-
-- `EventSubscriber`
- (inherits from: abc.ABC)
-
-
-  Base class for components that subscribe to events.
-
-  Methods: `__init__()`, `add_filter()`, `remove_all_filters()`, `is_interested_in()`
-
-- `CallbackEventSubscriber`
- (inherits from: EventSubscriber)
-
-
-  Event subscriber that delegates to a callback function.
-
-  Methods: `__init__()`
+  Methods: `__init__()`, `version()`, `status()`, `on_init()`, `on_start()`, ... (7 more)
 
 
 
@@ -1542,19 +1700,6 @@ This script:
 
 
 
-### app\core\auth\user_profile.py
-
-**Classes:**
-
-- `UserProfile`
-
-
-  Represents the user's profile and identity attributes.
-
-  Methods: `__init__()`, `to_dict()`, `from_dict()`
-
-
-
 ### integrations\registry\dependency_tracker.py
 
 **Description:**
@@ -1577,7 +1722,100 @@ component dependencies and ensuring proper component initialization order.
 
   Utility for tracking and analyzing dependencies between components.
 
-  Methods: `__init__()`, `validate_dependencies()`, `detect_circular_dependencies()`, `get_initialization_order()`, `get_dependency_tree()`, ... (4 more)
+  Methods: `__init__()`, `declare_dependency()`, `has_dependency()`, `validate_dependencies()`, `detect_circular_dependencies()`, ... (6 more)
+
+
+
+### app\core\db\local_cache.py
+
+**Description:**
+
+Local Cache System for AeroLearn AI
+- Local cache storage using SQLite (for persistence and offline ops)
+- Invalidation logic for expiration or manual/integrity-based removes
+- Cache prioritization support for critical data
+- Thread-safe design
+
+**Classes:**
+
+- `LocalCacheInvalidationPolicy`
+
+
+  Handles cache invalidation policies (time-based, manual, integrity).
+
+  Methods: `__init__()`, `is_expired()`
+
+- `LocalCache`
+
+
+  Local cache storage supporting offline operation and prioritization.
+
+  Methods: `__new__()`, `__init__()`, `set()`, `get()`, `delete()`, ... (5 more)
+
+
+
+### app\core\db\sync_manager.py
+
+**Description:**
+
+SyncManager for AeroLearn AI
+- Handles synchronization between local cache and remote persistence (or server)
+- Implements conflict resolution (last-writer-wins for now, pluggable in future)
+- Batch synchronization and detection of offline/online state
+
+**Classes:**
+
+- `RemoteSyncProvider`
+
+
+  Simulated remote store (would be replaced with actual DB/API client).
+
+  Methods: `__init__()`, `pull()`, `push()`, `get()`
+
+- `SyncManager`
+
+
+  Manage synchronization between the local cache and remote (cloud/server).
+
+  Methods: `__init__()`, `go_offline()`, `go_online()`, `sync()`, `resolve_conflict()`, ... (2 more)
+
+
+
+### app\ui\common\main_window.py
+
+**Description:**
+
+Main application window for AeroLearn AI.
+
+Implements:
+- Central widget layout with view-switching (navigation)
+- Role-based navigation (hooked)
+- Status bar showing integration health
+- Window state persistence/restoration
+- Theme and style management
+
+Requires PyQt6 (or compatible PySide6).
+
+**Classes:**
+
+- `MainWindow`
+ (inherits from: QMainWindow)
+
+
+  Methods: `__init__()`, `add_example_views()`, `update_role_navigation()`, `update_integration_health()`, `closeEvent()`, ... (5 more)
+
+
+
+### app\core\auth\user_profile.py
+
+**Classes:**
+
+- `UserProfile`
+
+
+  Represents the user's profile and identity attributes.
+
+  Methods: `__init__()`, `to_dict()`, `from_dict()`
 
 
 
@@ -1598,6 +1836,98 @@ component dependencies and ensuring proper component initialization order.
   Handles session creation, validation, and expiration.
 
   Methods: `__init__()`, `create_session()`, `get_session()`, `invalidate_session()`, `cleanup_expired()`
+
+
+
+### app\core\db\db_client.py
+
+**Description:**
+
+Database Client for AeroLearn AI
+Handles SQLAlchemy engine and session management.
+Edit DB_URL in schema.py as required for different environments.
+
+**Classes:**
+
+- `DBClient`
+
+
+  Methods: `__new__()`, `_initialize()`, `get_session()`, `dispose()`, `session_scope()`, ... (6 more)
+
+
+
+### tests\ui\test_component_architecture.py
+
+**Classes:**
+
+- `MockEvent`
+
+
+  Methods: `__init__()`
+
+- `MockEventBus`
+
+
+  Methods: `__init__()`, `subscribe()`, `publish()`
+
+**Functions:**
+
+- `mock_event_bus()`
+
+- `test_base_component_lifecycle_and_status(mock_event_bus)`
+
+- `test_event_handler_registration_and_callback(mock_event_bus)`
+
+- `test_registry_register_and_discover()`
+
+- `test_registry_replace_component()`
+
+- `test_dependency_injection_and_replacement()`
+
+- `test_bulk_lifecycle_operations()`
+
+
+
+### app\ui\common\test_component_architecture.py
+
+**Classes:**
+
+- `MockEvent`
+
+
+  Methods: `__init__()`
+
+- `MockEventBus`
+
+
+  Methods: `__init__()`, `subscribe()`, `publish()`
+
+**Functions:**
+
+- `mock_event_bus()`
+
+- `test_component_creation_and_lifecycle(mock_event_bus)`
+
+- `test_component_event_handler_and_publish(mock_event_bus)`
+
+- `test_component_registry_add_discover_replace()`
+
+- `test_dependency_injection()`
+
+- `test_lifecycle_bulk_operations()`
+
+
+
+### app\ui\common\component_registry.py
+
+**Classes:**
+
+- `ComponentRegistry`
+
+
+  Registry for UI components (Singleton).
+
+  Methods: `__init__()`, `instance()`, `register_component()`, `register_component_class()`, `get_component()`, ... (5 more)
 
 
 
@@ -1666,6 +1996,123 @@ component dependencies and ensuring proper component initialization order.
 - `test_dependency_tracking_and_warnings()`
 
 - `test_status_summary()`
+
+
+
+### tests\integration\phase1_foundation_patch.py
+
+**Functions:**
+
+- `matches(self, event)`
+
+  Determine whether the event matches this filter.
+
+- `register_component(self, component_id, version)`
+
+  Register a component by id and version only (test-friendly API).
+
+- `register_component_instance(self, component)`
+
+  Register a full Component instance (production API).
+
+- `declare_dependency(self, dependent, requirements)`
+
+  For testing: add a trivial mapping of dependencies from module to list.
+
+- `has_dependency(self, dependent, requirement)`
+
+  For testing: Check if dependent has declared requirement in stub.
+
+- `interface_method(method)`
+
+  Decorator for marking interface methods (test supports normal signature).
+
+- `collect_metric(self, key, value)`
+
+  Set a metric for test stubs.
+
+- `get_metric(self, key)`
+
+  Get metric for test stub.
+
+- `__init__(self)`
+
+- `set_status(self, component, status)`
+
+- `get_status(self, component)`
+
+- `__init__(self)`
+
+- `log_transaction(self, source, target, type_, data)`
+
+- `get_logs(self)`
+
+
+
+### app\core\drive\sync_manager.py
+
+**Description:**
+
+File: sync_manager.py
+
+Implements file synchronization between local cache and remote backend (e.g., Google Drive).
+Handles conflict resolution, batch sync, and uses MetadataManager for change detection.
+
+**Classes:**
+
+- `ConflictType`
+
+
+- `SyncConflict`
+ (inherits from: Exception)
+
+
+  Methods: `__init__()`
+
+- `SyncManager`
+
+
+  Methods: `__init__()`, `sync_file()`, `sync_all()`
+
+
+
+### app\models\user.py
+
+**Description:**
+
+User model for AeroLearn AI.
+
+Location: app/models/user.py
+Depends on: app/core/db/schema.py, integrations/events/event_bus.py
+
+Implements validation, event integration, and serialization.
+
+**Classes:**
+
+- `UserModel`
+
+
+  Methods: `__init__()`, `id()`, `username()`, `email()`, `is_active()`, ... (2 more)
+
+
+
+### app\models\course.py
+
+**Description:**
+
+Course model for AeroLearn AI.
+
+Location: app/models/course.py
+Depends on: app/core/db/schema.py, integrations/events/event_bus.py
+
+Covers ORM integration, validation, serialization, and event emission.
+
+**Classes:**
+
+- `CourseModel`
+
+
+  Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
 
 
 
@@ -1777,6 +2224,54 @@ inter-component communication in the AeroLearn AI system.
 
 
 
+### app\core\db\event_hooks.py
+
+**Description:**
+
+Event Bus hooks for publishing DB changes.
+This uses real project models (User, Module, Lesson, etc).
+
+**Classes:**
+
+- `EventBus`
+
+
+  Methods: `publish()`
+
+**Functions:**
+
+- `after_insert(mapper, connection, target)`
+
+- `after_update(mapper, connection, target)`
+
+- `after_delete(mapper, connection, target)`
+
+- `install_event_hooks()`
+
+
+
+### app\ui\common\navigation.py
+
+**Description:**
+
+Navigation management for AeroLearn AI main window.
+
+Handles:
+- Sidebar navigation UI
+- View registration and switching
+- Role-based navigation
+
+Requires PyQt6 (or compatible PySide6).
+
+**Classes:**
+
+- `NavigationManager`
+
+
+  Methods: `__init__()`, `set_stacked_widget()`, `register_view()`, `switch_to_role()`, `on_navigate()`
+
+
+
 ### tests\integration\test_component_registry.py
 
 **Description:**
@@ -1829,6 +2324,83 @@ Revised Component Registry tests for Spyder - adapted to your implementation.
 - `test_aggregation_and_history()`
 
 - `test_health_status_cache()`
+
+
+
+### tests\ui\test_main_window.py
+
+**Description:**
+
+Test cases for MainWindow and Navigation system.
+
+Uses pytest-qt or manual app launch for functional/smoke tests.
+
+**Classes:**
+
+- `DummyAuthService`
+
+
+  Methods: `__init__()`, `get_current_role()`
+
+**Functions:**
+
+- `qt_app()`
+
+  Provide QApplication only once per pytest session.
+
+- `test_window_initialization(qt_app)`
+
+- `test_navigation_role_switch(qt_app)`
+
+- `test_status_bar_health(qt_app)`
+
+- `test_theme_toggle(qt_app)`
+
+- `test_window_state_persistence(qt_app)`
+
+
+
+### app\core\drive\file_operations.py
+
+**Description:**
+
+File: file_operations.py
+
+Implements file upload and download operations with support for local and remote (Google Drive) backends.
+Uses events to notify about operations and errors. Metadata updates handled via metadata.py.
+
+**Classes:**
+
+- `FileOperationError`
+ (inherits from: Exception)
+
+
+  Custom exception type for file operations.
+
+- `FileOperations`
+
+
+  Methods: `__init__()`, `upload()`, `download()`, `delete()`
+
+
+
+### app\models\assessment.py
+
+**Description:**
+
+Assessment model for AeroLearn AI.
+
+Location: app/models/assessment.py
+Depends on: app/core/db/schema.py, integrations/events/event_bus.py
+
+Wraps ProgressRecord and assessment-related logic; provides validation, serialization, and event integration.
+
+**Classes:**
+
+- `AssessmentModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
 
 
 
@@ -1927,6 +2499,118 @@ Modified Component Registry tests for Spyder that patch event creation.
 
 
 
+### app\core\db\migrations.py
+
+**Description:**
+
+Database migration and verification tools for AeroLearn AI.
+Provides utilities for creating, dropping, and inspecting database tables.
+
+**Functions:**
+
+- `create_all_tables()`
+
+  Create all tables defined in the Base metadata.
+
+- `drop_all_tables()`
+
+  Drop all tables defined in the Base metadata.
+
+- `list_tables()`
+
+  List all tables in the database.
+
+- `verify_schema()`
+
+  Verify that the database schema matches the expected schema.
+
+- `get_table_details(table_name)`
+
+  Get detailed information about a specific table.
+
+- `run_migration(version)`
+
+  Run migration to specified version or latest.
+
+
+
+### app\core\drive\folder_structure.py
+
+**Description:**
+
+File: folder_structure.py
+
+Defines folder structure management utilities for file storage system.
+Able to create, verify, list, and traverse folders both locally and in external backends.
+
+**Classes:**
+
+- `FolderStructure`
+
+
+  Methods: `__init__()`, `create_folder()`, `folder_exists()`, `list_folders()`, `get_folder_tree()`
+
+
+
+### app\core\drive\metadata.py
+
+**Description:**
+
+File: metadata.py
+
+Manages metadata for files and directories, including custom tags, versioning, and change detection.
+
+**Classes:**
+
+- `MetadataManager`
+
+
+  Methods: `__init__()`, `generate_file_hash()`, `set_metadata()`, `get_metadata()`, `detect_change()`
+
+
+
+### tests\unit\test_local_cache_and_sync.py
+
+**Functions:**
+
+- `reset_cache_singletons()`
+
+- `test_cache_storage_and_retrieval(tmp_path)`
+
+- `test_cache_expiry(tmp_path)`
+
+- `test_cache_priority(tmp_path)`
+
+- `test_cache_offline_mode_sync(tmp_path)`
+
+- `test_sync_conflict_resolution(tmp_path)`
+
+- `test_cache_invalidation(tmp_path)`
+
+- `test_cache_persistence(tmp_path)`
+
+
+
+### tests\integration\test_phase1_foundation.py
+
+**Functions:**
+
+- `test_event_filter_matching()`
+
+- `test_component_registry_and_discovery()`
+
+- `test_dependency_tracking_validation()`
+
+- `test_base_interface_signature_validation()`
+
+- `test_integration_health_collect()`
+
+- `test_component_status_tracking()`
+
+- `test_transaction_logger()`
+
+
+
 ### tests\unit\test_crypto.py
 
 **Classes:**
@@ -1960,6 +2644,28 @@ Simplified Spyder-compatible tests for the Component Registry system without eve
 - `safe_call(obj, primary_method, fallback_method)`
 
   Call primary_method if it exists, otherwise try fallback_method
+
+
+
+### tests\integration\test_db_integration.py
+
+**Description:**
+
+Tests for AeroLearn DB client, schema, migrations, and event hooks.
+Run as:
+    python -m pytest tests/integration/test_db_integration.py
+
+**Functions:**
+
+- `reset_db()`
+
+- `test_schema_and_migration()`
+
+- `test_user_module_lesson_crud()`
+
+- `test_relationships_and_queries()`
+
+- `test_event_hooks()`
 
 
 
@@ -2004,6 +2710,78 @@ published and subscribers receive the events they are interested in.
 
 
 
+### tests\models\test_models.py
+
+**Description:**
+
+Basic tests for models created in Task 3.2.
+
+Location: tests/models/test_models.py
+
+Covers:
+- Creation, validation, and serialization for User, Course, Content, Assessment models.
+- Relationship checks.
+- Event bus integration stubs (mocked, as real event bus may need async setup).
+
+NOTE: This is a minimal, demonstration-level test suite. Extend as needed for CI or deeper coverage.
+
+**Functions:**
+
+- `test_user_model_creation_and_validation()`
+
+- `test_course_model_and_relationships()`
+
+- `test_content_models()`
+
+- `test_assessment_model()`
+
+
+
+### app\core\db\__init__.py
+
+**Description:**
+
+AeroLearn AI - Aerospace Engineering Education Platform
+Created: 2025-04-24
+
+This module is part of the AeroLearn AI project.
+
+
+
+### app\core\db\db_events.py
+
+**Description:**
+
+Database Event Hooks for Event Bus Integration (Task 3.1)
+---------------------------------------------------------
+
+This module connects SQLAlchemy ORM events (insert/update/delete) for tracked models 
+to the AeroLearn AI event system. 
+
+- Hooks are registered for all mapped models in app.core.db.schema.
+- On DB entity changes, a content.event (CREATED, UPDATED, DELETED) is published to the EventBus.
+- Each event includes model, PK, and change data in the payload.
+
+Place this file at: `app/core/db/db_events.py`
+
+To activate event publishing, import this module after SQLAlchemy models are loaded (e.g., at app startup):
+
+    from app.core.db import db_events
+
+Requires: event bus to be started (`await EventBus().start()`).
+
+**Functions:**
+
+- `_get_primary_key(obj)`
+
+  Helper to retrieve primary key(s) as a dict.
+
+- `register_db_event_hooks()`
+
+  Register all hooks for after_insert, after_update, after_delete
+
+
+
 ### app\main.py
 
 **Description:**
@@ -2037,17 +2815,6 @@ learning assistance, and comprehensive analytics.
 
 
 ### app\core\auth\__init__.py
-
-**Description:**
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-
-
-### app\core\db\__init__.py
 
 **Description:**
 
