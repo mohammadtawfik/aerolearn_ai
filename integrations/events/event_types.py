@@ -3,12 +3,54 @@ Event type definitions for the AeroLearn AI event system.
 
 This module defines the event classes and types used throughout the system for
 inter-component communication. It provides a type-safe way to define and handle events.
+
+Event types can be accessed either through the EventType enum (for type checking and IDE support)
+or through the category-specific classes (SystemEventType, ContentEventType, etc.) for
+organizational clarity.
 """
 import uuid
 import enum
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, Optional, List, Type
+
+
+class EventType(enum.Enum):
+    """
+    General event type enumeration for core system/event bus usage.
+    Provides a centralized enum for all event types across categories.
+    
+    For organizational clarity, category-specific event type classes
+    like SystemEventType, ContentEventType, etc. are also available.
+    """
+    # System events
+    SYSTEM_STARTUP = "system.startup"
+    SYSTEM_SHUTDOWN = "system.shutdown"
+    SYSTEM_COMPONENT_REGISTERED = "system.component.registered"
+    SYSTEM_COMPONENT_UNREGISTERED = "system.component.unregistered"
+    SYSTEM_COMPONENT_ERROR = "system.component.error"
+    SYSTEM_INTEGRATION_ERROR = "system.integration.error"
+    
+    # Content events
+    CONTENT_CREATED = "content.created"
+    CONTENT_UPDATED = "content.updated"
+    CONTENT_DELETED = "content.deleted"
+    CONTENT_INDEXED = "content.indexed"
+    CONTENT_ANALYZED = "content.analyzed"
+    CONTENT_SIMILARITY_DETECTED = "content.similarity.detected"
+    
+    # User events
+    USER_LOGGED_IN = "user.logged_in"
+    USER_LOGGED_OUT = "user.logged_out"
+    USER_PROFILE_UPDATED = "user.profile.updated"
+    USER_PERMISSION_CHANGED = "user.permission.changed"
+    USER_PROGRESS_UPDATED = "user.progress.updated"
+    
+    # AI events
+    AI_QUERY_PROCESSED = "ai.query.processed"
+    AI_CONTENT_ENHANCED = "ai.content.enhanced"
+    AI_RECOMMENDATION_GENERATED = "ai.recommendation.generated"
+    AI_MODEL_UPDATED = "ai.model.updated"
 
 
 class EventPriority(enum.IntEnum):

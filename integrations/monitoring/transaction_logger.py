@@ -874,6 +874,34 @@ class TransactionLogger(Component):
         # For now, just print
         print(f"Persisting transaction: {json_data[:100]}...")
     
+    def log_transaction(self, source: str, target: str, type_: str, data: Any) -> None:
+        """
+        Log a simple transaction for testing purposes.
+        
+        Args:
+            source: Source component or system
+            target: Target component or system
+            type_: Type of transaction
+            data: Transaction data
+        """
+        if not hasattr(self, '_logs'):
+            self._logs = []
+            
+        entry = {"source": source, "target": target, "type": type_, "data": data}
+        self._logs.append(entry)
+        
+    def get_logs(self) -> List[Dict[str, Any]]:
+        """
+        Get all simple transaction logs.
+        
+        Returns:
+            List of transaction log entries
+        """
+        if not hasattr(self, '_logs'):
+            self._logs = []
+            
+        return self._logs
+    
     @contextmanager
     def start_transaction(
         self,

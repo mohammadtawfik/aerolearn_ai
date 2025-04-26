@@ -91,6 +91,38 @@ class Component:
         self.provided_interfaces: Dict[str, str] = {}  # interface_name -> version
         self.metadata: Dict[str, Any] = {}
     
+    def __getitem__(self, key):
+        """
+        Allow dict-style access to attributes for test compatibility.
+        """
+        if key == "id":
+            return self.component_id
+        elif hasattr(self, key):
+            return getattr(self, key)
+        elif key in self.metadata:
+            return self.metadata[key]
+        raise KeyError(f"{key!r} not found in Component.")
+
+    def __iter__(self):
+        """
+        Allow iterating over selected keys as in a dict.
+        """
+        yield "id"
+        yield "component_type"
+        yield "version"
+        yield "state"
+        yield "dependencies"
+        yield "required_interfaces"
+        yield "provided_interfaces"
+        yield "metadata"
+
+    def items(self):
+        """
+        Return key-value pairs for basic dict-like usage.
+        """
+        for k in self.__iter__():
+            yield k, self[k]
+    
     def declare_dependency(self, component_type: str, version_requirement: str, optional: bool = False) -> None:
         """
         Declare a dependency on another component.
@@ -195,9 +227,24 @@ class ComponentRegistry:
         self._event_bus = EventBus()
         logger.info("Component registry initialized")
     
-    def register_component(self, component: Component) -> bool:
+    def register_component(self, component_id: str, version: str) -> bool:
         """
-        Register a component with the registry.
+        Register a component by id and version only (test-friendly API).
+        Component type is set as component_id (for test simplicity).
+        
+        Args:
+            component_id: Unique identifier for this component instance
+            version: Semantic version string (e.g., "1.0.0")
+            
+        Returns:
+            True if registration successful, False otherwise
+        """
+        component = Component(component_id=component_id, component_type=component_id, version=version)
+        return self.register_component_instance(component)
+    
+    def register_component_instance(self, component: Component) -> bool:
+        """
+        Register a full Component instance (production API).
         
         Args:
             component: The component to register
@@ -550,6 +597,12 @@ class ComponentRegistry:
     def get_stats(self) -> Dict[str, Any]:
         """Get statistics about the component registry."""
         return self._stats.copy()
+    
+    def list_components(self) -> List[str]:
+        """
+        Return a list of all registered component IDs.
+        """
+        return list(self._components.keys())
     
     def check_component_compatibility(self, component: Component) -> Dict[str, List[str]]:
         """

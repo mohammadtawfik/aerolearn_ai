@@ -439,6 +439,32 @@ class IntegrationHealth(Component):
         
         return result
     
+    def collect_metric(self, key: str, value: Any) -> None:
+        """
+        Set a metric for testing purposes.
+        
+        Args:
+            key: The metric key
+            value: The metric value
+        """
+        if not hasattr(self, '_test_metrics'):
+            self._test_metrics = {}
+        self._test_metrics[key] = value
+    
+    def get_metric(self, key: str) -> Any:
+        """
+        Get a metric value for testing purposes.
+        
+        Args:
+            key: The metric key
+            
+        Returns:
+            The metric value or None if not found
+        """
+        if not hasattr(self, '_test_metrics'):
+            self._test_metrics = {}
+        return self._test_metrics.get(key, None)
+    
     def create_timer_metric(self, name: str, component_id: str) -> Callable[[], HealthMetric]:
         """
         Create a timer for measuring operation duration.

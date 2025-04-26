@@ -295,10 +295,10 @@ class BaseInterface(abc.ABC):
         """
         methods = {}
         
-        # Get all InterfaceMethod decorated methods
+        # Get all interface_method decorated methods
         for name, member in inspect.getmembers(cls):
-            if isinstance(member, InterfaceMethod):
-                methods[name] = member.signature
+            if hasattr(member, '_signature'):
+                methods[name] = member._signature
         
         return methods
     
@@ -335,20 +335,22 @@ class BaseInterface(abc.ABC):
         return len(errors) == 0, errors
     
     @staticmethod
-    def interface_method(func):
+    def interface_method(method):
         """
-        Decorator for interface methods that captures signature information.
+        Decorator for marking interface methods (test supports normal signature).
         
         This decorator should be used on all abstract methods in interface
         classes to enable signature validation.
         
         Args:
-            func: The method being decorated
+            method: The method being decorated
             
         Returns:
-            InterfaceMethod wrapped around the original function
+            The original method, allowing for proper test behavior
         """
-        return InterfaceMethod(func)
+        # Store signature information for validation
+        method._signature = MethodSignature(method)
+        return method
 
 
 class InterfaceImplementation:

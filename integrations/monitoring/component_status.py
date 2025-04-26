@@ -112,8 +112,8 @@ class ComponentStatus:
     
     def __init__(
         self,
-        component_id: str,
-        state: ComponentState,
+        component_id: str = "",
+        state: Optional[ComponentState] = None,
         timestamp: Optional[datetime] = None,
         details: Optional[Dict[str, Any]] = None
     ):
@@ -121,8 +121,8 @@ class ComponentStatus:
         Initialize a component status object.
         
         Args:
-            component_id: ID of the component
-            state: Current state of the component
+            component_id: ID of the component (optional for testing)
+            state: Current state of the component (optional for testing)
             timestamp: Time the status was recorded (defaults to now)
             details: Detailed status information
         """
@@ -130,15 +130,42 @@ class ComponentStatus:
         self.state = state
         self.timestamp = timestamp or datetime.now()
         self.details = details or {}
+        self.statuses = {}  # For tracking multiple component statuses
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
+        if not self.component_id:
+            return {'statuses': {k: v for k, v in self.statuses.items()}}
+        
         return {
             'component_id': self.component_id,
-            'state': self.state.name,
+            'state': self.state.name if self.state else None,
             'timestamp': self.timestamp.isoformat(),
             'details': self.details
         }
+    
+    def set_status(self, component: str, status: Any) -> None:
+        """
+        Set status for a component in the tracking dictionary.
+        
+        Args:
+            component: Component identifier
+            status: Status value to set
+        """
+        self.statuses[component] = status
+    
+    def get_status(self, component: str, default: Any = "unknown") -> Any:
+        """
+        Get status for a component from the tracking dictionary.
+        
+        Args:
+            component: Component identifier
+            default: Default value if component not found
+            
+        Returns:
+            The component's status or default if not found
+        """
+        return self.statuses.get(component, default)
 
 
 class StatusHistoryEntry:

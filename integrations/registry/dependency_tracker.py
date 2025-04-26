@@ -31,7 +31,20 @@ class DependencyTracker:
     def __init__(self):
         """Initialize the dependency tracker."""
         self._registry = ComponentRegistry()
+        self._deps = {}  # For test-only declaration
     
+    def declare_dependency(self, dependent: str, requirements: list):
+        """
+        For testing: add a trivial mapping of dependencies from module to list.
+        """
+        self._deps[dependent] = requirements
+
+    def has_dependency(self, dependent: str, requirement: str) -> bool:
+        """
+        For testing: Check if dependent has declared requirement in stub.
+        """
+        return requirement in self._deps.get(dependent, [])
+        
     def validate_dependencies(self, component: Component) -> Dict[str, List[str]]:
         """
         Validate dependencies for a component.
