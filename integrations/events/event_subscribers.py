@@ -127,6 +127,49 @@ class AcceptAllEventFilter(EventFilter):
         return True
 
 
+class CompositeEventFilter(EventFilter):
+    """
+    Accepts events if any of the provided filters accept them.
+    """
+    def __init__(self, filters: List[EventFilter]):
+        """
+        Initialize with a list of filters.
+        
+        Args:
+            filters: List of EventFilter instances to check
+        """
+        super().__init__()
+        self.filters = filters
+
+    def matches(self, event_or_type: Union[Event, EventType, str], category: Optional[EventCategory] = None, 
+                priority: Optional[EventPriority] = None) -> bool:
+        """
+        Return True if any of the contained filters match the event.
+        
+        Args:
+            event_or_type: The Event instance or event type to check
+            category: The event category (if applicable)
+            priority: The event priority (if applicable)
+            
+        Returns:
+            True if any filter matches; False otherwise
+        """
+        return any(f.matches(event_or_type, category, priority) for f in self.filters)
+
+    def filter(self, event_type: EventType, payload: Dict[str, Any]) -> bool:
+        """
+        Return True if any of the contained filters accept the event.
+        
+        Args:
+            event_type: The type of the event
+            payload: Event data
+            
+        Returns:
+            True if any filter accepts the event; False otherwise
+        """
+        return any(f.filter(event_type, payload) for f in self.filters)
+
+
 class EventSubscriber:
     """
     Abstract base class for components that subscribe to events from the EventBus.
@@ -134,6 +177,25 @@ class EventSubscriber:
     Subscribers implement the on_event method to handle events they are interested in.
     Optionally, they may provide an event_filter property for advanced filtering.
     """
+    
+    def __init__(self, subscriber_id: str = None):
+        """
+        Optionally accept a subscriber_id for identification (used for testing and bus unregistration/debugging).
+        
+        Args:
+            subscriber_id: Optional identifier for this subscriber
+        """
+        self.subscriber_id = subscriber_id
+        self._filters: List[EventFilter] = []
+    
+    def add_filter(self, filter: EventFilter):
+        """
+        Add an event filter to this subscriber. Multiple filters are OR'd together.
+        
+        Args:
+            filter: EventFilter instance to add
+        """
+        self._filters.append(filter)
     
     def on_event(self, event_type: EventType, payload: Dict[str, Any]) -> None:
         """
@@ -148,17 +210,25 @@ class EventSubscriber:
     @property
     def event_filter(self) -> EventFilter:
         """
-        Optional: Return an event filter instance to filter events for this subscriber.
-        By default, no filtering (accept all).
+        Return a composite event filter built from all filters added, or accept all by default.
+        
+        Returns:
+            An EventFilter instance that combines all added filters
         """
-        return AcceptAllEventFilter()
+        if not self._filters:
+            return AcceptAllEventFilter()
+        elif len(self._filters) == 1:
+            return self._filters[0]
+        else:
+            return CompositeEventFilter(self._filters)
 
 
 class LoggingEventSubscriber(EventSubscriber):
     """Example event subscriber that logs all received events."""
     
-    def __init__(self):
+    def __init__(self, subscriber_id: str = None):
         """Initialize a new logging event subscriber."""
+        super().__init__(subscriber_id)
         self.events = []
     
     def on_event(self, event_type: EventType, payload: Dict[str, Any]) -> None:
@@ -180,21 +250,21 @@ class CallbackEventSubscriber(EventSubscriber):
     Optionally, an EventFilter can be provided to filter which events to receive.
     """
     def __init__(self, callback: Callable[[EventType, Dict[str, Any]], None], 
-                 event_filter: Optional[EventFilter] = None):
+                 event_filter: Optional[EventFilter] = None,
+                 subscriber_id: str = None):
         """
         Initialize with a callback and optional event filter.
 
         Args:
             callback: Function to invoke for each accepted event (event_type, payload)
             event_filter: Optional EventFilter, defaults to accepting all events
+            subscriber_id: Optional identifier for this subscriber
         """
+        super().__init__(subscriber_id)
         self._callback = callback
-        self._event_filter = event_filter or AcceptAllEventFilter()
+        if event_filter:
+            self.add_filter(event_filter)
 
     def on_event(self, event_type: EventType, payload: Dict[str, Any]) -> None:
         """Pass event to the callback function."""
         self._callback(event_type, payload)
-
-    @property
-    def event_filter(self) -> EventFilter:
-        return self._event_filter
