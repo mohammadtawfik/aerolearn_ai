@@ -2,18 +2,19 @@
 Event bus implementation for the AeroLearn AI event system.
 
 This module provides the central event bus for inter-component communication,
-implementing the publisher-subscriber pattern with advanced event filtering
-and asynchronous event handling.
+implementing the publisher-subscriber pattern with event filtering
+and persistence for critical events.
 """
-import asyncio
-import logging
 import threading
-import time
-from typing import Dict, List, Optional, Set, Any
+import logging
+import json
+import os
+from typing import Dict, List, Optional, Callable, Any
 
-from .event_types import Event, EventPriority
-from .event_subscribers import EventSubscriber, EventFilter
+from .event_types import EventType
 
+# File path for persisting critical events
+_EVENT_PERSISTENCE_FILE = "/tmp/aerolearn_critical_events.jsonl"
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,15 @@ class EventBus:
     _instance = None
     _lock = threading.Lock()
     
+    @classmethod
+    def get(cls):
+        """Get the singleton instance of the EventBus."""
+        if not cls._instance:
+            with cls._lock:
+                if not cls._instance:
+                    cls._instance = EventBus()
+        return cls._instance
+    
     def __new__(cls):
         with cls._lock:
             if cls._instance is None:
@@ -37,164 +47,129 @@ class EventBus:
     
     def __init__(self):
         """Initialize the event bus (only executed once due to Singleton pattern)."""
-        if self._initialized:
+        if hasattr(self, '_initialized') and self._initialized:
             return
         
-        self._subscribers: Dict[str, EventSubscriber] = {}
-        self._event_loop: Optional[asyncio.AbstractEventLoop] = None
-        self._event_queue: asyncio.Queue = asyncio.Queue()
-        self._is_running: bool = False
-        self._worker_task: Optional[asyncio.Task] = None
-        self._persistent_events: List[Event] = []
-        self._stats: Dict[str, Any] = {
+        self._subscribers = []
+        self._sub_lock = threading.Lock()
+        self._stats = {
             "events_published": 0,
-            "events_processed": 0,
             "events_by_category": {},
-            "events_by_priority": {},
-            "subscriber_counts": 0,
+            "subscriber_count": 0,
         }
         self._initialized = True
+        logger.info("Event bus initialized")
     
-    async def start(self) -> None:
-        """Start the event processing loop."""
-        if self._is_running:
-            return
+    def subscribe(self, subscriber, event_filter: Optional[Callable[[EventType, dict], bool]]=None):
+        """
+        Subscribe to events on the bus.
         
-        self._is_running = True
-        self._event_loop = asyncio.get_event_loop()
-        self._worker_task = asyncio.create_task(self._process_events())
-        logger.info("Event bus started")
+        Args:
+            subscriber: Object implementing .on_event(EventType, payload)
+            event_filter: Optional predicate function (EventType, payload) -> bool
+        """
+        with self._sub_lock:
+            self._subscribers.append((subscriber, event_filter))
+            self._stats["subscriber_count"] = len(self._subscribers)
+            logger.info(f"Subscriber registered: {subscriber}")
     
-    async def stop(self) -> None:
-        """Stop the event processing loop."""
-        if not self._is_running:
-            return
+    def unsubscribe(self, subscriber) -> bool:
+        """
+        Unsubscribe from events on the bus.
         
-        self._is_running = False
-        if self._worker_task:
-            self._worker_task.cancel()
-            try:
-                await self._worker_task
-            except asyncio.CancelledError:
-                pass
-            self._worker_task = None
-        
-        logger.info("Event bus stopped")
+        Args:
+            subscriber: The subscriber to unregister
+            
+        Returns:
+            True if the subscriber was unregistered, False if it was not found
+        """
+        with self._sub_lock:
+            for i, (sub, _) in enumerate(self._subscribers):
+                if sub == subscriber:
+                    self._subscribers.pop(i)
+                    self._stats["subscriber_count"] = len(self._subscribers)
+                    logger.info(f"Subscriber unregistered: {subscriber}")
+                    return True
+            
+            logger.warning(f"Subscriber not found: {subscriber}")
+            return False
     
-    async def _process_events(self) -> None:
-        """Process events from the queue."""
-        while self._is_running:
-            try:
-                event = await self._event_queue.get()
-                await self._dispatch_event(event)
-                self._event_queue.task_done()
-                self._stats["events_processed"] += 1
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.error(f"Error processing event: {e}")
-    
-    async def _dispatch_event(self, event: Event) -> None:
-        """Dispatch an event to all interested subscribers."""
-        interested_subscribers = [
-            sub for sub in self._subscribers.values()
-            if sub.is_interested_in(event)
-        ]
-        
-        if not interested_subscribers:
-            logger.debug(f"No subscribers interested in event: {event.event_type}")
-            return
-        
-        # Store persistent events
-        if event.is_persistent:
-            self._persistent_events.append(event)
-            # Limit the number of stored persistent events
-            if len(self._persistent_events) > 1000:  # Arbitrary limit
-                self._persistent_events.pop(0)
-        
-        # Dispatch to subscribers in priority order
-        tasks = []
-        for subscriber in interested_subscribers:
-            try:
-                task = asyncio.create_task(subscriber.handle_event(event))
-                tasks.append(task)
-            except Exception as e:
-                logger.error(f"Error dispatching event to subscriber {subscriber.subscriber_id}: {e}")
-        
-        await asyncio.gather(*tasks)
-    
-    async def publish(self, event: Event) -> None:
+    def publish(self, event_type: EventType, payload: dict):
         """
         Publish an event to the bus.
         
         Args:
-            event: The event to publish
+            event_type: The type of event
+            payload: The event data
         """
-        if not self._is_running:
-            logger.warning("Attempting to publish event while event bus is not running")
-            return
-        
         # Update statistics
         self._stats["events_published"] += 1
-        category = event.category.value
+        category = event_type.category if hasattr(event_type, 'category') else 'default'
         if category in self._stats["events_by_category"]:
             self._stats["events_by_category"][category] += 1
         else:
             self._stats["events_by_category"][category] = 1
         
-        priority = int(event.priority)
-        if priority in self._stats["events_by_priority"]:
-            self._stats["events_by_priority"][priority] += 1
-        else:
-            self._stats["events_by_priority"][priority] = 1
+        # Persist critical events
+        if hasattr(event_type, 'critical') and event_type.critical:
+            self._persist_critical_event(event_type, payload)
         
-        # Queue the event
-        await self._event_queue.put(event)
-        logger.debug(f"Event published: {event.event_type}")
+        # Notify subscribers
+        with self._sub_lock:
+            for subscriber, event_filter in self._subscribers:
+                if event_filter is None or event_filter(event_type, payload):
+                    threading.Thread(
+                        target=self._notify_subscriber,
+                        args=(subscriber, event_type, payload)
+                    ).start()
+        
+        logger.debug(f"Event published: {event_type}")
     
-    def register_subscriber(self, subscriber: EventSubscriber) -> None:
-        """
-        Register a subscriber with the event bus.
+    def _notify_subscriber(self, subscriber, event_type, payload):
+        """Safely notify a subscriber of an event."""
+        try:
+            subscriber.on_event(event_type, payload)
+        except Exception as e:
+            logger.error(f"Error notifying subscriber {subscriber}: {e}")
+    
+    def _persist_critical_event(self, event_type: EventType, payload: dict):
+        """Persist critical events to disk for recovery."""
+        try:
+            event_data = json.dumps({
+                "event_type": event_type.to_dict() if hasattr(event_type, 'to_dict') else str(event_type),
+                "payload": payload
+            })
+            with open(_EVENT_PERSISTENCE_FILE, "a") as f:
+                f.write(event_data + "\n")
+        except Exception as e:
+            logger.error(f"Error persisting critical event: {e}")
+    
+    def replay_critical_events(self):
+        """Replay persisted critical events (for recovery/testing)."""
+        if not os.path.exists(_EVENT_PERSISTENCE_FILE):
+            logger.info("No critical events to replay")
+            return []
         
-        Args:
-            subscriber: The subscriber to register
-        """
-        if subscriber.subscriber_id in self._subscribers:
-            logger.warning(f"Subscriber already registered with ID: {subscriber.subscriber_id}")
-            return
-        
-        self._subscribers[subscriber.subscriber_id] = subscriber
-        self._stats["subscriber_counts"] = len(self._subscribers)
-        logger.info(f"Subscriber registered: {subscriber.subscriber_id}")
-        
-        # Send persistent events to the new subscriber
-        if self._persistent_events:
-            async def send_persistent_events():
-                for event in self._persistent_events:
-                    if subscriber.is_interested_in(event):
-                        await subscriber.handle_event(event)
+        replayed_events = []
+        try:
+            with open(_EVENT_PERSISTENCE_FILE, "r") as f:
+                lines = f.readlines()
+                for line in lines:
+                    j = json.loads(line)
+                    if isinstance(j['event_type'], dict) and hasattr(EventType, 'from_dict'):
+                        event_type = EventType.from_dict(j['event_type'])
+                    else:
+                        # Handle string event types or other formats
+                        event_type = j['event_type']
+                    
+                    self.publish(event_type, j['payload'])
+                    replayed_events.append((event_type, j['payload']))
             
-            if self._event_loop and self._is_running:
-                asyncio.run_coroutine_threadsafe(send_persistent_events(), self._event_loop)
-    
-    def unregister_subscriber(self, subscriber_id: str) -> bool:
-        """
-        Unregister a subscriber from the event bus.
+            logger.info(f"Replayed {len(replayed_events)} critical events")
+        except Exception as e:
+            logger.error(f"Error replaying critical events: {e}")
         
-        Args:
-            subscriber_id: The ID of the subscriber to unregister
-        
-        Returns:
-            True if the subscriber was unregistered, False if it was not found
-        """
-        if subscriber_id not in self._subscribers:
-            logger.warning(f"Subscriber not found with ID: {subscriber_id}")
-            return False
-        
-        del self._subscribers[subscriber_id]
-        self._stats["subscriber_counts"] = len(self._subscribers)
-        logger.info(f"Subscriber unregistered: {subscriber_id}")
-        return True
+        return replayed_events
     
     def get_stats(self) -> Dict[str, Any]:
         """Get statistics about the event bus."""
@@ -204,10 +179,14 @@ class EventBus:
         """Get the number of registered subscribers."""
         return len(self._subscribers)
     
-    def get_queue_size(self) -> int:
-        """Get the current event queue size."""
-        return self._event_queue.qsize()
-    
-    def clear_persistent_events(self) -> None:
-        """Clear all persistent events."""
-        self._persistent_events.clear()
+    def clear_critical_events(self) -> bool:
+        """Clear persisted critical events."""
+        try:
+            if os.path.exists(_EVENT_PERSISTENCE_FILE):
+                os.remove(_EVENT_PERSISTENCE_FILE)
+                logger.info("Critical events cleared")
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Error clearing critical events: {e}")
+            return False
