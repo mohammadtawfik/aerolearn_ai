@@ -13,8 +13,9 @@ Requires PyQt6 (or compatible PySide6).
 
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget,
-    QStatusBar, QLabel, QToolBar, QAction, QApplication
+    QStatusBar, QLabel, QToolBar, QApplication
 )
+from PyQt6.QtGui import QAction  # QAction is in QtGui in PyQt6, not QtWidgets
 from PyQt6.QtCore import Qt, QSettings, QSize
 from app.ui.common.navigation import NavigationManager
 
