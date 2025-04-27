@@ -1,52 +1,4 @@
-def stop(self):
-    """Force immediate shutdown with thread cleanup"""
-    self.running = False
-    with self.lock:
-        # Cancel all active uploads
-        for upload in self.active_uploads.values():
-            upload.cancel_event.set()
-        self.active_uploads.clear()
-
-    # Clear queue and terminate workers
-    while not self.upload_queue.empty():
-        try: self.upload_queue.get_nowait()
-        except queue.Empty: break
-
-    for t in self.threads:
-        if t.is_alive():
-            t.join(timeout=0.5)# In test_professor_upload_workflow.py
-def test_full_upload_workflow(qapp, tmp_path):
-    # Configure test-optimized services
-    upload_service = UploadService(
-        test_mode=True,
-        max_retries=0,  # Disable retries
-        concurrency=1,  # Single worker
-        chunk_size=512  # Small chunks for fast completion
-    )
-
-    # Bypass normal validation
-    validator = ValidationSystem(fast_validation=True)
-
-    # Direct service injection
-    widget = ProfessorUploadWidget()
-    widget.upload_service = upload_service
-    widget.metadata_manager = MetadataManager()# In event_bus.py
-from concurrent.futures import ThreadPoolExecutor
-
-def publish(self, event_or_type, payload=None):
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        future = executor.submit(self._publish_internal, event_or_type, payload)
-        try:
-            future.result(timeout=2)  # 2-second timeout
-        except TimeoutError:
-            logger.warning("Event processing timed out")def test_professor_upload_workflow(...):
-    try:
-        # Test implementation
-    finally:
-        upload_service.stop()
-        widget.deleteLater()
-        qapp.processEvents()
-        time.sleep(0.5)  # Allow Qt cleanup"""
+"""
 Integration Test: Professor Upload Workflow
 
 This test covers:
@@ -65,6 +17,16 @@ from app.core.validation.main import ValidationSystem
 from app.core.db.content_db import ContentDB
 from integrations.events.event_bus import EventBus
 from app.models.metadata_manager import MetadataManager
+from concurrent.futures import ThreadPoolExecutor
+
+def publish(self, event_or_type, payload=None):
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(self._publish_internal, event_or_type, payload)
+        try:
+            future.result(timeout=2)  # 2-second timeout
+        except TimeoutError:
+            logger.warning("Event processing timed out")
+
 
 @pytest.fixture
 def qapp():
@@ -145,3 +107,39 @@ def test_full_upload_workflow(qapp, tmp_path):
 
     # UI feedback
     assert widget.last_status_message == "Upload completed successfully"
+
+
+def stop(self):
+    """Force immediate shutdown with thread cleanup"""
+    self.running = False
+    with self.lock:
+        # Cancel all active uploads
+        for upload in self.active_uploads.values():
+            upload.cancel_event.set()
+        self.active_uploads.clear()
+
+    # Clear queue and terminate workers
+    while not self.upload_queue.empty():
+        try: self.upload_queue.get_nowait()
+        except queue.Empty: break
+
+    for t in self.threads:
+        if t.is_alive():
+            t.join(timeout=0.5)# In test_professor_upload_workflow.py
+def test_full_upload_workflow(qapp, tmp_path):
+    # Configure test-optimized services
+    upload_service = UploadService(
+        test_mode=True,
+        max_retries=0,  # Disable retries
+        concurrency=1,  # Single worker
+        chunk_size=512  # Small chunks for fast completion
+    )
+
+    # Bypass normal validation
+    validator = ValidationSystem(fast_validation=True)
+
+    # Direct service injection
+    widget = ProfessorUploadWidget()
+    widget.upload_service = upload_service
+    widget.metadata_manager = MetadataManager()# In event_bus.py
+

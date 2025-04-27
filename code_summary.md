@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 136
+Total Python files: 145
 
 ## Table of Contents
 
@@ -39,7 +39,11 @@ Total Python files: 136
 │   │   │   ├── file_operations.py
 │   │   │   ├── folder_structure.py
 │   │   │   ├── metadata.py
-│   │   │   └── sync_manager.py
+│   │   │   ├── sync_manager.py
+│   │   │   ├── metadata_schema_video.py
+│   │   │   ├── metadata_inheritance_utilities.py
+│   │   │   ├── metadata_store.py
+│   │   │   └── metadata_persistence_manager.py
 │   │   ├── ai
 │   │   │   └── __init__.py
 │   │   ├── api
@@ -51,9 +55,10 @@ Total Python files: 136
 │   │   │   ├── __init__.py
 │   │   │   ├── upload_service.py
 │   │   │   └── batch_controller.py
-│   │   └── validation
-│   │       ├── format_validator.py
-│   │       └── main.py
+│   │   ├── validation
+│   │   │   ├── format_validator.py
+│   │   │   └── main.py
+│   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
 │   │   │   ├── __init__.py
@@ -64,11 +69,13 @@ Total Python files: 136
 │   │   │   ├── navigation.py
 │   │   │   ├── form_controls.py
 │   │   │   ├── content_browser.py
-│   │   │   └── content_preview.py
+│   │   │   ├── content_preview.py
+│   │   │   └── metadata_editor.py
 │   │   ├── professor
 │   │   │   ├── __init__.py
 │   │   │   ├── upload_widget.py
-│   │   │   └── upload_service.py
+│   │   │   ├── upload_service.py
+│   │   │   └── batch_upload_ui.py
 │   │   ├── student
 │   │   │   └── __init__.py
 │   │   └── admin
@@ -162,7 +169,8 @@ Total Python files: 136
 │   │   ├── test_upload_flow.py
 │   │   ├── test_upload_metadata_integration.py
 │   │   ├── test_batch_content_metadata.py
-│   │   └── test_professor_upload_workflow.py
+│   │   ├── test_professor_upload_workflow.py
+│   │   └── test_content_management_workflow.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -176,7 +184,8 @@ Total Python files: 136
 │   ├── models
 │   │   └── test_models.py
 │   ├── __init__.py
-│   └── conftest.py
+│   ├── conftest.py
+│   └── metadata_store_tests.py
 ├── docs
 │   ├── architecture
 
@@ -235,9 +244,9 @@ Event type definitions for the AeroLearn AI event system.
 This module defines the event classes and types used throughout the system for
 inter-compon...
 
-- Classes: 13
+- Classes: 15
 - Functions: 0
-- Dependency Score: 91.00
+- Dependency Score: 98.00
 
 ### integrations\registry\component_registry.py
 
@@ -259,7 +268,19 @@ implementin...
 
 - Classes: 1
 - Functions: 0
-- Dependency Score: 64.00
+- Dependency Score: 67.00
+
+### app\core\upload\batch_controller.py
+
+BatchUploadController: Coordinate and track multiple simultaneous uploads.
+
+- Aggregates progress
+- Controls pause/resume/cancel for all or any
+- Repo...
+
+- Classes: 4
+- Functions: 2
+- Dependency Score: 65.00
 
 ### integrations\interfaces\base_interface.py
 
@@ -325,25 +346,13 @@ of system components, ...
 - Functions: 0
 - Dependency Score: 53.00
 
-### app\core\upload\batch_controller.py
-
-BatchUploadController: Coordinate and track multiple simultaneous uploads.
-
-- Aggregates progress
-- Controls pause/resume/cancel for all or any
-- Repo...
-
-- Classes: 4
-- Functions: 0
-- Dependency Score: 50.00
-
 ## Dependencies
 
 Key file relationships (files with most dependencies):
 
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
-- **integrations\monitoring\integration_health.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
-- **integrations\monitoring\component_status.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **integrations\monitoring\component_status.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 
 
 ## Detailed Code Analysis
@@ -420,6 +429,14 @@ organizational clarity.
 
   Methods: `__init__()`
 
+- `BatchEvent`
+ (inherits from: Event)
+
+
+  Events related to batch processing operations.
+
+  Methods: `__init__()`
+
 - `UIEvent`
  (inherits from: Event)
 
@@ -447,6 +464,11 @@ organizational clarity.
 
 
   Common AI event type constants.
+
+- `BatchEventType`
+
+
+  Common batch processing event type constants.
 
 
 
@@ -524,6 +546,57 @@ and persistence for critical events.
   Central event bus for the AeroLearn AI system.
 
   Methods: `get()`, `__new__()`, `__init__()`, `register_subscriber()`, `unregister_subscriber()`, ... (8 more)
+
+
+
+### app\core\upload\batch_controller.py
+
+**Description:**
+
+BatchUploadController: Coordinate and track multiple simultaneous uploads.
+
+- Aggregates progress
+- Controls pause/resume/cancel for all or any
+- Reports status per file & batch
+
+**Classes:**
+
+- `BatchStatus`
+ (inherits from: Enum)
+
+
+  Status of a batch upload operation
+
+- `BatchEvent`
+
+
+  Event object for batch upload notifications
+
+  Methods: `__init__()`
+
+- `BatchUploadListener`
+
+
+  Concrete base listener for batch upload event notifications.
+
+  Methods: `on_batch_event()`
+
+- `BatchUploadController`
+
+
+  Controller to manage batch uploads with aggregated progress and event reporting.
+
+  Methods: `__init__()`, `add_listener()`, `notify_event()`, `_safe_on_batch_event()`, `_extract_file_path()`, ... (26 more)
+
+**Functions:**
+
+- `start_batch(self, batch_id, files, dest, callbacks, metadata)`
+
+  Start batch with optional metadata
+
+- `apply_metadata(self, batch_id, metadata)`
+
+  Apply metadata to all files in batch
 
 
 
@@ -965,44 +1038,30 @@ and operational capability.
 
 
 
-### app\core\upload\batch_controller.py
-
-**Description:**
-
-BatchUploadController: Coordinate and track multiple simultaneous uploads.
-
-- Aggregates progress
-- Controls pause/resume/cancel for all or any
-- Reports status per file & batch
+### app\models\metadata_manager.py
 
 **Classes:**
 
-- `BatchStatus`
- (inherits from: Enum)
+- `MetadataField`
 
 
-  Status of a batch upload operation
+  Represents a metadata field definition.
 
-- `BatchEvent`
+  Methods: `__init__()`, `validate()`
 
-
-  Event object for batch upload notifications
-
-  Methods: `__init__()`
-
-- `BatchUploadListener`
+- `MetadataSchema`
 
 
-  Concrete base listener for batch upload event notifications.
+  Represents a schema with a set of metadata fields (required/optional).
 
-  Methods: `on_batch_event()`
+  Methods: `__init__()`, `validate()`, `get_required_fields()`, `get_optional_fields()`
 
-- `BatchUploadController`
+- `MetadataManager`
 
 
-  Controller to manage batch uploads with aggregated progress and event reporting.
+  Manages metadata across content, supports CRUD, inheritance, editing, and validation.
 
-  Methods: `__init__()`, `add_listener()`, `notify_event()`, `_safe_on_batch_event()`, `add_files()`, ... (22 more)
+  Methods: `__init__()`, `register_schema()`, `get_schema()`, `set_metadata()`, `update_metadata()`, ... (12 more)
 
 
 
@@ -1215,6 +1274,48 @@ and handle events from the event bus. It also defines the EventFilter interface 
 **Functions:**
 
 - `_add_project_root_to_syspath()`
+
+
+
+### app\core\upload\upload_service.py
+
+**Description:**
+
+UploadService: Handles efficient, robust file uploads for AeroLearn AI.
+Features:
+- Chunked upload for large files
+- Retry mechanism with configurable policies
+- Concurrent upload management (queue, pausing)
+- Progress tracking & status reporting
+- Pluggable backend destination (cloud/local for now)
+- Backoff strategy for retries
+- Upload cancellation support
+
+NOTE: This is a scaffold/partial for integration; extend as needed.
+
+Author: AeroLearn AI Team
+
+**Classes:**
+
+- `UploadStatus`
+
+
+- `UploadRequest`
+
+
+  Methods: `__init__()`
+
+- `BackoffStrategy`
+
+
+  Implements exponential backoff with jitter for retries
+
+  Methods: `__init__()`, `get_delay()`
+
+- `UploadService`
+
+
+  Methods: `__init__()`, `enqueue()`, `get_upload_status()`, `cancel_upload()`, `_worker()`, ... (8 more)
 
 
 
@@ -1490,72 +1591,56 @@ storage providers, synchronization mechanisms, and file operations.
 
 
 
-### app\core\upload\upload_service.py
+### app\core\validation\format_validator.py
 
 **Description:**
 
-UploadService: Handles efficient, robust file uploads for AeroLearn AI.
-Features:
-- Chunked upload for large files
-- Retry mechanism with configurable policies
-- Concurrent upload management (queue, pausing)
-- Progress tracking & status reporting
-- Pluggable backend destination (cloud/local for now)
-- Backoff strategy for retries
-- Upload cancellation support
+Format Validation Framework for AeroLearn AI
 
-NOTE: This is a scaffold/partial for integration; extend as needed.
-
-Author: AeroLearn AI Team
+- Pluggable architecture (built-in & plugin validators)
+- Example: PDF, image, video, text
+- Supports aerospace/CAD extensions
 
 **Classes:**
 
-- `UploadStatus`
+- `ValidationResult`
 
 
-- `UploadRequest`
+  Methods: `__init__()`, `success()`, `errors()`
+
+- `BaseValidator`
 
 
-  Methods: `__init__()`
+  Methods: `validate()`
 
-- `BackoffStrategy`
-
-
-  Implements exponential backoff with jitter for retries
-
-  Methods: `__init__()`, `get_delay()`
-
-- `UploadService`
+- `PDFValidator`
+ (inherits from: BaseValidator)
 
 
-  Methods: `__init__()`, `enqueue()`, `get_upload_status()`, `cancel_upload()`, `_worker()`, ... (8 more)
+  Methods: `validate()`
+
+- `ImageValidator`
+ (inherits from: BaseValidator)
 
 
+  Methods: `validate()`
 
-### app\models\metadata_manager.py
-
-**Classes:**
-
-- `MetadataField`
+- `VideoValidator`
+ (inherits from: BaseValidator)
 
 
-  Represents a metadata field definition.
+  Methods: `validate()`
 
-  Methods: `__init__()`, `validate()`
-
-- `MetadataSchema`
-
-
-  Represents a schema with a set of metadata fields (required/optional).
-
-  Methods: `__init__()`, `validate()`, `get_required_fields()`, `get_optional_fields()`
-
-- `MetadataManager`
+- `TextValidator`
+ (inherits from: BaseValidator)
 
 
-  Manages metadata across content, supports CRUD, inheritance, editing, and validation.
+  Methods: `validate()`
 
-  Methods: `__init__()`, `register_schema()`, `get_schema()`, `set_metadata()`, `update_metadata()`, ... (8 more)
+- `ValidationFramework`
+
+
+  Methods: `__init__()`, `register()`, `register_plugin()`, `validate()`
 
 
 
@@ -1685,6 +1770,61 @@ providers, content retrieval, and content processing components.
 
 
 
+### app\ui\professor\upload_widget.py
+
+**Description:**
+
+Professor Material Upload Widget for AeroLearn AI
+=================================================
+
+PyQt6 widget for file uploads with drag-and-drop, multi-selection dialog,
+file type detection, MIME validation, and event notification.
+
+Features:
+- Drag-and-drop upload zone with visual feedback
+- File dialog selection with multi-file and MIME filtering
+- Progress visualization per file
+- MIME type validation and pluggable acceptance logic
+- Upload event system (signals) for cross-component integration
+- Extensible for backend upload integration
+
+Author: AeroLearn AI Team
+Date: 2025-04-25
+
+Usage:
+------
+from app.ui.professor.upload_widget import ProfessorUploadWidget
+# Add as a widget in your view/layout
+
+API:
+----
+- fileUploadRequested(list[dict]): Emitted after validation with list of files
+- fileUploadProgress(str, int): Emitted to update progress (file_id, percent)
+- fileUploadCompleted(str, bool): Emitted on upload completion (file_id, success)
+See method and signal docstrings for more.
+
+**Classes:**
+
+- `UploadWorker`
+ (inherits from: QObject)
+
+
+  Worker thread for handling file uploads asynchronously
+
+  Methods: `__init__()`, `process()`
+
+- `ProfessorUploadWidget`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `dragEnterEvent()`, `dragLeaveEvent()`, `dropEvent()`, `open_file_dialog()`, ... (15 more)
+
+**Functions:**
+
+- `default_mime_validator(filepath, mimetype)`
+
+
+
 ### app\models\content.py
 
 **Description:**
@@ -1759,59 +1899,6 @@ Handles Topic, Module, Lesson, Quiz logic; validation, serialization, and event 
 - `require_permission(permission)`
 
   Decorator for functions/methods to enforce the required permission.
-
-
-
-### app\core\validation\format_validator.py
-
-**Description:**
-
-Format Validation Framework for AeroLearn AI
-
-- Pluggable architecture (built-in & plugin validators)
-- Example: PDF, image, video, text
-- Supports aerospace/CAD extensions
-
-**Classes:**
-
-- `ValidationResult`
-
-
-  Methods: `__init__()`, `success()`, `errors()`
-
-- `BaseValidator`
-
-
-  Methods: `validate()`
-
-- `PDFValidator`
- (inherits from: BaseValidator)
-
-
-  Methods: `validate()`
-
-- `ImageValidator`
- (inherits from: BaseValidator)
-
-
-  Methods: `validate()`
-
-- `VideoValidator`
- (inherits from: BaseValidator)
-
-
-  Methods: `validate()`
-
-- `TextValidator`
- (inherits from: BaseValidator)
-
-
-  Methods: `validate()`
-
-- `ValidatorRegistry`
-
-
-  Methods: `__init__()`, `register()`, `validate()`
 
 
 
@@ -1894,61 +1981,6 @@ Content Type Registry
   Registry for file/content type detection with multiple detection strategies.
 
   Methods: `__new__()`, `_initialize()`, `register()`, `register_detector()`, `detect_type()`, ... (4 more)
-
-
-
-### app\ui\professor\upload_widget.py
-
-**Description:**
-
-Professor Material Upload Widget for AeroLearn AI
-=================================================
-
-PyQt6 widget for file uploads with drag-and-drop, multi-selection dialog,
-file type detection, MIME validation, and event notification.
-
-Features:
-- Drag-and-drop upload zone with visual feedback
-- File dialog selection with multi-file and MIME filtering
-- Progress visualization per file
-- MIME type validation and pluggable acceptance logic
-- Upload event system (signals) for cross-component integration
-- Extensible for backend upload integration
-
-Author: AeroLearn AI Team
-Date: 2025-04-25
-
-Usage:
-------
-from app.ui.professor.upload_widget import ProfessorUploadWidget
-# Add as a widget in your view/layout
-
-API:
-----
-- fileUploadRequested(list[dict]): Emitted after validation with list of files
-- fileUploadProgress(str, int): Emitted to update progress (file_id, percent)
-- fileUploadCompleted(str, bool): Emitted on upload completion (file_id, success)
-See method and signal docstrings for more.
-
-**Classes:**
-
-- `UploadWorker`
- (inherits from: QObject)
-
-
-  Worker thread for handling file uploads asynchronously
-
-  Methods: `__init__()`, `process()`
-
-- `ProfessorUploadWidget`
- (inherits from: QWidget)
-
-
-  Methods: `__init__()`, `dragEnterEvent()`, `dragLeaveEvent()`, `dropEvent()`, `open_file_dialog()`, ... (10 more)
-
-**Functions:**
-
-- `default_mime_validator(filepath, mimetype)`
 
 
 
@@ -2041,6 +2073,114 @@ See method and signal docstrings for more.
 - `test_end_to_end_ui_to_data_workflow(ui_integration_env)`
 
 - `test_ui_event_handler_performance(ui_integration_env)`
+
+
+
+### tests\integration\test_upload_metadata_integration.py
+
+**Classes:**
+
+- `DummyUploadRequest`
+
+
+  Methods: `__init__()`
+
+- `DummyUpload`
+
+
+  Methods: `__init__()`, `upload_iter()`, `enqueue()`, `pause()`, `resume()`, ... (1 more)
+
+- `DummyValidationFramework`
+
+
+  Methods: `__init__()`, `validate_batch()`, `validate_file()`, `validate()`
+
+**Functions:**
+
+- `patch_upload_request(monkeypatch)`
+
+- `test_batch_upload_metadata_consistency()`
+
+- `test_batch_metadata_inheritance()`
+
+  Test that batch metadata is properly inherited by all files in the batch
+
+- `test_ui_batch_progress()`
+
+  Test UI integration with batch upload progress tracking
+
+- `test_end_to_end_workflow()`
+
+  Test complete end-to-end workflow from batch creation to completion
+
+
+
+### tests\integration\test_content_management_workflow.py
+
+**Description:**
+
+Integration Test Suite for Content Management (Task 9.4)
+Covers:
+- Upload and metadata workflows with UI and service layers
+- Batch operations with mixed content types
+- Metadata consistency across components
+- Content type detection accuracy across formats
+- Summarizes/document test results
+
+Assumptions:
+- Access to ProfessorUploadWidget, BatchUploadController, MetadataManager, ContentDB, and ContentTypeRegistry classes.
+- Pytest and mocking facilities available.
+
+**Classes:**
+
+- `DummyUploadRequest`
+
+
+  Methods: `__init__()`
+
+- `DummyUploadService`
+
+
+  Simulate uploads asynchronously with progress and completion for integration tests.
+
+  Methods: `__init__()`, `enqueue()`, `_simulate_upload()`, `pause()`, `resume()`, ... (1 more)
+
+- `PatchedContentTypeRegistry`
+
+
+  Methods: `get_content_type()`
+
+**Functions:**
+
+- `create_temp_file_with_content(suffix, content)`
+
+- `temp_test_files()`
+
+  Create files of various types for upload tests
+
+- `setup_content_management_mocks(qtbot)`
+
+  Set up UI, DB, metadata, and batch controller for integration.
+
+- `test_upload_and_metadata_workflow(qtbot, temp_test_files, setup_content_management_mocks)`
+
+  Test that upload and metadata workflow integrates end-to-end.
+
+- `test_batch_operations_mixed_content(qtbot, temp_test_files, setup_content_management_mocks)`
+
+  Test batch upload operations with mixed file types.
+
+- `test_metadata_consistency(qtbot, temp_test_files, setup_content_management_mocks)`
+
+  Verify that metadata is consistent across DB, widget, and batch controller.
+
+- `test_content_type_detection_accuracy(temp_test_files)`
+
+  Validate content type detection across formats using ContentTypeRegistry.
+
+- `test_document_results_and_issues()`
+
+  Manually generates a result doc (for developer review only).
 
 
 
@@ -2300,33 +2440,6 @@ Metadata Schema and Editor
 
 
 
-### tests\integration\test_upload_metadata_integration.py
-
-**Classes:**
-
-- `DummyUploadRequest`
-
-
-  Methods: `__init__()`
-
-- `DummyUpload`
-
-
-  Methods: `upload_iter()`, `enqueue()`, `pause()`, `resume()`, `cancel()`
-
-- `DummyValidationFramework`
-
-
-  Methods: `__init__()`, `validate_batch()`, `validate_file()`
-
-**Functions:**
-
-- `patch_upload_request(monkeypatch)`
-
-- `test_batch_upload_metadata_consistency()`
-
-
-
 ### app\ui\common\main_window.py
 
 **Description:**
@@ -2436,6 +2549,44 @@ Edit DB_URL in schema.py as required for different environments.
 
 
 
+### tests\unit\core\upload\test_batch_controller.py
+
+**Classes:**
+
+- `DummyListener`
+ (inherits from: BatchUploadListener)
+
+
+  Methods: `__init__()`, `on_batch_event()`
+
+**Functions:**
+
+- `fake_files()`
+
+- `file_patches(fake_files)`
+
+- `dummy_upload_service()`
+
+- `dummy_validation_framework()`
+
+- `test_batch_add_and_progress(file_patches)`
+
+- `test_batch_validation_fail(file_patches)`
+
+- `test_pause_resume_cancel(file_patches)`
+
+- `test_file_not_found(file_patches)`
+
+- `test_mixed_file_validation(file_patches)`
+
+- `test_batch_with_named_id(file_patches)`
+
+- `test_detailed_progress_reporting(file_patches)`
+
+- `test_validation_events(file_patches)`
+
+
+
 ### app\ui\common\test_component_architecture.py
 
 **Classes:**
@@ -2532,6 +2683,25 @@ Edit DB_URL in schema.py as required for different environments.
 - `test_scenario_builder_runall()`
 
   Test: TestScenarioBuilder properly runs a sample scenario.
+
+
+
+### app\core\db\content_db.py
+
+**Description:**
+
+ContentDB stub for integration testing.
+
+Provides minimal is_uploaded logic for test_professor_upload_workflow.
+
+Location: /app/core/db/content_db.py
+
+**Classes:**
+
+- `ContentDB`
+
+
+  Methods: `__init__()`, `mark_uploaded()`, `is_uploaded()`
 
 
 
@@ -2638,6 +2808,19 @@ Edit DB_URL in schema.py as required for different environments.
 
 
 
+### app\core\drive\metadata_store.py
+
+**Classes:**
+
+- `MetadataStore`
+
+
+  Simple file-based persistence for demonstration.
+
+  Methods: `__init__()`, `_load()`, `_save()`, `save_metadata()`, `get_metadata()`, ... (3 more)
+
+
+
 ### app\ui\professor\upload_service.py
 
 **Description:**
@@ -2720,6 +2903,22 @@ Handles conflict resolution, batch sync, and uses MetadataManager for change det
 
 
 
+### app\core\drive\metadata_schema_video.py
+
+**Classes:**
+
+- `MetadataField`
+
+
+  Methods: `__init__()`, `validate()`
+
+- `MetadataSchema`
+
+
+  Methods: `__init__()`, `validate()`, `get_field()`, `get_required_fields()`, `get_optional_fields()`
+
+
+
 ### app\models\user.py
 
 **Description:**
@@ -2778,33 +2977,35 @@ Covers ORM integration, validation, serialization, and event emission.
 
 
 
-### tests\unit\core\upload\test_batch_controller.py
-
-**Classes:**
-
-- `DummyListener`
- (inherits from: BatchUploadListener)
-
-
-  Methods: `__init__()`, `on_batch_event()`
+### tests\unit\models\test_content_type_registry.py
 
 **Functions:**
 
-- `fake_files()`
+- `test_pdf_detection_by_extension()`
 
-- `file_patches(fake_files)`
+- `test_pdf_detection_by_mimetype()`
 
-- `dummy_upload_service()`
+- `test_slide_deck_detection()`
 
-- `dummy_validation_framework()`
+- `test_image_detection()`
 
-- `test_batch_add_and_progress(file_patches, dummy_upload_service, dummy_validation_framework)`
+- `test_video_detection()`
 
-- `test_batch_validation_fail(file_patches, dummy_upload_service, dummy_validation_framework)`
+- `test_cad_detection()`
 
-- `test_pause_resume_cancel(file_patches, dummy_upload_service, dummy_validation_framework)`
+- `test_simulation_detection()`
 
-- `test_file_not_found(file_patches, dummy_upload_service, dummy_validation_framework)`
+- `test_unknown_detection()`
+
+- `test_ai_detector_fallback()`
+
+- `test_metadata_extraction()`
+
+- `test_supported_types_and_taxonomy()`
+
+- `test_plugin_registration_and_detection()`
+
+- `test_error_handling()`
 
 
 
@@ -3059,6 +3260,19 @@ This uses real project models (User, Module, Lesson, etc).
 - `after_delete(mapper, connection, target)`
 
 - `install_event_hooks()`
+
+
+
+### app\core\drive\metadata_persistence_manager.py
+
+**Classes:**
+
+- `MetadataStore`
+
+
+  Simple file-based persistence for demonstration.
+
+  Methods: `__init__()`, `_load()`, `_save()`, `save_metadata()`, `get_metadata()`, ... (3 more)
 
 
 
@@ -3341,22 +3555,23 @@ Provides utilities for creating, dropping, and inspecting database tables.
 
 
 
-### app\core\db\content_db.py
+### app\core\validation\main.py
 
 **Description:**
 
-ContentDB stub for integration testing.
+ValidationSystem: Main interface for all content format validations.
 
-Provides minimal is_uploaded logic for test_professor_upload_workflow.
+This system loads registered validators (PDF, image, video, text, etc)
+and provides a unified check method.
 
-Location: /app/core/db/content_db.py
+Location: /app/core/validation/main.py
 
 **Classes:**
 
-- `ContentDB`
+- `ValidationSystem`
 
 
-  Methods: `__init__()`, `mark_uploaded()`, `is_uploaded()`
+  Methods: `__init__()`, `infer_validator()`, `check()`
 
 
 
@@ -3419,6 +3634,18 @@ Manages metadata for files and directories, including custom tags, versioning, a
 
 
 
+### app\ui\professor\batch_upload_ui.py
+
+**Classes:**
+
+- `BatchUploadUI`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `on_batch_event()`
+
+
+
 ### tests\integration\test_phase1_foundation.py
 
 **Functions:**
@@ -3438,6 +3665,17 @@ Manages metadata for files and directories, including custom tags, versioning, a
 - `test_component_status_tracking()`
 
 - `test_transaction_logger()`
+
+
+
+### app\ui\common\metadata_editor.py
+
+**Classes:**
+
+- `MetadataEditorBase`
+
+
+  Methods: `__init__()`, `set_field()`, `get_metadata()`, `interactive_edit()`
 
 
 
@@ -3479,26 +3717,6 @@ Setup script for AeroLearn AI development environment.
 
 
 
-### app\core\validation\main.py
-
-**Description:**
-
-ValidationSystem: Main interface for all content format validations.
-
-This system loads registered validators (PDF, image, video, text, etc)
-and provides a unified check method.
-
-Location: /app/core/validation/main.py
-
-**Classes:**
-
-- `ValidationSystem`
-
-
-  Methods: `__init__()`, `infer_validator()`, `check()`
-
-
-
 ### tests\unit\test_crypto.py
 
 **Classes:**
@@ -3530,24 +3748,6 @@ Location: /app/core/validation/main.py
 - `test_upload_retries_on_error(qapp, dummy_file, monkeypatch)`
 
 - `test_upload_failed_emits_error(qapp, dummy_file, monkeypatch)`
-
-
-
-### tests\unit\models\test_content_type_registry.py
-
-**Functions:**
-
-- `test_pdf_detection()`
-
-- `test_image_detection()`
-
-- `test_video_detection()`
-
-- `test_cad_detection()`
-
-- `test_simulation_detection()`
-
-- `test_fallback_ai_detector()`
 
 
 
@@ -3656,6 +3856,37 @@ Location: /app/core/validation/main.py
 - `test_inheritance_logic()`
 
 - `test_search_and_filter()`
+
+
+
+### tests\integration\test_professor_upload_workflow.py
+
+**Description:**
+
+Integration Test: Professor Upload Workflow
+
+This test covers:
+- UI upload → backend service → validation → event/callback → metadata
+- Batch upload and progress
+- Metadata assignment and consistency
+
+Location: /tests/integration/test_professor_upload_workflow.py
+
+**Functions:**
+
+- `publish(self, event_or_type, payload)`
+
+- `qapp()`
+
+  Ensure a QApplication exists.
+
+- `test_full_upload_workflow(qapp, tmp_path)`
+
+- `stop(self)`
+
+  Force immediate shutdown with thread cleanup
+
+- `test_full_upload_workflow(qapp, tmp_path)`
 
 
 
@@ -3793,6 +4024,18 @@ Requires: event bus to be started (`await EventBus().start()`).
 
 
 
+### app\core\drive\metadata_inheritance_utilities.py
+
+**Functions:**
+
+- `inherit_metadata(parent_metadata, item_metadata, overwrite)`
+
+  For any field not present in item_metadata, inherit from parent_metadata.
+
+- `batch_apply_metadata(items_metadata, batch_metadata, overwrite)`
+
+
+
 ### tests\conftest.py
 
 **Functions:**
@@ -3832,6 +4075,14 @@ Main entry point for the AeroLearn AI application.
 **Functions:**
 
 - `_add_project_root_to_syspath()`
+
+
+
+### tests\metadata_store_tests.py
+
+**Functions:**
+
+- `test_metadata_store_basic()`
 
 
 
@@ -3906,6 +4157,10 @@ Created: 2025-04-24
 An AI-first education system for Aerospace Engineering that enhances teaching
 and learning experiences through intelligent content management, personalized
 learning assistance, and comprehensive analytics.
+
+
+
+### app\core\__init__.py
 
 
 
