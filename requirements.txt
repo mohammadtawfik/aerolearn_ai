@@ -1,8 +1,6 @@
 # Core Dependencies
-PyQt5
 PyQt6
 PyQt6-WebEngine
-pyside6
 requests
 python-dotenv
 pycryptodome
