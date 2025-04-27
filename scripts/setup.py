@@ -11,84 +11,84 @@ from pathlib import Path
 
 
 def check_python_version():
- """Check if Python version is compatible."""
- if sys.version_info < (3, 9):
-     print("Error: AeroLearn AI requires Python 3.9 or higher")
-     sys.exit(1)
+    """Check if Python version is compatible."""
+    if sys.version_info < (3, 9):
+        print("Error: AeroLearn AI requires Python 3.9 or higher")
+        sys.exit(1)
 
 
 def create_virtual_env(venv_path):
- """Create a virtual environment."""
- if not os.path.exists(venv_path):
-     print(f"Creating virtual environment at {venv_path}")
-     subprocess.run([sys.executable, "-m", "venv", venv_path], check=True)
-     print("Virtual environment created")
- else:
-     print(f"Virtual environment already exists at {venv_path}")
+    """Create a virtual environment."""
+    if not os.path.exists(venv_path):
+        print(f"Creating virtual environment at {venv_path}")
+        subprocess.run([sys.executable, "-m", "venv", venv_path], check=True)
+        print("Virtual environment created")
+    else:
+        print(f"Virtual environment already exists at {venv_path}")
 
 
 def install_dependencies(venv_path, dev=False):
- """Install project dependencies."""
- # Construct path to pip
- if os.name == "nt":  # Windows
-     pip_path = os.path.join(venv_path, "Scripts", "pip")
- else:  # macOS/Linux
-     pip_path = os.path.join(venv_path, "bin", "pip")
+    """Install project dependencies."""
+    # Construct path to pip
+    if os.name == "nt":  # Windows
+        pip_path = os.path.join(venv_path, "Scripts", "pip")
+    else:  # macOS/Linux
+        pip_path = os.path.join(venv_path, "bin", "pip")
  
- # Upgrade pip
- subprocess.run([pip_path, "install", "--upgrade", "pip"], check=True)
+    # Upgrade pip
+    subprocess.run([pip_path, "install", "--upgrade", "pip"], check=True)
  
- # Install dependencies
- req_file = "requirements-dev.txt" if dev else "requirements.txt"
- print(f"Installing dependencies from {req_file}")
- subprocess.run([pip_path, "install", "-r", req_file], check=True)
- print("Dependencies installed")
+    # Install dependencies
+    req_file = "requirements-dev.txt" if dev else "requirements.txt"
+    print(f"Installing dependencies from {req_file}")
+    subprocess.run([pip_path, "install", "-r", req_file], check=True)
+    print("Dependencies installed")
 
 
 def setup_environment(env_file=".env.example"):
- """Set up environment variables."""
- if not os.path.exists(".env"):
-     if os.path.exists(env_file):
-         print(f"Creating .env file from {env_file}")
-         with open(env_file, "r") as source:
-             with open(".env", "w") as target:
-                 target.write(source.read())
-         print(".env file created. Please update it with your actual configuration.")
-     else:
-         print(f"Warning: {env_file} not found. Please create .env file manually.")
- else:
-     print(".env file already exists")
+    """Set up environment variables."""
+    if not os.path.exists(".env"):
+        if os.path.exists(env_file):
+            print(f"Creating .env file from {env_file}")
+            with open(env_file, "r") as source:
+                with open(".env", "w") as target:
+                    target.write(source.read())
+            print(".env file created. Please update it with your actual configuration.")
+        else:
+            print(f"Warning: {env_file} not found. Please create .env file manually.")
+    else:
+        print(".env file already exists")
 
 
 def setup_pre_commit(venv_path):
- """Install and configure pre-commit hooks."""
- if os.name == "nt":  # Windows
-     pre_commit_path = os.path.join(venv_path, "Scripts", "pre-commit")
- else:  # macOS/Linux
-     pre_commit_path = os.path.join(venv_path, "bin", "pre-commit")
+    """Install and configure pre-commit hooks."""
+    if os.name == "nt":  # Windows
+        pre_commit_path = os.path.join(venv_path, "Scripts", "pre-commit")
+    else:  # macOS/Linux
+        pre_commit_path = os.path.join(venv_path, "bin", "pre-commit")
  
- if os.path.exists(".git"):
-     if os.path.exists(pre_commit_path):
-         print("Installing pre-commit hooks")
-         subprocess.run([pre_commit_path, "install"], check=True)
-         print("Pre-commit hooks installed")
-     else:
-         print("Warning: pre-commit not found in virtual environment")
- else:
-     print("Warning: Not a git repository, skipping pre-commit setup")
+    if os.path.exists(".git"):
+        if os.path.exists(pre_commit_path):
+            print("Installing pre-commit hooks")
+            subprocess.run([pre_commit_path, "install"], check=True)
+            print("Pre-commit hooks installed")
+        else:
+            print("Warning: pre-commit not found in virtual environment")
+    else:
+        print("Warning: Not a git repository, skipping pre-commit setup")
 
 
 def create_secure_directory():
- """Create secure directory for credentials."""
- secure_dir = "secure_credentials"
- if not os.path.exists(secure_dir):
-     os.makedirs(secure_dir)
-     print(f"Created {secure_dir} directory for storing credentials")
+    """Create secure directory for credentials."""
+    secure_dir = "secure_credentials"
+    if not os.path.exists(secure_dir):
+        os.makedirs(secure_dir)
+        print(f"Created {secure_dir} directory for storing credentials")
      
-     # Create a README file in the secure directory
-     readme_path = os.path.join(secure_dir, "README.md")
-     with open(readme_path, "w") as f:
-         f.write("""# Secure Credentials
+        # Create a README file in the secure directory
+        readme_path = os.path.join(secure_dir, "README.md")
+        with open(readme_path, "w") as f:
+            f.write("""# Secure Credentials
 
 This directory is for storing sensitive credential files such as:
 - DeepSeek API key
