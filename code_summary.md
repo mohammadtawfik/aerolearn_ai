@@ -312,7 +312,7 @@ Key file relationships (files with most dependencies):
 - **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **integrations\monitoring\component_status.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
-- **tests\integration\interfaces\test_ai_interface.py** depends on: integrations\interfaces\base_interface.py, integrations\interfaces\ai_interface.py
+- **tests\integration\interfaces\test_ai_interface.py** depends on: integrations\interfaces\ai_interface.py, integrations\interfaces\base_interface.py
 
 
 ## Detailed Code Analysis
