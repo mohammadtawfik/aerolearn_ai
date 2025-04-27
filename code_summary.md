@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 110
+Total Python files: 127
 
 ## Table of Contents
 
@@ -41,10 +41,17 @@ Total Python files: 110
 │   │   │   └── sync_manager.py
 │   │   ├── ai
 │   │   │   └── __init__.py
-│   │   └── api
-│   │       ├── api_client.py
-│   │       ├── deepseek_client.py
-│   │       └── google_drive_client.py
+│   │   ├── api
+│   │   │   ├── api_client.py
+│   │   │   ├── deepseek_client.py
+│   │   │   └── google_drive_client.py
+│   │   ├── upload
+│   │   │   ├── test_upload_service.py
+│   │   │   ├── __init__.py
+│   │   │   ├── upload_service.py
+│   │   │   └── batch_controller.py
+│   │   └── validation
+│   │       └── format_validator.py
 │   ├── ui
 │   │   ├── common
 │   │   │   ├── __init__.py
@@ -57,7 +64,9 @@ Total Python files: 110
 │   │   │   ├── content_browser.py
 │   │   │   └── content_preview.py
 │   │   ├── professor
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   ├── upload_widget.py
+│   │   │   └── upload_service.py
 │   │   ├── student
 │   │   │   └── __init__.py
 │   │   └── admin
@@ -67,7 +76,9 @@ Total Python files: 110
 │   │   ├── user.py
 │   │   ├── course.py
 │   │   ├── content.py
-│   │   └── assessment.py
+│   │   ├── assessment.py
+│   │   ├── content_type_registry.py
+│   │   └── metadata_schema.py
 │   ├── utils
 │   │   ├── __init__.py
 │   │   └── crypto.py
@@ -106,6 +117,9 @@ Total Python files: 110
 │   │   │   │   └── test_authorization.py
 │   │   │   ├── api
 │   │   │   │   └── test_api_clients.py
+│   │   │   ├── upload
+│   │   │   │   ├── test_upload_service.py
+│   │   │   │   └── __init__.py
 │   │   │   ├── __init__.py
 │   │   │   └── test_integration_health.py
 │   │   ├── ui
@@ -114,7 +128,8 @@ Total Python files: 110
 │   │   │   └── __init__.py
 │   │   ├── test_crypto.py
 │   │   ├── test_credential_manager.py
-│   │   └── test_local_cache_and_sync.py
+│   │   ├── test_local_cache_and_sync.py
+│   │   └── __init__.py
 │   ├── integration
 │   │   ├── interfaces
 │   │   │   ├── test_base_interface.py
@@ -137,19 +152,22 @@ Total Python files: 110
 │   │   ├── test_framework.py
 │   │   ├── test_auth_integration.py
 │   │   ├── test_storage_integration.py
-│   │   └── test_ui_integration.py
+│   │   ├── test_ui_integration.py
+│   │   └── test_upload_flow.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
 │   │   ├── test_main_window.py
-│   │   └── test_common_ui_controls.py
+│   │   ├── test_common_ui_controls.py
+│   │   └── test_professor_upload_widget.py
 │   ├── fixtures
 │   │   └── __init__.py
 │   ├── examples
 │   │   └── event_bus_example.py
 │   ├── models
 │   │   └── test_models.py
-│   └── __init__.py
+│   ├── __init__.py
+│   └── conftest.py
 ├── docs
 │   ├── architecture
 
@@ -157,13 +175,17 @@ Total Python files: 110
 
 │   ├── user_guides
 
-│   └── development
+│   ├── development
+
+│   └── ui
 
 ├── tools
 │   ├── integration_monitor
 │   │   └── __init__.py
-│   └── project_management
-│       └── __init__.py
+│   ├── project_management
+│   │   └── __init__.py
+│   ├── auto_patch_test_root_import.py
+│   └── auto_patch_all_tests.py
 ├── resources
 │   ├── styles
 
@@ -296,22 +318,17 @@ of system components, ...
 
 ### tests\integration\interfaces\test_ai_interface.py
 
-Unit tests for the AI interface contracts.
-
-This module tests the functionality of the AI-related interfaces like
-AIModelProviderInterface, ContentAna...
-
 - Classes: 10
-- Functions: 0
-- Dependency Score: 48.00
+- Functions: 1
+- Dependency Score: 49.00
 
 ## Dependencies
 
 Key file relationships (files with most dependencies):
 
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
-- **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
-- **integrations\monitoring\component_status.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **integrations\monitoring\integration_health.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **integrations\monitoring\component_status.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
 - **tests\integration\interfaces\test_ai_interface.py** depends on: integrations\interfaces\ai_interface.py, integrations\interfaces\base_interface.py
 
 
@@ -936,13 +953,6 @@ and operational capability.
 
 ### tests\integration\interfaces\test_ai_interface.py
 
-**Description:**
-
-Unit tests for the AI interface contracts.
-
-This module tests the functionality of the AI-related interfaces like
-AIModelProviderInterface, ContentAnalysisInterface, and others.
-
 **Classes:**
 
 - `TestAIEnums`
@@ -1015,6 +1025,10 @@ AIModelProviderInterface, ContentAnalysisInterface, and others.
 
   Methods: `test_register_ai_interfaces()`, `test_individual_interface_registrations()`
 
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
 
 
 ### integrations\events\event_subscribers.py
@@ -1073,6 +1087,79 @@ and handle events from the event bus. It also defines the EventFilter interface 
   Event subscriber that uses a provided callback function for event processing.
 
   Methods: `__init__()`, `on_event()`
+
+
+
+### tests\integration\interfaces\test_storage_interface.py
+
+**Classes:**
+
+- `TestStorageEnums`
+
+
+  Tests for storage-related enumerations.
+
+  Methods: `test_storage_scope_values()`, `test_storage_permission_values()`, `test_sync_status_values()`
+
+- `TestStorageItem`
+
+
+  Tests for the StorageItem class.
+
+  Methods: `test_init_with_required_fields()`, `test_init_with_all_fields()`, `test_to_dict()`, `test_from_dict()`
+
+- `TestSyncConflict`
+
+
+  Tests for the SyncConflict class.
+
+  Methods: `test_init()`
+
+- `TestSyncProgress`
+
+
+  Tests for the SyncProgress class.
+
+  Methods: `test_init_with_required_fields()`, `test_init_with_all_fields()`, `test_completion_percentage()`
+
+- `TestStorageProviderInterface`
+
+
+  Tests for the StorageProviderInterface.
+
+  Methods: `test_interface_registration()`
+
+- `TestSynchronizationInterface`
+
+
+  Tests for the SynchronizationInterface.
+
+  Methods: `test_interface_registration()`
+
+- `TestStorageQuotaInterface`
+
+
+  Tests for the StorageQuotaInterface.
+
+  Methods: `test_interface_registration()`
+
+- `TestStoragePermissionInterface`
+
+
+  Tests for the StoragePermissionInterface.
+
+  Methods: `test_interface_registration()`
+
+- `TestFileStreamingInterface`
+
+
+  Tests for the FileStreamingInterface.
+
+  Methods: `test_interface_registration()`
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
 
 
 
@@ -1148,79 +1235,48 @@ Integration: Hooks into EventBus system for notification and validation events.
 
 
 
-### tests\integration\interfaces\test_storage_interface.py
-
-**Description:**
-
-Unit tests for the storage interface contracts.
-
-This module tests the functionality of the storage-related interfaces like
-StorageProviderInterface, SynchronizationInterface, and others.
+### tests\integration\interfaces\test_base_interface.py
 
 **Classes:**
 
-- `TestStorageEnums`
+- `TestInterfaceVersion`
 
 
-  Tests for storage-related enumerations.
+  Tests for the InterfaceVersion class.
 
-  Methods: `test_storage_scope_values()`, `test_storage_permission_values()`, `test_sync_status_values()`
+  Methods: `test_init()`, `test_str_representation()`, `test_from_string_valid()`, `test_from_string_invalid()`, `test_is_compatible_with()`
 
-- `TestStorageItem`
-
-
-  Tests for the StorageItem class.
-
-  Methods: `test_init_with_required_fields()`, `test_init_with_all_fields()`, `test_to_dict()`, `test_from_dict()`
-
-- `TestSyncConflict`
+- `TestMethodSignature`
 
 
-  Tests for the SyncConflict class.
+  Tests for the MethodSignature class.
 
-  Methods: `test_init()`
+  Methods: `test_capture_signature()`, `test_validate_implementation_valid()`, `test_validate_implementation_invalid_return()`, `test_validate_implementation_missing_param()`, `test_validate_implementation_invalid_param_type()`, ... (2 more)
 
-- `TestSyncProgress`
-
-
-  Tests for the SyncProgress class.
-
-  Methods: `test_init_with_required_fields()`, `test_init_with_all_fields()`, `test_completion_percentage()`
-
-- `TestStorageProviderInterface`
+- `TestBaseInterface`
 
 
-  Tests for the StorageProviderInterface.
+  Tests for the BaseInterface class.
 
-  Methods: `test_interface_registration()`
+  Methods: `setup_method()`, `test_register_interface()`, `test_register_interface_no_name()`, `test_register_interface_duplicate_compatible()`, `test_register_interface_duplicate_incompatible()`, ... (3 more)
 
-- `TestSynchronizationInterface`
-
-
-  Tests for the SynchronizationInterface.
-
-  Methods: `test_interface_registration()`
-
-- `TestStorageQuotaInterface`
+- `TestInterfaceImplementation`
 
 
-  Tests for the StorageQuotaInterface.
+  Tests for the InterfaceImplementation decorator.
 
-  Methods: `test_interface_registration()`
+  Methods: `setup_method()`, `test_valid_implementation()`, `test_invalid_implementation_missing_method()`, `test_invalid_implementation_wrong_signature()`, `test_implementation_with_component()`
 
-- `TestStoragePermissionInterface`
-
-
-  Tests for the StoragePermissionInterface.
-
-  Methods: `test_interface_registration()`
-
-- `TestFileStreamingInterface`
+- `TestRegisterAllInterfaces`
 
 
-  Tests for the FileStreamingInterface.
+  Tests for the register_all_interfaces function.
 
-  Methods: `test_interface_registration()`
+  Methods: `setup_method()`, `test_register_all_interfaces()`
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
 
 
 
@@ -1306,62 +1362,7 @@ storage providers, synchronization mechanisms, and file operations.
 
 
 
-### tests\integration\interfaces\test_base_interface.py
-
-**Description:**
-
-Unit tests for the base interface contracts.
-
-This module tests the functionality of the BaseInterface class and related
-interface registration and validation mechanisms.
-
-**Classes:**
-
-- `TestInterfaceVersion`
-
-
-  Tests for the InterfaceVersion class.
-
-  Methods: `test_init()`, `test_str_representation()`, `test_from_string_valid()`, `test_from_string_invalid()`, `test_is_compatible_with()`
-
-- `TestMethodSignature`
-
-
-  Tests for the MethodSignature class.
-
-  Methods: `test_capture_signature()`, `test_validate_implementation_valid()`, `test_validate_implementation_invalid_return()`, `test_validate_implementation_missing_param()`, `test_validate_implementation_invalid_param_type()`, ... (2 more)
-
-- `TestBaseInterface`
-
-
-  Tests for the BaseInterface class.
-
-  Methods: `setup_method()`, `test_register_interface()`, `test_register_interface_no_name()`, `test_register_interface_duplicate_compatible()`, `test_register_interface_duplicate_incompatible()`, ... (3 more)
-
-- `TestInterfaceImplementation`
-
-
-  Tests for the InterfaceImplementation decorator.
-
-  Methods: `setup_method()`, `test_valid_implementation()`, `test_invalid_implementation_missing_method()`, `test_invalid_implementation_wrong_signature()`, `test_implementation_with_component()`
-
-- `TestRegisterAllInterfaces`
-
-
-  Tests for the register_all_interfaces function.
-
-  Methods: `setup_method()`, `test_register_all_interfaces()`
-
-
-
 ### tests\integration\interfaces\test_content_interface.py
-
-**Description:**
-
-Unit tests for the content interface contracts.
-
-This module tests the functionality of the content-related interfaces like
-ContentProviderInterface, ContentSearchInterface, and others.
 
 **Classes:**
 
@@ -1427,6 +1428,10 @@ ContentProviderInterface, ContentSearchInterface, and others.
   Tests for the ContentAnalyzerInterface.
 
   Methods: `test_interface_registration()`
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
 
 
 
@@ -1633,6 +1638,101 @@ Handles Topic, Module, Lesson, Quiz logic; validation, serialization, and event 
 
 
 
+### app\core\upload\upload_service.py
+
+**Description:**
+
+UploadService: Handles efficient, robust file uploads for AeroLearn AI.
+Features:
+- Chunked upload for large files
+- Retry mechanism with configurable policies
+- Concurrent upload management (queue, pausing)
+- Progress tracking & status reporting
+- Pluggable backend destination (cloud/local for now)
+- Backoff strategy for retries
+- Upload cancellation support
+
+NOTE: This is a scaffold/partial for integration; extend as needed.
+
+Author: AeroLearn AI Team
+
+**Classes:**
+
+- `UploadStatus`
+
+
+- `UploadRequest`
+
+
+  Methods: `__init__()`
+
+- `BackoffStrategy`
+
+
+  Implements exponential backoff with jitter for retries
+
+  Methods: `__init__()`, `get_delay()`
+
+- `UploadService`
+
+
+  Methods: `__init__()`, `enqueue()`, `get_upload_status()`, `cancel_upload()`, `_worker()`, ... (8 more)
+
+
+
+### app\core\validation\format_validator.py
+
+**Description:**
+
+Format Validation Framework for AeroLearn AI
+
+- Pluggable architecture (built-in & plugin validators)
+- Example: PDF, image, video, text
+- Supports aerospace/CAD extensions
+
+**Classes:**
+
+- `ValidationResult`
+
+
+  Methods: `__init__()`
+
+- `BaseValidator`
+
+
+  Methods: `validate()`
+
+- `PDFValidator`
+ (inherits from: BaseValidator)
+
+
+  Methods: `validate()`
+
+- `ImageValidator`
+ (inherits from: BaseValidator)
+
+
+  Methods: `validate()`
+
+- `VideoValidator`
+ (inherits from: BaseValidator)
+
+
+  Methods: `validate()`
+
+- `TextValidator`
+ (inherits from: BaseValidator)
+
+
+  Methods: `validate()`
+
+- `ValidatorRegistry`
+
+
+  Methods: `__init__()`, `register()`, `validate()`
+
+
+
 ### integrations\registry\interface_registry.py
 
 **Description:**
@@ -1688,13 +1788,6 @@ properly implement required interfaces and allowing for interface discovery.
 
 ### tests\integration\component_harness.py
 
-**Description:**
-
-Integration Test Harness, Mock Component System, and Event Capture Utility
-Location: tests/integration/component_harness.py
-
-This module provides the foundational tools required to do component-based integration testing in AeroLearn AI.
-
 **Classes:**
 
 - `ComponentTestHarness`
@@ -1718,29 +1811,13 @@ This module provides the foundational tools required to do component-based integ
 
   Methods: `__init__()`, `subscribe()`, `unsubscribe()`, `clear()`, `get_events()`, ... (1 more)
 
+**Functions:**
 
-
-### app\ui\common\component_base.py
-
-**Classes:**
-
-- `BaseComponent`
-
-
-  Base class for all UI components.
-
-  Methods: `__init__()`, `version()`, `status()`, `on_init()`, `on_start()`, ... (7 more)
+- `_add_project_root_to_syspath()`
 
 
 
 ### tests\integration\test_monitoring.py
-
-**Description:**
-
-Integration tests for the monitoring system.
-
-This module tests the integration health, component status, and transaction logging
-components to ensure they work together correctly.
 
 **Classes:**
 
@@ -1760,20 +1837,13 @@ components to ensure they work together correctly.
 
   Methods: `setUp()`, `test_health_metrics_collection()`, `test_health_status_changes()`, `test_overall_system_health()`, `test_component_status_tracking()`, ... (6 more)
 
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
 
 
 ### tests\integration\test_ui_integration.py
-
-**Description:**
-
-UI Component Integration Tests
-
-These tests target integration between UI components and their data providers,
-event bus interactions, and support for end-to-end and performance scenarios.
-
-Assumptions:
-- UI components expose load_content, update_data, and subscribe_to_events
-- EventBus used for event-driven updates
 
 **Classes:**
 
@@ -1794,6 +1864,8 @@ Assumptions:
 
 **Functions:**
 
+- `_add_project_root_to_syspath()`
+
 - `ui_integration_env()`
 
 - `test_ui_loads_content_and_triggers_event(ui_integration_env)`
@@ -1803,6 +1875,19 @@ Assumptions:
 - `test_end_to_end_ui_to_data_workflow(ui_integration_env)`
 
 - `test_ui_event_handler_performance(ui_integration_env)`
+
+
+
+### app\ui\common\component_base.py
+
+**Classes:**
+
+- `BaseComponent`
+
+
+  Base class for all UI components.
+
+  Methods: `__init__()`, `version()`, `status()`, `on_init()`, `on_start()`, ... (7 more)
 
 
 
@@ -1893,6 +1978,78 @@ component dependencies and ensuring proper component initialization order.
 
 
 
+### tests\integration\test_auth_integration.py
+
+**Classes:**
+
+- `DummyAuth`
+
+
+  Methods: `authenticate_user()`, `create_session()`, `get_user_profile()`
+
+- `FakeEventBus`
+
+
+  Methods: `__init__()`, `publish()`, `clear()`
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `event_bus()`
+
+- `auth_system(event_bus)`
+
+- `test_authenticate_multiple_roles(auth_system, event_bus)`
+
+- `test_invalid_authentication_fires_event(auth_system, event_bus)`
+
+- `test_session_created_on_auth(auth_system)`
+
+- `test_logout_event_firing(auth_system, event_bus)`
+
+- `test_user_profile_retrieval()`
+
+- `test_auth_end_to_end_workflow(auth_system, event_bus)`
+
+- `test_performance_multiple_auth(auth_system)`
+
+
+
+### tests\integration\test_storage_integration.py
+
+**Classes:**
+
+- `DummyLocalStorage`
+
+
+  Methods: `upload_file()`, `download_file()`, `delete_file()`, `list_files()`
+
+- `DummyCloudStorage`
+
+
+  Methods: `upload_file()`, `download_file()`, `delete_file()`, `list_files()`
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `reset_storage()`
+
+- `storage_system(request)`
+
+- `test_file_upload_and_download(storage_system)`
+
+- `test_file_delete_and_list(storage_system)`
+
+- `test_cross_backend_integrity()`
+
+- `test_end_to_end_storage_workflow(storage_system)`
+
+- `test_storage_performance_upload(storage_system)`
+
+
+
 ### app\core\db\local_cache.py
 
 **Description:**
@@ -1921,97 +2078,6 @@ Local Cache System for AeroLearn AI
 
 
 
-### tests\integration\test_auth_integration.py
-
-**Description:**
-
-Authentication Integration Tests
-
-These tests verify the integration between authentication, session management, event bus, 
-and the permission/role system. They include E2E flows and event verification for multi-role scenarios.
-
-Assumptions:
-- Auth system exposes: authenticate_user, create_session, get_user_profile, logout_user
-- EventBus is set up and events are fired for auth state changes
-- User/role data is pre-populated or mocked as necessary
-
-**Classes:**
-
-- `DummyAuth`
-
-
-  Methods: `authenticate_user()`, `create_session()`, `get_user_profile()`
-
-- `FakeEventBus`
-
-
-  Methods: `__init__()`, `publish()`, `clear()`
-
-**Functions:**
-
-- `event_bus()`
-
-- `auth_system(event_bus)`
-
-- `test_authenticate_multiple_roles(auth_system, event_bus)`
-
-- `test_invalid_authentication_fires_event(auth_system, event_bus)`
-
-- `test_session_created_on_auth(auth_system)`
-
-- `test_logout_event_firing(auth_system, event_bus)`
-
-- `test_user_profile_retrieval()`
-
-- `test_auth_end_to_end_workflow(auth_system, event_bus)`
-
-- `test_performance_multiple_auth(auth_system)`
-
-
-
-### tests\integration\test_storage_integration.py
-
-**Description:**
-
-Storage System Integration Tests
-
-These tests validate the storage layer's integration with local and cloud backends,
-including end-to-end workflows and performance measurement.
-
-Assumptions:
-- Storage interface exposes: upload_file, download_file, delete_file, list_files
-- There is a unified abstraction for local/cloud, selectable by config or function arg
-
-**Classes:**
-
-- `DummyLocalStorage`
-
-
-  Methods: `upload_file()`, `download_file()`, `delete_file()`, `list_files()`
-
-- `DummyCloudStorage`
-
-
-  Methods: `upload_file()`, `download_file()`, `delete_file()`, `list_files()`
-
-**Functions:**
-
-- `reset_storage()`
-
-- `storage_system(request)`
-
-- `test_file_upload_and_download(storage_system)`
-
-- `test_file_delete_and_list(storage_system)`
-
-- `test_cross_backend_integrity()`
-
-- `test_end_to_end_storage_workflow(storage_system)`
-
-- `test_storage_performance_upload(storage_system)`
-
-
-
 ### app\core\db\sync_manager.py
 
 **Description:**
@@ -2036,6 +2102,35 @@ SyncManager for AeroLearn AI
   Manage synchronization between the local cache and remote (cloud/server).
 
   Methods: `__init__()`, `go_offline()`, `go_online()`, `sync()`, `resolve_conflict()`, ... (2 more)
+
+
+
+### app\models\metadata_schema.py
+
+**Description:**
+
+Metadata Schema and Editor
+
+- Extensible schema for required/optional metadata fields
+- Base editor UI class for dynamic metadata editing
+- Enables validation, inheritance, and search
+
+**Classes:**
+
+- `MetadataSchemaField`
+
+
+  Methods: `__init__()`
+
+- `MetadataSchema`
+
+
+  Methods: `__init__()`, `required_fields()`, `optional_fields()`, `as_dict()`
+
+- `MetadataEditorBase`
+
+
+  Methods: `__init__()`, `set_field()`, `get_metadata()`
 
 
 
@@ -2077,6 +2172,40 @@ Requires PyQt6 (or compatible PySide6).
 
 
 
+### tests\ui\test_component_architecture.py
+
+**Classes:**
+
+- `MockEvent`
+
+
+  Methods: `__init__()`
+
+- `MockEventBus`
+
+
+  Methods: `__init__()`, `subscribe()`, `publish()`
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `mock_event_bus()`
+
+- `test_base_component_lifecycle_and_status(mock_event_bus)`
+
+- `test_event_handler_registration_and_callback(mock_event_bus)`
+
+- `test_registry_register_and_discover()`
+
+- `test_registry_replace_component()`
+
+- `test_dependency_injection_and_replacement()`
+
+- `test_bulk_lifecycle_operations()`
+
+
+
 ### app\core\auth\session.py
 
 **Classes:**
@@ -2114,35 +2243,50 @@ Edit DB_URL in schema.py as required for different environments.
 
 
 
-### tests\ui\test_component_architecture.py
+### app\ui\professor\upload_widget.py
+
+**Description:**
+
+Professor Material Upload Widget for AeroLearn AI
+=================================================
+
+PyQt6 widget for file uploads with drag-and-drop, multi-selection dialog,
+file type detection, MIME validation, and event notification.
+
+Features:
+- Drag-and-drop upload zone with visual feedback
+- File dialog selection with multi-file and MIME filtering
+- Progress visualization per file
+- MIME type validation and pluggable acceptance logic
+- Upload event system (signals) for cross-component integration
+- Extensible for backend upload integration
+
+Author: AeroLearn AI Team
+Date: 2025-04-25
+
+Usage:
+------
+from app.ui.professor.upload_widget import ProfessorUploadWidget
+# Add as a widget in your view/layout
+
+API:
+----
+- fileUploadRequested(list[dict]): Emitted after validation with list of files
+- fileUploadProgress(str, int): Emitted to update progress (file_id, percent)
+- fileUploadCompleted(str, bool): Emitted on upload completion (file_id, success)
+See method and signal docstrings for more.
 
 **Classes:**
 
-- `MockEvent`
+- `ProfessorUploadWidget`
+ (inherits from: QWidget)
 
 
-  Methods: `__init__()`
-
-- `MockEventBus`
-
-
-  Methods: `__init__()`, `subscribe()`, `publish()`
+  Methods: `__init__()`, `dragEnterEvent()`, `dragLeaveEvent()`, `dropEvent()`, `open_file_dialog()`, ... (5 more)
 
 **Functions:**
 
-- `mock_event_bus()`
-
-- `test_base_component_lifecycle_and_status(mock_event_bus)`
-
-- `test_event_handler_registration_and_callback(mock_event_bus)`
-
-- `test_registry_register_and_discover()`
-
-- `test_registry_replace_component()`
-
-- `test_dependency_injection_and_replacement()`
-
-- `test_bulk_lifecycle_operations()`
+- `default_mime_validator(filepath, mimetype)`
 
 
 
@@ -2199,19 +2343,13 @@ Edit DB_URL in schema.py as required for different environments.
 
   Methods: `setUp()`, `tearDown()`, `_cleanup_files()`, `test_store_and_retrieve_credential()`, `test_encryption_at_rest()`, ... (7 more)
 
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
 
 
 ### tests\integration\test_framework.py
-
-**Description:**
-
-Integration Test Framework for the AeroLearn Project
-Location: tests/integration/test_framework.py
-
-Includes:
-- Interface compliance validation for components.
-- Test scenario builder.
-- Pytest-discoverable integration test functions.
 
 **Classes:**
 
@@ -2231,6 +2369,8 @@ Includes:
 
 **Functions:**
 
+- `_add_project_root_to_syspath()`
+
 - `test_component_lifecycle()`
 
   Test: Component harness initializes, starts and tears down components.
@@ -2249,17 +2389,6 @@ Includes:
 
 
 
-### app\utils\crypto.py
-
-**Classes:**
-
-- `CryptoUtils`
-
-
-  Methods: `__init__()`, `generate_key()`, `generate_salt()`, `encrypt()`, `decrypt()`
-
-
-
 ### tests\unit\core\auth\test_authentication.py
 
 **Classes:**
@@ -2274,6 +2403,10 @@ Includes:
 
 
   Methods: `setUp()`, `test_login_success_event_emission()`, `test_login_failure_event_emission()`, `test_session_creation_and_expiry()`, `test_logout_event_emission()`, ... (2 more)
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
 
 
 
@@ -2293,6 +2426,8 @@ Includes:
 
 **Functions:**
 
+- `_add_project_root_to_syspath()`
+
 - `test_register_status_provider_and_update()`
 
 - `test_state_change_records_history_and_severity()`
@@ -2308,6 +2443,8 @@ Includes:
 ### tests\integration\phase1_foundation_patch.py
 
 **Functions:**
+
+- `_add_project_root_to_syspath()`
 
 - `matches(self, event)`
 
@@ -2352,6 +2489,86 @@ Includes:
 - `log_transaction(self, source, target, type_, data)`
 
 - `get_logs(self)`
+
+
+
+### app\core\upload\batch_controller.py
+
+**Description:**
+
+BatchUploadController: Coordinate and track multiple simultaneous uploads.
+
+- Aggregates progress
+- Controls pause/resume/cancel for all or any
+- Reports status per file & batch
+
+**Classes:**
+
+- `BatchStatus`
+ (inherits from: Enum)
+
+
+  Status of a batch upload operation
+
+- `BatchUploadController`
+
+
+  Methods: `__init__()`, `start_batch()`, `_create_file_callbacks()`, `pause_batch()`, `resume_batch()`, ... (3 more)
+
+
+
+### app\ui\professor\upload_service.py
+
+**Description:**
+
+Professor UploadService for AeroLearn AI
+========================================
+
+Handles file upload with chunked uploads, retry policies, concurrency management and progress event notification.
+
+Features:
+- Chunked file reads/writes for large file support
+- Retry with backoff on failure (configurable)
+- Concurrency management allowing prioritized queue
+- Progress event hooks for UI feedback
+- Simple in-memory upload queue (could swap for persistent/job-based)
+- Designed for integration with ProfessorUploadWidget
+
+Author: AeroLearn AI Team
+Date: 2025-04-25
+
+API:
+----
+- upload_files(files: List[dict]): Start upload for given file specs
+- signals: uploadProgress(file_id, percent), uploadCompleted(file_id, success), uploadFailed(file_id, error)
+- Configurable: chunk_size, max_retries, concurrent_uploads
+
+Usage:
+from app.core.upload.upload_service import UploadService
+
+service = UploadService()
+service.upload_files([...])
+service.uploadProgress.connect(...)
+service.uploadCompleted.connect(...)
+
+**Classes:**
+
+- `UploadService`
+ (inherits from: QObject)
+
+
+  Methods: `__init__()`, `upload_files()`, `_enqueue_upload()`, `_start_uploads()`, `_upload_file_with_retry()`, ... (3 more)
+
+
+
+### app\utils\crypto.py
+
+**Classes:**
+
+- `CryptoUtils`
+
+
+  Methods: `__init__()`, `generate_key()`, `generate_salt()`, `encrypt()`, `decrypt()`
 
 
 
@@ -2419,6 +2636,112 @@ Covers ORM integration, validation, serialization, and event emission.
 
 
   Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
+
+
+
+### app\models\content_type_registry.py
+
+**Description:**
+
+Content Type Registry
+
+- Provides taxonomy and categorization for content
+- Pluggable for future AI/content analysis
+- Used in validation, display, extraction
+
+**Classes:**
+
+- `ContentType`
+
+
+  Methods: `__init__()`
+
+- `ContentTypeRegistry`
+
+
+  Methods: `__init__()`, `register()`, `detect()`
+
+
+
+### tests\unit\core\test_integration_health.py
+
+**Classes:**
+
+- `TestHealthMonitoring`
+ (inherits from: unittest.TestCase)
+
+
+  Test suite for the health metric collection system.
+
+  Methods: `setUp()`, `tearDown()`, `test_metric_registration()`, `test_metric_update()`, `test_counter_metric()`, ... (4 more)
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+
+
+### tests\ui\test_common_ui_controls.py
+
+**Classes:**
+
+- `NotificationManager`
+ (inherits from: QWidget)
+
+
+  Simple notification logger for UI tests.
+
+  Methods: `__init__()`, `notify()`
+
+- `TestMainWindow`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `submit_form()`
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `main()`
+
+- `test_pyqt5_installed()`
+
+  Minimal test to show that the UI test suite is present and PyQt5 is importable.
+
+
+
+### tests\examples\event_bus_example.py
+
+**Classes:**
+
+- `SystemComponent`
+ (inherits from: EventSubscriber)
+
+
+  Example system component that publishes and subscribes to events.
+
+  Methods: `__init__()`
+
+- `ContentManager`
+ (inherits from: EventSubscriber)
+
+
+  Example content manager component.
+
+  Methods: `__init__()`
+
+- `UserManager`
+ (inherits from: EventSubscriber)
+
+
+  Example user manager component.
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
 
 
 
@@ -2502,111 +2825,87 @@ Features:
 
 
 
-### tests\unit\core\test_integration_health.py
-
-**Description:**
-
-Unit tests for the integration health monitoring system.
-
-This module tests the health metric collection functionality including:
-- Health metric registration
-- Health metric updates
-- Health metric querying
-- Threshold monitoring
+### tests\integration\test_component_registry.py
 
 **Classes:**
 
-- `TestHealthMonitoring`
- (inherits from: unittest.TestCase)
+- `TestComponentRegistry`
 
 
-  Test suite for the health metric collection system.
+  Test wrapper for ComponentRegistry that disables event publishing.
 
-  Methods: `setUp()`, `tearDown()`, `test_metric_registration()`, `test_metric_update()`, `test_counter_metric()`, ... (4 more)
+  Methods: `__init__()`, `__getattr__()`, `restore()`
 
-
-
-### tests\ui\test_common_ui_controls.py
-
-**Description:**
-
-Test Suite for AeroLearn Common UI Controls (Task 4.3)
-
-Covers:
-- Form controls: validation, value change, error display
-- Content browser: item listing, search, selection, drag event
-- Content preview: file/type-based preview, error, notification
-- Notification signal aggregation
-- Simulated drag-and-drop (programmatic, for basic verification)
-- Hooks for manual interaction
-
-Requirements: PyQt5 or PySide2, minimal test assets (text/image files for preview step)
-
-To run:
-$ python tests/ui/test_common_ui_controls.py
-
-Note: Because most UI verification requires human observation (and/or QtTest for full automation), this provides BOTH interactive UI and signal logging for confirmation.
-
-**Classes:**
-
-- `NotificationManager`
- (inherits from: QWidget)
+- `TestComponent`
+ (inherits from: Component)
 
 
-  Simple notification logger for UI tests.
+  Basic test component for registry tests.
 
-  Methods: `__init__()`, `notify()`
-
-- `TestMainWindow`
- (inherits from: QWidget)
-
-
-  Methods: `__init__()`, `submit_form()`
+  Methods: `__init__()`
 
 **Functions:**
 
-- `main()`
+- `_add_project_root_to_syspath()`
 
-- `test_pyqt5_installed()`
+- `improved_register_component(component)`
 
-  Minimal test to show that the UI test suite is present and PyQt5 is importable.
+  Register component directly with all necessary bookkeeping.
 
 
 
-### tests\examples\event_bus_example.py
-
-**Description:**
-
-Example usage of the event bus system.
-
-This script demonstrates how to set up and use the event bus for
-inter-component communication in the AeroLearn AI system.
+### tests\integration\test_health_metrics.py
 
 **Classes:**
 
-- `SystemComponent`
- (inherits from: EventSubscriber)
+- `DummyHealthProvider`
+ (inherits from: HealthProvider)
 
 
-  Example system component that publishes and subscribes to events.
+  Methods: `__init__()`, `get_health_metrics()`, `get_health_status()`
 
-  Methods: `__init__()`
+**Functions:**
 
-- `ContentManager`
- (inherits from: EventSubscriber)
+- `_add_project_root_to_syspath()`
+
+- `test_register_and_collect_metrics()`
+
+- `test_status_transition_on_metric_thresholds()`
+
+- `test_collect_metrics_error_handling()`
+
+- `test_aggregation_and_history()`
+
+- `test_health_status_cache()`
 
 
-  Example content manager component.
 
-  Methods: `__init__()`
+### tests\ui\test_main_window.py
 
-- `UserManager`
- (inherits from: EventSubscriber)
+**Classes:**
+
+- `DummyAuthService`
 
 
-  Example user manager component.
+  Methods: `__init__()`, `get_current_role()`
 
-  Methods: `__init__()`
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `qt_app()`
+
+  Provide QApplication only once per pytest session.
+
+- `test_window_initialization(qt_app)`
+
+- `test_navigation_role_switch(qt_app)`
+
+- `test_status_bar_health(qt_app)`
+
+- `test_theme_toggle(qt_app)`
+
+- `test_window_state_persistence(qt_app)`
 
 
 
@@ -2658,13 +2957,61 @@ Requires PyQt6 (or compatible PySide6).
 
 
 
-### tests\integration\test_component_registry.py
-
-**Description:**
-
-Revised Component Registry tests for Spyder - adapted to your implementation.
+### tests\unit\core\auth\test_authorization.py
 
 **Classes:**
+
+- `TestAuthorizationAndPermissions`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `setUp()`, `test_permission_and_role_equality()`, `test_role_permission_inheritance()`, `test_user_role_assignment_and_permission_check()`, `test_dynamic_permission_assignment_and_removal()`, ... (2 more)
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+
+
+### tests\unit\core\api\test_api_clients.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `test_deepseek_authentication()`
+
+- `test_google_drive_authentication()`
+
+- `test_deepseek_success_request_is_cached()`
+
+- `test_google_drive_success_request_is_cached()`
+
+- `test_deepseek_error_handling()`
+
+- `test_google_drive_error_handling()`
+
+- `test_deepseek_rate_limit()`
+
+- `test_google_drive_rate_limit()`
+
+- `test_rate_limit_resets_after_period()`
+
+- `test_clearing_cache()`
+
+
+
+### tests\integration\test_component_registry_async.py
+
+**Classes:**
+
+- `TestComponent`
+ (inherits from: Component)
+
+
+  Test component for registry tests.
+
+  Methods: `__init__()`
 
 - `TestComponentRegistry`
 
@@ -2673,76 +3020,33 @@ Revised Component Registry tests for Spyder - adapted to your implementation.
 
   Methods: `__init__()`, `__getattr__()`, `restore()`
 
-- `TestComponent`
- (inherits from: Component)
+**Functions:**
+
+- `_add_project_root_to_syspath()`
 
 
-  Basic test component for registry tests.
+
+### tests\integration\test_auth_event_bus.py
+
+**Classes:**
+
+- `AuthEventRecorder`
+ (inherits from: EventSubscriber)
+
 
   Methods: `__init__()`
 
-**Functions:**
-
-- `improved_register_component(component)`
-
-  Register component directly with all necessary bookkeeping.
+- `AsyncTestCase`
+ (inherits from: unittest.IsolatedAsyncioTestCase)
 
 
+- `TestAuthEventBusIntegration`
+ (inherits from: AsyncTestCase)
 
-### tests\integration\test_health_metrics.py
-
-**Classes:**
-
-- `DummyHealthProvider`
- (inherits from: HealthProvider)
-
-
-  Methods: `__init__()`, `get_health_metrics()`, `get_health_status()`
 
 **Functions:**
 
-- `test_register_and_collect_metrics()`
-
-- `test_status_transition_on_metric_thresholds()`
-
-- `test_collect_metrics_error_handling()`
-
-- `test_aggregation_and_history()`
-
-- `test_health_status_cache()`
-
-
-
-### tests\ui\test_main_window.py
-
-**Description:**
-
-Test cases for MainWindow and Navigation system.
-
-Uses pytest-qt or manual app launch for functional/smoke tests.
-
-**Classes:**
-
-- `DummyAuthService`
-
-
-  Methods: `__init__()`, `get_current_role()`
-
-**Functions:**
-
-- `qt_app()`
-
-  Provide QApplication only once per pytest session.
-
-- `test_window_initialization(qt_app)`
-
-- `test_navigation_role_switch(qt_app)`
-
-- `test_status_bar_health(qt_app)`
-
-- `test_theme_toggle(qt_app)`
-
-- `test_window_state_persistence(qt_app)`
+- `_add_project_root_to_syspath()`
 
 
 
@@ -2828,89 +3132,6 @@ Wraps ProgressRecord and assessment-related logic; provides validation, serializ
 
 
 
-### tests\unit\core\auth\test_authorization.py
-
-**Classes:**
-
-- `TestAuthorizationAndPermissions`
- (inherits from: unittest.TestCase)
-
-
-  Methods: `setUp()`, `test_permission_and_role_equality()`, `test_role_permission_inheritance()`, `test_user_role_assignment_and_permission_check()`, `test_dynamic_permission_assignment_and_removal()`, ... (2 more)
-
-
-
-### tests\unit\core\api\test_api_clients.py
-
-**Functions:**
-
-- `test_deepseek_authentication()`
-
-- `test_google_drive_authentication()`
-
-- `test_deepseek_success_request_is_cached()`
-
-- `test_google_drive_success_request_is_cached()`
-
-- `test_deepseek_error_handling()`
-
-- `test_google_drive_error_handling()`
-
-- `test_deepseek_rate_limit()`
-
-- `test_google_drive_rate_limit()`
-
-- `test_rate_limit_resets_after_period()`
-
-- `test_clearing_cache()`
-
-
-
-### tests\integration\test_component_registry_async.py
-
-**Description:**
-
-Modified Component Registry tests for Spyder that patch event creation.
-
-**Classes:**
-
-- `TestComponent`
- (inherits from: Component)
-
-
-  Test component for registry tests.
-
-  Methods: `__init__()`
-
-- `TestComponentRegistry`
-
-
-  Test wrapper for ComponentRegistry that disables event publishing.
-
-  Methods: `__init__()`, `__getattr__()`, `restore()`
-
-
-
-### tests\integration\test_auth_event_bus.py
-
-**Classes:**
-
-- `AuthEventRecorder`
- (inherits from: EventSubscriber)
-
-
-  Methods: `__init__()`
-
-- `AsyncTestCase`
- (inherits from: unittest.IsolatedAsyncioTestCase)
-
-
-- `TestAuthEventBusIntegration`
- (inherits from: AsyncTestCase)
-
-
-
-
 ### app\core\auth\permission_registry.py
 
 **Functions:**
@@ -2958,6 +3179,30 @@ Provides utilities for creating, dropping, and inspecting database tables.
 
 
 
+### tests\unit\test_local_cache_and_sync.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `reset_cache_singletons()`
+
+- `test_cache_storage_and_retrieval(tmp_path)`
+
+- `test_cache_expiry(tmp_path)`
+
+- `test_cache_priority(tmp_path)`
+
+- `test_cache_offline_mode_sync(tmp_path)`
+
+- `test_sync_conflict_resolution(tmp_path)`
+
+- `test_cache_invalidation(tmp_path)`
+
+- `test_cache_persistence(tmp_path)`
+
+
+
 ### app\core\drive\folder_structure.py
 
 **Description:**
@@ -2993,31 +3238,11 @@ Manages metadata for files and directories, including custom tags, versioning, a
 
 
 
-### tests\unit\test_local_cache_and_sync.py
-
-**Functions:**
-
-- `reset_cache_singletons()`
-
-- `test_cache_storage_and_retrieval(tmp_path)`
-
-- `test_cache_expiry(tmp_path)`
-
-- `test_cache_priority(tmp_path)`
-
-- `test_cache_offline_mode_sync(tmp_path)`
-
-- `test_sync_conflict_resolution(tmp_path)`
-
-- `test_cache_invalidation(tmp_path)`
-
-- `test_cache_persistence(tmp_path)`
-
-
-
 ### tests\integration\test_phase1_foundation.py
 
 **Functions:**
+
+- `_add_project_root_to_syspath()`
 
 - `test_event_filter_matching()`
 
@@ -3045,16 +3270,31 @@ Manages metadata for files and directories, including custom tags, versioning, a
 
   Methods: `setUp()`, `test_encryption_decryption()`
 
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+
+
+### tests\unit\core\upload\test_upload_service.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `qapp()`
+
+- `dummy_file()`
+
+- `test_successful_upload(qapp, dummy_file)`
+
+- `test_upload_retries_on_error(qapp, dummy_file, monkeypatch)`
+
+- `test_upload_failed_emits_error(qapp, dummy_file, monkeypatch)`
+
 
 
 ### tests\integration\test_event_bus.py
-
-**Description:**
-
-Integration test for the event bus system.
-
-This module tests the event bus functionality to ensure events are correctly
-published, subscribers receive the correct events, filters work, and concurrent/event thread safety is maintained.
 
 **Classes:**
 
@@ -3066,13 +3306,13 @@ published, subscribers receive the correct events, filters work, and concurrent/
 
   Methods: `__init__()`, `reset()`
 
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
 
 
 ### tests\integration\test_component_registry_Simple.py
-
-**Description:**
-
-Simplified Spyder-compatible tests for the Component Registry system without events.
 
 **Classes:**
 
@@ -3086,6 +3326,8 @@ Simplified Spyder-compatible tests for the Component Registry system without eve
 
 **Functions:**
 
+- `_add_project_root_to_syspath()`
+
 - `safe_call(obj, primary_method, fallback_method)`
 
   Call primary_method if it exists, otherwise try fallback_method
@@ -3094,13 +3336,9 @@ Simplified Spyder-compatible tests for the Component Registry system without eve
 
 ### tests\integration\test_db_integration.py
 
-**Description:**
-
-Tests for AeroLearn DB client, schema, migrations, and event hooks.
-Run as:
-    python -m pytest tests/integration/test_db_integration.py
-
 **Functions:**
+
+- `_add_project_root_to_syspath()`
 
 - `reset_db()`
 
@@ -3111,6 +3349,56 @@ Run as:
 - `test_relationships_and_queries()`
 
 - `test_event_hooks()`
+
+
+
+### tests\ui\test_professor_upload_widget.py
+
+**Functions:**
+
+- `qapp()`
+
+- `widget(qapp, qtbot)`
+
+- `test_add_files_and_selection(widget)`
+
+- `test_mimetype_detection(widget)`
+
+- `test_progress_bar_updates(widget, qtbot)`
+
+- `test_completed_and_failed_labels(widget, qtbot)`
+
+
+
+### app\core\upload\test_upload_service.py
+
+**Functions:**
+
+- `qapp()`
+
+- `dummy_file()`
+
+- `test_successful_upload(qapp, dummy_file)`
+
+- `test_upload_retries_on_error(qapp, dummy_file, monkeypatch)`
+
+- `test_upload_failed_emits_error(qapp, dummy_file, monkeypatch)`
+
+
+
+### tests\models\test_models.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `test_user_model_creation_and_validation()`
+
+- `test_course_model_and_relationships()`
+
+- `test_content_models()`
+
+- `test_assessment_model()`
 
 
 
@@ -3134,33 +3422,6 @@ Run as:
 
 
 
-### tests\models\test_models.py
-
-**Description:**
-
-Basic tests for models created in Task 3.2.
-
-Location: tests/models/test_models.py
-
-Covers:
-- Creation, validation, and serialization for User, Course, Content, Assessment models.
-- Relationship checks.
-- Event bus integration stubs (mocked, as real event bus may need async setup).
-
-NOTE: This is a minimal, demonstration-level test suite. Extend as needed for CI or deeper coverage.
-
-**Functions:**
-
-- `test_user_model_creation_and_validation()`
-
-- `test_course_model_and_relationships()`
-
-- `test_content_models()`
-
-- `test_assessment_model()`
-
-
-
 ### app\core\db\__init__.py
 
 **Description:**
@@ -3169,6 +3430,59 @@ AeroLearn AI - Aerospace Engineering Education Platform
 Created: 2025-04-24
 
 This module is part of the AeroLearn AI project.
+
+
+
+### tools\auto_patch_test_root_import.py
+
+**Description:**
+
+auto_patch_test_root_import.py
+
+AeroLearn AI — Utility to Insert Universal Project Root Import Patch in All Test Files
+
+Usage:
+    python tools/auto_patch_test_root_import.py
+
+- Recursively scans all *.py files under /tests
+- For each file, checks for presence of universal sys.path patch
+- If missing, inserts the patch at the true top of the file (lines are preserved)
+- Idempotent: Will *not* add the patch if already present
+- Prints summary (files patched, files skipped)
+
+To add this for new tests: re-run this script as needed!
+
+**Functions:**
+
+- `patch_exists_in_content(content)`
+
+- `process_file(filepath)`
+
+- `main()`
+
+
+
+### tools\auto_patch_all_tests.py
+
+**Description:**
+
+auto_patch_all_tests.py
+
+Force-inserts the universal sys.path project root patch at the top of every test file in /tests,
+if not already present. Makes your import environment robust for single-file, CLI, IDE, Pytest, and CI runs.
+
+USAGE:
+    python tools/auto_patch_all_tests.py
+
+This should be re-run after adding any new test files!
+
+**Functions:**
+
+- `patch_exists(filepath)`
+
+- `insert_patch(filepath)`
+
+- `patch_all_test_files(tests_root)`
 
 
 
@@ -3206,6 +3520,26 @@ Requires: event bus to be started (`await EventBus().start()`).
 
 
 
+### tests\conftest.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `_ensure_app_on_syspath()`
+
+
+
+### tests\integration\test_upload_flow.py
+
+**Functions:**
+
+- `upload_service()`
+
+- `test_full_upload_validation_flow(tmp_path, upload_service)`
+
+
+
 ### app\main.py
 
 **Description:**
@@ -3217,6 +3551,70 @@ Main entry point for the AeroLearn AI application.
 - `main()`
 
   Initialize and run the AeroLearn AI application.
+
+
+
+### tests\__init__.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+
+
+### tests\unit\__init__.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+
+
+### tests\unit\core\__init__.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+
+
+### tests\unit\ui\__init__.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+
+
+### tests\unit\models\__init__.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+
+
+### tests\integration\__init__.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+
+
+### tests\ui\__init__.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+
+
+### tests\fixtures\__init__.py
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
 
 
 
@@ -3268,6 +3666,10 @@ AeroLearn AI - Aerospace Engineering Education Platform
 Created: 2025-04-24
 
 This module is part of the AeroLearn AI project.
+
+
+
+### app\core\upload\__init__.py
 
 
 
@@ -3407,80 +3809,7 @@ and provide visualization data for system administrators.
 
 
 
-### tests\__init__.py
-
-**Description:**
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-
-
-### tests\unit\core\__init__.py
-
-**Description:**
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-
-
-### tests\unit\ui\__init__.py
-
-**Description:**
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-
-
-### tests\unit\models\__init__.py
-
-**Description:**
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-
-
-### tests\integration\__init__.py
-
-**Description:**
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-
-
-### tests\ui\__init__.py
-
-**Description:**
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-
-
-### tests\fixtures\__init__.py
-
-**Description:**
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
+### tests\unit\core\upload\__init__.py
 
 
 
