@@ -140,15 +140,13 @@ def main():
     if args.dev:
         setup_pre_commit(venv_path)
     
-    print("
-Setup complete!")
+    print("Setup complete!")
     print(f"Activate the virtual environment with:")
     if os.name == "nt":  # Windows
         print(f"    {venv_path}\Scripts\activate")
     else:  # macOS/Linux
         print(f"    source {venv_path}/bin/activate")
-    print("
-Start the application with:")
+    print("Start the application with:")
     print("    python -m app.main")
 
 

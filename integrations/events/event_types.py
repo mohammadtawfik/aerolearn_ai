@@ -51,6 +51,12 @@ class EventType(enum.Enum):
     AI_CONTENT_ENHANCED = "ai.content.enhanced"
     AI_RECOMMENDATION_GENERATED = "ai.recommendation.generated"
     AI_MODEL_UPDATED = "ai.model.updated"
+    
+    # Batch processing events
+    BATCH_STARTED = "batch.started"
+    BATCH_PROGRESS = "batch.progress"
+    BATCH_COMPLETED = "batch.completed"
+    BATCH_VALIDATION_FAILED = "batch.validation_failed"
 
 
 class EventPriority(enum.IntEnum):
@@ -71,6 +77,7 @@ class EventCategory(enum.Enum):
     STORAGE = "storage"
     AUTH = "auth"
     INTEGRATION = "integration"
+    BATCH = "batch"
 
 
 @dataclass
@@ -169,6 +176,20 @@ class AIEvent(Event):
         )
 
 
+# Batch Events
+@dataclass
+class BatchEvent(Event):
+    """Events related to batch processing operations."""
+    def __init__(self, event_type: str, source_component: str, data: Dict[str, Any], **kwargs):
+        super().__init__(
+            event_type=event_type,
+            category=EventCategory.BATCH,
+            source_component=source_component,
+            data=data,
+            **kwargs
+        )
+
+
 # UI Events
 @dataclass
 class UIEvent(Event):
@@ -222,3 +243,12 @@ class AIEventType:
     CONTENT_ENHANCED = "ai.content.enhanced"
     RECOMMENDATION_GENERATED = "ai.recommendation.generated"
     MODEL_UPDATED = "ai.model.updated"
+
+
+# Common Batch Events
+class BatchEventType:
+    """Common batch processing event type constants."""
+    STARTED = "batch.started"
+    PROGRESS = "batch.progress"
+    COMPLETED = "batch.completed"
+    VALIDATION_FAILED = "batch.validation_failed"

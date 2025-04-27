@@ -5,3 +5,6 @@ Created: 2025-04-24
 This module is part of the AeroLearn AI project.
 """
 
+from .batch_upload_ui import BatchUploadUI
+
+__all__ = ['BatchUploadUI']
