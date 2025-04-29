@@ -1,7 +1,7 @@
 # /app/ui/common/tag_autocomplete.py
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QListWidget, QPushButton, QListWidgetItem, QCompleter
-from PyQt5.QtCore import Qt, QStringListModel
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QListWidget, QPushButton, QListWidgetItem, QCompleter
+from PyQt6.QtCore import Qt, QStringListModel
 
 class TagAutocomplete(QWidget):
     """

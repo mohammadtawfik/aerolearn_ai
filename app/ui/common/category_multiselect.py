@@ -1,7 +1,7 @@
 # /app/ui/common/category_multiselect.py
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QListWidgetItem, QPushButton
-from PyQt5.QtCore import Qt
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QListWidget, QListWidgetItem, QPushButton
+from PyQt6.QtCore import Qt
 
 class CategoryMultiSelect(QWidget):
     """
@@ -12,7 +12,7 @@ class CategoryMultiSelect(QWidget):
         self.layout = QVBoxLayout(self)
         self.setWindowTitle("Select Categories")
         self.list_widget = QListWidget()
-        self.list_widget.setSelectionMode(QListWidget.MultiSelection)
+        self.list_widget.setSelectionMode(QListWidget.SelectionMode.MultiSelection)
         self.layout.addWidget(QLabel("Select one or more categories:"))
         self.layout.addWidget(self.list_widget)
         self.confirm_button = QPushButton("Confirm Selection")
@@ -26,14 +26,14 @@ class CategoryMultiSelect(QWidget):
         self.list_widget.clear()
         for cat in self.categories:
             item = QListWidgetItem(cat.get("name", "Unnamed Category"))
-            item.setData(Qt.UserRole, cat.get("id"))
+            item.setData(Qt.ItemDataRole.UserRole, cat.get("id"))
             if cat.get("id") in self.selected_ids:
                 item.setSelected(True)
             self.list_widget.addItem(item)
 
     def get_selected_category_ids(self):
         return [
-            item.data(Qt.UserRole)
+            item.data(Qt.ItemDataRole.UserRole)
             for item in self.list_widget.selectedItems()
         ]
 

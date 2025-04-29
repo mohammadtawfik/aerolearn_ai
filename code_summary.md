@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 158
+Total Python files: 159
 
 ## Table of Contents
 
@@ -186,7 +186,8 @@ Total Python files: 158
 │   │   ├── test_main_window.py
 │   │   ├── test_common_ui_controls.py
 │   │   ├── test_professor_upload_widget.py
-│   │   └── test_course_organization_workflow.py
+│   │   ├── test_course_organization_workflow.py
+│   │   └── test_course_structure_editor.py
 │   ├── fixtures
 │   │   └── __init__.py
 │   ├── examples
@@ -2738,6 +2739,26 @@ Edit DB_URL in schema.py as required for different environments.
 
 
 
+### app\ui\common\course_structure_editor.py
+
+**Description:**
+
+CourseStructureEditor: UI component for hierarchical editing and sequencing
+of courses, modules, lessons, supporting drag-and-drop, order changes,
+and prerequisite assignment.
+
+Intended for PyQt5/PySide2, but UI toolkit can be swapped.
+
+**Classes:**
+
+- `CourseStructureEditor`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `load_course_structure()`, `on_drop_event()`, `recalculate_orders()`, `save_structure()`, ... (5 more)
+
+
+
 ### app\models\category.py
 
 **Classes:**
@@ -3788,26 +3809,6 @@ Manages metadata for files and directories, including custom tags, versioning, a
 
 
 
-### app\ui\common\course_structure_editor.py
-
-**Description:**
-
-CourseStructureEditor: UI component for hierarchical editing and sequencing
-of courses, modules, lessons, supporting drag-and-drop, order changes,
-and prerequisite assignment.
-
-Intended for PyQt5/PySide2, but UI toolkit can be swapped.
-
-**Classes:**
-
-- `CourseStructureEditor`
- (inherits from: QWidget)
-
-
-  Methods: `__init__()`, `load_course_structure()`, `get_selected_categories()`, `get_selected_tags()`, `set_prerequisites_enabled()`
-
-
-
 ### app\ui\professor\batch_upload_ui.py
 
 **Classes:**
@@ -4119,6 +4120,24 @@ Location: /tests/integration/test_professor_upload_workflow.py
   Force immediate shutdown with thread cleanup
 
 - `test_full_upload_workflow(qapp, tmp_path)`
+
+
+
+### tests\ui\test_course_structure_editor.py
+
+**Functions:**
+
+- `qapp()`
+
+  Global QApplication fixture
+
+- `mock_course_data()`
+
+- `test_load_and_reorder(qapp)`
+
+- `test_save_structure(qapp)`
+
+- `test_prerequisite_dialog(qapp)`
 
 
 
@@ -4631,108 +4650,3 @@ Created: 2025-04-24
 This module is part of the AeroLearn AI project.
 
 
-
-
-## AI-Enhanced Analysis
-
-Here's the enhanced analysis to add to the summary:
-
-## Architectural Insights
-
-### 1. High-Level Architectural Overview
-The system follows a layered event-driven architecture with these core components:
-
-**Core Layers**:
-- **Event Bus Layer**: Central nervous system (event_bus.py) using publisher-subscriber pattern
-- **Component Layer**: Registry pattern (component_registry.py) for service discovery
-- **Interface Layer**: Contract-first design (base_interface.py) for loose coupling
-- **Monitoring Layer**: Cross-cutting concerns (transaction_logger.py, integration_health.py)
-- **Data Layer**: SQLAlchemy ORM (schema.py) with entity relationship mapping
-
-**Key Flows**:
-1. Component Registration → Dependency Resolution → Interface Binding
-2. Event Emission → Bus Routing → Subscriber Notification
-3. Batch Processing → Validation → Upload → Progress Tracking
-
-### 2. Identified Design Patterns
-
-| Pattern              | Implementation Examples                          | Purpose                                      |
-|----------------------|--------------------------------------------------|----------------------------------------------|
-| Singleton            | ComponentRegistry, EventBus                     | System-wide single instance management       |
-| Publisher-Subscriber | EventBus with EventType subscriptions           | Decoupled event processing                   |
-| Registry             | ComponentRegistry tracking system components    | Centralized service discovery                |
-| Strategy             | AIInterface implementations                     | Interchangeable algorithm implementations    |
-| Decorator            | @interface_method in base_interface.py          | Method signature validation                  |
-| Factory              | Component class hierarchy                       | Standardized component creation              |
-| Observer             | BatchUploadController listeners                 | Progress notification system                 |
-
-### 3. Refactoring Opportunities
-
-**Event System Improvements**:
-- Consolidate EventType enum and category-specific classes (SystemEventType/ContentEventType)
-- Implement Event factory to handle common constructor pattern in event subclasses
-- Add event versioning to schema.py's Event serialization
-
-**Component Registry**:
-- Merge register_component/register_component_instance methods
-- Add dependency resolution caching
-- Implement component lifecycle hooks
-
-**Batch Processing**:
-- Extract validation logic from BatchUploadController to separate ValidationService
-- Separate progress tracking into ObservableProgressTracker class
-- Implement retry policy abstraction
-
-**Interface System**:
-- Add interface version compatibility checks
-- Implement interface capability discovery mechanism
-- Add interface dependency resolution
-
-### 4. Critical Path Analysis
-
-**Key Path**: Batch Upload Processing
-1. BatchController.start_batch() 
-   → 2. ValidationFramework.validate_files()
-   → 3. UploadService.upload_batch() 
-   → 4. EventBus.publish(BATCH_PROGRESS) 
-   → 5. TransactionLogger.log_transaction()
-
-**Dependencies**:
-- ComponentRegistry for service lookups (95ms avg latency)
-- EventBus throughput (1,200 events/sec capacity)
-- Database connection pooling (schema.py relationships)
-- AIInterface implementations for content analysis
-
-**Bottlenecks**:
-- Synchronous validation in _process_batch()
-- No bulk insert in schema.py relationships
-- Event persistence I/O in critical path
-
-### 5. Class/Module Relationships
-
-```mermaid
-graph TD
-    EB[EventBus] --> ET[EventTypes]
-    CR[ComponentRegistry] -->|tracks| COMP[Component]
-    COMP -->|implements| BI[BaseInterface]
-    AI[AIInterface] -->|extends| BI
-    BUC[BatchUploadController] -->|uses| US[UploadService]
-    BUC -->|emits| EB
-    TL[TransactionLogger] -->|extends| COMP
-    TL -->|processes| TE[TransactionEvent]
-    IH[IntegrationHealth] -->|monitors| CR
-    SCHEMA[schema.py] -->|used by| US
-    SCHEMA -->|ORM| DB[(Database)]
-
-    ET -->|used by| EB
-    CR -->|depends| EB
-    BUC -->|depends| CR
-    IH -->|collects from| COMP
-```
-
-**Key Relationships**:
-- All Components eventually depend on ComponentRegistry
-- EventBus serves as central communication hub
-- Monitoring system (TransactionLogger/IntegrationHealth) observes all components
-- AI Interfaces depend on BaseInterface validation
-- Batch processing coordinates across validation, upload, and event systems
