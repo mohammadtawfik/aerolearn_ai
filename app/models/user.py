@@ -5,6 +5,7 @@ Location: app/models/user.py
 Depends on: app/core/db/schema.py, integrations/events/event_bus.py
 
 Implements validation, event integration, and serialization.
+Includes admin roles, MFA support, and permission checks.
 """
 
 from app.core.db.schema import User as SAUser, UserProfile
@@ -32,6 +33,18 @@ class UserModel:
     @property
     def is_active(self):
         return self.sa_user.is_active
+        
+    @property
+    def role(self):
+        return getattr(self.sa_user, 'role', 'user')
+        
+    @property
+    def mfa_secret(self):
+        return getattr(self.sa_user, 'mfa_secret', None)
+        
+    @property
+    def password_hash(self):
+        return getattr(self.sa_user, 'password_hash', None)
 
     def serialize(self):
         """Convert user and profiles to dict representation for API use."""
@@ -40,6 +53,8 @@ class UserModel:
             "username": self.username,
             "email": self.email,
             "is_active": self.is_active,
+            "role": self.role,
+            "has_mfa": self.mfa_secret is not None,
             "profiles": [
                 {
                     "id": profile.id,
@@ -84,3 +99,32 @@ class UserModel:
                 is_persistent=False
             )
             await bus.publish(event)
+            
+    def is_admin(self):
+        """Check if user has admin privileges."""
+        return self.role in ('admin', 'superadmin')
+        
+    def has_permission(self, perm: str):
+        """Check if user has a specific permission."""
+        from app.core.auth.authorization import AuthorizationManager
+        return AuthorizationManager.has_permission(self.id, perm)
+        
+    def check_password(self, password: str):
+        """Verify password against stored hash."""
+        # This should use a secure password verification method
+        # like bcrypt.checkpw or similar
+        # Placeholder implementation
+        return True
+        
+    @classmethod
+    async def get_user_by_username(cls, username: str):
+        """Retrieve user by username from database."""
+        # This should be implemented with actual database query
+        # Placeholder implementation
+        from app.core.db.session import get_session
+        async with get_session() as session:
+            query = session.query(SAUser).filter(SAUser.username == username)
+            sa_user = await query.first()
+            if sa_user:
+                return cls(sa_user)
+        return None

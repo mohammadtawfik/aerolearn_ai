@@ -73,7 +73,105 @@ class UserPermissions:
     def has_permission(self, user_id: str, permission: Permission) -> bool:
         return permission in self.get_permissions(user_id)
 
-def require_permission(permission: Permission):
+class AuthorizationManagerClass:
+    """
+    Central registry for roles, permissions, and user/role assignment.
+    Provides high-level APIs for assigning and checking permissions/roles.
+    """
+    def __init__(self):
+        self._roles: Dict[str, Role] = {}
+        self._permissions: Dict[str, Permission] = {}
+        self._user_permissions = UserPermissions()
+        # For tracking user-role assignments
+        self._user_role_map: Dict[str, Set[str]] = {}
+
+    def register_permission(self, perm_name: str) -> Permission:
+        """Register a permission by name, or return existing one if already registered"""
+        if perm_name not in self._permissions:
+            self._permissions[perm_name] = Permission(perm_name)
+        return self._permissions[perm_name]
+
+    def register_role(self, role_name: str, perm_names: List[str] = None) -> Role:
+        """Register a role with optional permissions"""
+        # Create/get Role object
+        if role_name not in self._roles:
+            self._roles[role_name] = Role(name=role_name)
+        role = self._roles[role_name]
+        
+        # Assign all permissions if provided
+        if perm_names:
+            for pname in perm_names:
+                perm = self.register_permission(pname)
+                role.add_permission(perm)
+        return role
+
+    def set_role_parent(self, role_name: str, parent_role_name: str):
+        """Set a parent role for inheritance"""
+        if role_name not in self._roles:
+            raise ValueError(f"Role '{role_name}' not registered")
+        if parent_role_name not in self._roles:
+            raise ValueError(f"Parent role '{parent_role_name}' not registered")
+            
+        role = self._roles[role_name]
+        parent_role = self._roles[parent_role_name]
+        role.add_parent(parent_role)
+
+    def assign_role_to_user(self, user_id: str, role_name: str):
+        """Assign a role to a user"""
+        if role_name not in self._roles:
+            raise ValueError(f"Role '{role_name}' not registered")
+        self._user_permissions.assign_role(user_id, self._roles[role_name])
+        # For quick reference/tracking
+        self._user_role_map.setdefault(user_id, set()).add(role_name)
+
+    def remove_role_from_user(self, user_id: str, role_name: str):
+        """Remove a role from a user"""
+        if role_name not in self._roles:
+            return  # No-op if role doesn't exist
+        self._user_permissions.remove_role(user_id, self._roles[role_name])
+        if user_id in self._user_role_map:
+            self._user_role_map[user_id].discard(role_name)
+
+    def assign_permission_to_user(self, user_id: str, perm_name: str):
+        """Assign a direct permission to a user"""
+        perm = self.register_permission(perm_name)
+        self._user_permissions.assign_permission(user_id, perm)
+
+    def remove_permission_from_user(self, user_id: str, perm_name: str):
+        """Remove a direct permission from a user"""
+        if perm_name in self._permissions:
+            self._user_permissions.remove_permission(user_id, self._permissions[perm_name])
+
+    def has_permission(self, user_id: str, perm_name: str) -> bool:
+        """Check if a user has a specific permission"""
+        if perm_name not in self._permissions:
+            return False
+        return self._user_permissions.has_permission(user_id, self._permissions[perm_name])
+
+    def get_user_roles(self, user_id: str) -> Set[Role]:
+        """Get all roles assigned to a user"""
+        return self._user_permissions.get_roles(user_id)
+    
+    def get_user_role_names(self, user_id: str) -> Set[str]:
+        """Get names of all roles assigned to a user"""
+        return self._user_role_map.get(user_id, set())
+
+    def get_user_permissions(self, user_id: str) -> Set[Permission]:
+        """Get all permissions a user has (from roles and direct assignments)"""
+        return self._user_permissions.get_permissions(user_id)
+
+    def get_role(self, role_name: str) -> Optional[Role]:
+        """Get a role by name"""
+        return self._roles.get(role_name)
+
+    def get_permission(self, perm_name: str) -> Optional[Permission]:
+        """Get a permission by name"""
+        return self._permissions.get(perm_name)
+
+# Create the singleton instance
+AuthorizationManager = AuthorizationManagerClass()
+
+def require_permission(permission: str):
     """
     Decorator for functions/methods to enforce the required permission.
     Expects the decorated function to accept a 'user_id' kwarg or positional argument.
@@ -85,9 +183,9 @@ def require_permission(permission: Permission):
             user_id = kwargs.get('user_id')
             if user_id is None and len(args) > 0:
                 user_id = args[0]  # Assume first positional argument is user_id by convention
-            # Permission registry must be globally accessible or passed in
-            from app.core.auth.permission_registry import permission_registry
-            if not permission_registry.has_permission(user_id, permission):
+            
+            # Use the AuthorizationManager to check permission
+            if not AuthorizationManager.has_permission(user_id, permission):
                 raise PermissionError(f"User '{user_id}' lacks permission '{permission}'")
             return func(*args, **kwargs)
         return wrapper

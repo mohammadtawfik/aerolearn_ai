@@ -11,6 +11,14 @@ class UserProfile:
         self.email = email
         self.roles = roles if roles is not None else []
         self.extra = extra if extra is not None else {}
+        
+    @property
+    def role(self):
+        """Return the primary role (string) for backward compatibility."""
+        if self.roles:
+            return self.roles[0]
+        # Optionally support legacy (single-role) usage via extra
+        return self.extra.get("role", None)
 
     def to_dict(self) -> dict:
         return {
