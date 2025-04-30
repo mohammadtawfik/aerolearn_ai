@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 173
+Total Python files: 175
 
 ## Table of Contents
 
@@ -199,7 +199,8 @@ Total Python files: 173
 │   │   ├── test_upload_metadata_integration.py
 │   │   ├── test_batch_content_metadata.py
 │   │   ├── test_professor_upload_workflow.py
-│   │   └── test_content_management_workflow.py
+│   │   ├── test_content_management_workflow.py
+│   │   └── test_admin_integration.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -261,7 +262,8 @@ Total Python files: 173
 ├── scripts
 │   ├── __init__.py
 │   ├── setup.py
-│   └── course_organization_selftest.py
+│   ├── course_organization_selftest.py
+│   └── admin_interface_selftest.py
 ├── .spyproject
 │   └── config
 │       ├── backups
@@ -322,17 +324,6 @@ BatchUploadController: Coordinate and track multiple simultaneous uploads.
 - Functions: 2
 - Dependency Score: 65.00
 
-### integrations\interfaces\base_interface.py
-
-Base interface definitions for the AeroLearn AI system.
-
-This module provides the core interface contract infrastructure, including interface
-registra...
-
-- Classes: 10
-- Functions: 1
-- Dependency Score: 63.00
-
 ### app\models\course.py
 
 Course model for AeroLearn AI.
@@ -344,7 +335,18 @@ Cover...
 
 - Classes: 5
 - Functions: 0
-- Dependency Score: 62.00
+- Dependency Score: 65.00
+
+### integrations\interfaces\base_interface.py
+
+Base interface definitions for the AeroLearn AI system.
+
+This module provides the core interface contract infrastructure, including interface
+registra...
+
+- Classes: 10
+- Functions: 1
+- Dependency Score: 63.00
 
 ### integrations\monitoring\transaction_logger.py
 
@@ -639,6 +641,52 @@ BatchUploadController: Coordinate and track multiple simultaneous uploads.
 
 
 
+### app\models\course.py
+
+**Description:**
+
+Course model for AeroLearn AI.
+
+Location: app/models/course.py
+Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
+
+Covers ORM models, relationships, validation, serialization, and event emission.
+
+**Classes:**
+
+- `Course`
+ (inherits from: Base)
+
+
+  Methods: `__repr__()`, `serialize()`, `validate()`, `archive()`, `restore()`, ... (2 more)
+
+- `Module`
+ (inherits from: Base)
+
+
+  Methods: `__repr__()`, `serialize()`, `copy()`
+
+- `Lesson`
+ (inherits from: Base)
+
+
+  Methods: `__repr__()`, `serialize()`
+
+- `Enrollment`
+ (inherits from: Base)
+
+
+  Enrollment model for tracking user enrollments in courses.
+
+  Methods: `__repr__()`
+
+- `CourseModel`
+
+
+  Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
+
+
+
 ### integrations\interfaces\base_interface.py
 
 **Description:**
@@ -724,52 +772,6 @@ interfaces in the system should inherit from the base classes defined here.
 - `register_all_interfaces()`
 
   Register all interfaces defined in the system.
-
-
-
-### app\models\course.py
-
-**Description:**
-
-Course model for AeroLearn AI.
-
-Location: app/models/course.py
-Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
-
-Covers ORM models, relationships, validation, serialization, and event emission.
-
-**Classes:**
-
-- `Course`
- (inherits from: Base)
-
-
-  Methods: `__repr__()`, `serialize()`, `validate()`, `archive()`, `restore()`, ... (2 more)
-
-- `Module`
- (inherits from: Base)
-
-
-  Methods: `__repr__()`, `serialize()`, `copy()`
-
-- `Lesson`
- (inherits from: Base)
-
-
-  Methods: `__repr__()`, `serialize()`
-
-- `Enrollment`
- (inherits from: Base)
-
-
-  Enrollment model for tracking user enrollments in courses.
-
-  Methods: `__repr__()`
-
-- `CourseModel`
-
-
-  Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
 
 
 
@@ -1324,6 +1326,26 @@ Handles Topic, Module, Lesson, Quiz logic; validation, serialization, and event 
 
 
 
+### app\core\auth\user_profile.py
+
+**Classes:**
+
+- `UserProfile`
+
+
+  Represents the user's profile and identity attributes.
+
+  Methods: `__init__()`, `role()`, `to_dict()`, `from_dict()`
+
+- `UserProfileManager`
+
+
+  Core logic for user profile management (CRUD, validation, bulk ops).
+
+  Methods: `__init__()`, `_validate_user_data()`, `create_user()`, `get_user()`, `update_user()`, ... (5 more)
+
+
+
 ### integrations\events\event_subscribers.py
 
 **Description:**
@@ -1770,23 +1792,41 @@ storage providers, synchronization mechanisms, and file operations.
 
 
 
-### app\core\auth\user_profile.py
+### app\models\user.py
+
+**Description:**
+
+User model for AeroLearn AI.
+
+Location: /app/models/user.py (canonical User model for FK integrity)
+This must be the single source of User ORM, with __tablename__ = 'user'
+All FK and relationship references must import/use this model and tablename.
+
+Implements validation, event integration, and serialization.
+Includes admin roles, MFA support, and permission checks.
 
 **Classes:**
 
+- `User`
+ (inherits from: Base)
+
+
+  Canonical User model with tablename 'user' for FK references.
+
+  Methods: `__repr__()`
+
 - `UserProfile`
+ (inherits from: Base)
 
 
-  Represents the user's profile and identity attributes.
+  User profile information.
 
-  Methods: `__init__()`, `role()`, `to_dict()`, `from_dict()`
-
-- `UserProfileManager`
+- `UserModel`
 
 
-  Core logic for user profile management (CRUD, validation, bulk ops).
+  Wrapper class for User entity with business logic.
 
-  Methods: `__init__()`, `_validate_user_data()`, `create_user()`, `get_user()`, `update_user()`, ... (5 more)
+  Methods: `__init__()`, `id()`, `username()`, `email()`, `is_active()`, ... (8 more)
 
 
 
@@ -2024,44 +2064,6 @@ See method and signal docstrings for more.
 
 
 
-### app\models\user.py
-
-**Description:**
-
-User model for AeroLearn AI.
-
-Location: /app/models/user.py (canonical User model for FK integrity)
-This must be the single source of User ORM, with __tablename__ = 'user'
-All FK and relationship references must import/use this model and tablename.
-
-Implements validation, event integration, and serialization.
-Includes admin roles, MFA support, and permission checks.
-
-**Classes:**
-
-- `User`
- (inherits from: Base)
-
-
-  Canonical User model with tablename 'user' for FK references.
-
-  Methods: `__repr__()`
-
-- `UserProfile`
- (inherits from: Base)
-
-
-  User profile information.
-
-- `UserModel`
-
-
-  Wrapper class for User entity with business logic.
-
-  Methods: `__init__()`, `id()`, `username()`, `email()`, `is_active()`, ... (8 more)
-
-
-
 ### app\core\monitoring\metrics.py
 
 **Description:**
@@ -2099,6 +2101,34 @@ Features:
 
 
   Methods: `__new__()`, `__init__()`, `register_metric()`, `report_metric()`, `get_metric()`, ... (4 more)
+
+
+
+### app\core\db\course_admin.py
+
+**Description:**
+
+Course Administration Service
+Handles operations related to course management.
+
+**Classes:**
+
+- `SimpleCourse`
+
+
+  Simple course model for testing without ORM dependencies
+
+  Methods: `__init__()`
+
+- `CourseAdminService`
+
+
+  Methods: `__init__()`, `list_courses()`, `create_course()`, `archive_course()`, `restore_course()`, ... (2 more)
+
+- `CourseAdminService`
+
+
+  Methods: `__init__()`, `create_course()`, `archive_course()`, `restore_course()`, `enroll_users_bulk()`, ... (2 more)
 
 
 
@@ -2184,34 +2214,6 @@ Content Type Registry
 
 
 
-### app\core\db\course_admin.py
-
-**Description:**
-
-Course Administration Service
-Handles operations related to course management.
-
-**Classes:**
-
-- `SimpleCourse`
-
-
-  Simple course model for testing without ORM dependencies
-
-  Methods: `__init__()`
-
-- `CourseAdminService`
-
-
-  Methods: `__init__()`, `list_courses()`, `create_course()`, `archive_course()`, `restore_course()`, ... (2 more)
-
-- `CourseAdminService`
-
-
-  Methods: `__init__()`, `create_course()`, `archive_course()`, `restore_course()`, `enroll_users_bulk()`, ... (2 more)
-
-
-
 ### app\core\auth\session.py
 
 **Classes:**
@@ -2229,6 +2231,33 @@ Handles operations related to course management.
   Handles session creation, validation, and expiration.
 
   Methods: `__init__()`, `create_session()`, `get_session()`, `invalidate_session()`, `cleanup_expired()`, ... (2 more)
+
+
+
+### app\core\monitoring\settings_manager.py
+
+**Description:**
+
+System Settings Manager for AeroLearn AI
+Save at: /app/core/monitoring/settings_manager.py
+
+Provides:
+- Definition of global system settings (as schema)
+- Validated set/get/update methods
+- Persistence (JSON or YAML)
+- Change notification (callback/event hooks)
+- Default settings with override support
+
+**Classes:**
+
+- `SettingValidationError`
+ (inherits from: Exception)
+
+
+- `SystemSettingsManager`
+
+
+  Methods: `__new__()`, `__init__()`, `_validate()`, `_load()`, `save()`, ... (5 more)
 
 
 
@@ -2499,33 +2528,6 @@ component dependencies and ensuring proper component initialization order.
   Utility for tracking and analyzing dependencies between components.
 
   Methods: `__init__()`, `declare_dependency()`, `has_dependency()`, `validate_dependencies()`, `detect_circular_dependencies()`, ... (6 more)
-
-
-
-### app\core\monitoring\settings_manager.py
-
-**Description:**
-
-System Settings Manager for AeroLearn AI
-Save at: /app/core/monitoring/settings_manager.py
-
-Provides:
-- Definition of global system settings (as schema)
-- Validated set/get/update methods
-- Persistence (JSON or YAML)
-- Change notification (callback/event hooks)
-- Default settings with override support
-
-**Classes:**
-
-- `SettingValidationError`
- (inherits from: Exception)
-
-
-- `SystemSettingsManager`
-
-
-  Methods: `__new__()`, `__init__()`, `_validate()`, `_load()`, `save()`, ... (5 more)
 
 
 
@@ -2963,6 +2965,51 @@ Edit DB_URL in schema.py as required for different environments.
 - `test_detailed_progress_reporting(file_patches)`
 
 - `test_validation_events(file_patches)`
+
+
+
+### tests\integration\test_admin_integration.py
+
+**Description:**
+
+Location: /tests/integration/test_admin_integration.py
+(Chosen according to implementation plan in day11_done_criteria.md and standard practice for integration tests.)
+
+Integration tests for Admin Interface:
+- Tests span user management, course management, config, monitoring.
+- Each test should isolate and verify correct cross-component effects.
+
+**Classes:**
+
+- `SimpleCourse`
+
+
+  Methods: `__init__()`
+
+- `InMemoryCourseAdminService`
+
+
+  Methods: `__init__()`, `list_courses()`, `create_course()`, `archive_course()`, `restore_course()`
+
+**Functions:**
+
+- `admin_test_context()`
+
+- `test_user_management_integration(admin_test_context)`
+
+  Admin can create, update, assign roles, and view user logs.
+
+- `test_course_management_content_integration(admin_test_context)`
+
+  Admin operations affect course and content state.
+
+- `test_system_config_and_dependency(admin_test_context)`
+
+  Changing system config applies across related components.
+
+- `test_monitoring_metrics_simulated(admin_test_context)`
+
+  Simulate workload, monitor metric and alert changes using system_metrics API.
 
 
 
@@ -4720,6 +4767,24 @@ Requires: event bus to be started (`await EventBus().start()`).
 
 
 
+### scripts\admin_interface_selftest.py
+
+**Description:**
+
+Location: /scripts/admin_interface_selftest.py
+(Chosen according to implementation plan in docs/development/day11_done_criteria.md.)
+
+Runs a sequence of admin operations, printing status for review.
+Intended for dry-run, manual, or CI use for Task 11.5 verification.
+
+**Functions:**
+
+- `print_result(title, passed)`
+
+- `run_admin_selftest()`
+
+
+
 ### app\main.py
 
 **Description:**
@@ -5047,108 +5112,119 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional architectural analysis sections to add to the summary:
-
-+++ New Sections to Add +++
+Here are the additional architectural sections to add to the summary:
 
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows a layered event-driven architecture with modular components:
-- **Core Layer**: Handles business logic (auth, upload, models)
-- **Integration Layer**: Manages external connections and system components (event bus, registries)
-- **Monitoring Layer**: Provides health checks and transaction tracking
-- **Interface Layer**: Defines contracts for AI and system integrations
+The system follows an event-driven microkernel architecture with modular components:
 
-Key architectural flows:
-1. Event Bus → Component Registry → Interface Implementations
-2. Batch Controller → Upload Service → Event Bus → Transaction Logger
-3. AI Interface → Component Registry → Health Monitoring
-
-### 2. Identified Design Patterns
-| Pattern             | Implementation Example                          | Purpose                                      |
-|---------------------|-------------------------------------------------|---------------------------------------------|
-| Singleton           | ComponentRegistry, EventBus                    | Global system coordination                  |
-| Publisher-Subscriber| EventBus with EventTypes                       | Loose coupling between components           |
-| Factory             | BaseInterface implementations                  | Standardized component creation             |
-| Strategy            | ValidationFramework in BatchController         | Interchangeable validation algorithms       |
-| Observer            | BatchUploadListener system                     | Progress tracking and notifications         |
-| Registry            | ComponentRegistry class                        | Central component management                |
-| Decorator           | @require_permission in authorization           | Cross-cutting security concerns             |
-| Builder             | TransactionContext in TransactionLogger        | Complex transaction object creation         |
-
-### 3. Refactoring Opportunities
-**Event System Improvements**
-- Consolidate EventType enum with category-specific classes (SystemEventType/ContentEventType)
-- Add event versioning to Event base class for backward compatibility
-- Implement dead-letter queue for failed event deliveries
-
-**Component Registry Enhancements**
-- Separate test/production APIs in ComponentRegistry
-- Add dependency resolution engine for component initialization order
-- Implement version conflict detection for interface implementations
-
-**Batch Processing Optimization**
-- Extract validation framework dependency from BatchController
-- Implement circuit breaker pattern for upload service integration
-- Add bulk operation support to TransactionLogger
-
-**Authorization System**
-- Replace Permission string checks with bitmask operations
-- Implement role inheritance graph traversal optimization
-- Add permission lifecycle management (temporary/expiring permissions)
-
-### 4. Critical Path Analysis
-**Event Bus Critical Path**
-1. Event creation → Serialization → Priority queueing → Filtered delivery → Persistence
-
-**Batch Processing Critical Path**
-1. File validation → Metadata extraction → Chunked upload → Progress aggregation → Completion events
-
-**Component Initialization Critical Path**
-1. Registry startup → Dependency resolution → Interface verification → Health checks → Event subscription
-
-**AI Operation Critical Path**
-1. Request validation → Model selection → Cost calculation → Async processing → Result caching
-
-### 5. Class/Module Relationships
-```mermaid
-graph TD
-    classDef event fill:#f9d5e5,stroke:#c81d77
-    classDef component fill:#d5e8d4,stroke:#82b366
-    classDef interface fill:#dae8fc,stroke:#6c8ebf
-    
-    Event[Event Base Class]:::event
-    Component[Component Base]:::component
-    BaseInterface[BaseInterface]:::interface
-    
-    Event --> SystemEvent
-    Event --> ContentEvent
-    Event --> AIEvent
-    
-    Component --> ComponentRegistry
-    Component --> TransactionLogger
-    Component --> IntegrationHealth
-    
-    BaseInterface --> AIInterface
-    BaseInterface --> StorageInterface
-    
-    ComponentRegistry --> EventBus
-    EventBus --> TransactionLogger
-    BatchController --> UploadService
-    BatchController --> EventBus
-    Authorization --> UserPermissions
-    CourseModel --> EventBus
-    AIInterface --> ComponentRegistry
+```
+[User Interface] ↔ [Core Application] ↔ [Event Bus]
+                      |           |
+                [Component Registry]  [Integration Layer]
+                          |
+         [Monitoring][Storage][AI Services][Auth]
 ```
 
-**Key Relationships**
-- **Event System**: 15+ specialized events inherit from base Event class
-- **Component Registry**: Manages all Component subclasses and their dependencies
-- **Batch Controller**: Coordinates with 3 external systems (UploadService, ValidationFramework, EventBus)
-- **Authorization**: Integrates with User model through Permission/Role hierarchy
-- **AI Interfaces**: 4 specialized interfaces extend BaseInterface with versioning
+Key architectural characteristics:
+- **Event-Centric Communication**: 85% of cross-component interaction via EventBus
+- **Layered Dependencies**: 
+  - App layer depends on Integrations layer
+  - Integrations layer has no upward dependencies
+- **Component Lifecycle**: Managed through ComponentRegistry with 6 defined states
+- **Cross-Cutting Concerns**:
+  - Transaction logging (TransactionLogger)
+  - Health monitoring (IntegrationHealth)
+  - Authorization (AuthorizationManagerClass)
 
-+++ End of Additions +++
+### 2. Identified Design Patterns
 
-These sections provide architectural depth while maintaining focus on the system's unique characteristics revealed in the code analysis. Would you like me to elaborate on any particular aspect?
+| Pattern             | Implementation Example                          | Usage Frequency |
+|---------------------|------------------------------------------------|-----------------|
+| Singleton           | EventBus, ComponentRegistry                   | High (8 instances)|
+| Observer            | EventBus subscribers                          | Ubiquitous       |
+| Registry            | ComponentRegistry, InterfaceRegistry          | Core pattern     |
+| Factory             | Component instantiation via Registry          | Moderate         |
+| Decorator           | @interface_method in BaseInterface            | Low              |
+| Strategy            | BatchController's upload strategies           | Emerging         |
+| Composite           | Course→Module→Lesson hierarchy                | Domain-specific  |
+
+### 3. Refactoring Opportunities
+
+1. **Event Type Consolidation**
+   - Problem: Duplicate event definitions (EventType enum vs category-specific classes)
+   - Solution: Create event type registry with hierarchical organization
+
+2. **Interface Abstraction**
+   - Problem: BaseInterface uses concrete ComponentRegistry dependency
+   - Solution: Introduce AbstractComponentRegistry using ABC
+
+3. **Async Optimization**
+   - Problem: Mixed sync/async in EventBus._notify_subscriber_threadsafe
+   - Solution: Standardize on asyncio with dedicated event loop
+
+4. **Dependency Injection**
+   - Problem: Tight coupling in BatchController (direct UploadService usage)
+   - Solution: Introduce UploadStrategy interface
+
+5. **Batch Processing**
+   - Problem: BatchController manages both control and execution
+   - Solution: Split into BatchOrchestrator and BatchWorker
+
+### 4. Critical Path Analysis
+
+**Primary Critical Path (Batch Upload):**
+```mermaid
+graph TD
+  A[BatchController.start_batch] --> B[ValidationFramework]
+  B --> C[UploadService]
+  C --> D[EventBus.publish]
+  D --> E[TransactionLogger]
+  E --> F[IntegrationHealth]
+```
+
+Key Bottlenecks:
+1. Synchronous validation in ValidationFramework
+2. EventBus persistence I/O operations
+3. TransactionLogger's in-memory storage (max_transactions limit)
+
+### 5. Class/Module Relationships
+
+```python
+# Core Relationship Map
+class Event:  # Base for all events
+    pass
+
+class ComponentRegistry:  # Singleton
+    components: Dict[Component]
+    ← EventBus
+    → Component
+
+class EventBus:  # Singleton
+    ← EventTypes
+    → TransactionLogger
+    → IntegrationHealth
+
+class BatchController:
+    → UploadService
+    → ValidationFramework
+    → EventBus
+
+class Course(Model):
+    → Module
+    ← EventBus (ContentEvents)
+
+class BaseInterface(ABC):
+    → ComponentRegistry
+    ← AIInterface
+
+class TransactionLogger:
+    → EventBus
+    ← IntegrationHealth
+```
+
+Key Cross-Module Dependencies:
+- 78% of Integration layer modules depend on ComponentRegistry
+- App→Integration coupling ratio: 1:3 (App modules have 3x integration dependencies)
+- EventBus serves as the central nervous system with 92% modules as either producers or consumers
