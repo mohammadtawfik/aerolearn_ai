@@ -1,0 +1,7 @@
+{
+  "max_upload_size_mb": 50,
+  "enable_alerts": true,
+  "alert_email": "",
+  "dependency_visual_theme": "light",
+  "maintenance_mode": false
+}

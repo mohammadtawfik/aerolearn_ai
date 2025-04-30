@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 169
+Total Python files: 173
 
 ## Table of Contents
 
@@ -59,6 +59,11 @@ Total Python files: 169
 │   │   ├── validation
 │   │   │   ├── format_validator.py
 │   │   │   └── main.py
+│   │   ├── monitoring
+│   │   │   ├── settings_manager.py
+│   │   │   └── metrics.py
+│   │   ├── config
+
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -84,10 +89,13 @@ Total Python files: 169
 │   │   ├── student
 │   │   │   └── __init__.py
 │   │   └── admin
+│   │       ├── templates
+
 │   │       ├── __init__.py
 │   │       ├── dashboard.py
 │   │       ├── user_management.py
-│   │       └── course_management.py
+│   │       ├── course_management.py
+│   │       └── system_config.py
 │   ├── models
 │   │   ├── __init__.py
 │   │   ├── user.py
@@ -108,6 +116,13 @@ Total Python files: 169
 │   │   └── crypto.py
 │   ├── config
 │   │   └── __init__.py
+│   ├── static
+│   │   ├── js
+
+│   │   └── css
+
+│   ├── templates
+
 │   ├── __init__.py
 │   └── main.py
 ├── integrations
@@ -195,7 +210,8 @@ Total Python files: 169
 │   │   ├── test_course_structure_editor.py
 │   │   ├── test_admin_auth.py
 │   │   ├── test_user_management.py
-│   │   └── test_course_ops.py
+│   │   ├── test_course_ops.py
+│   │   └── test_system_config.py
 │   ├── fixtures
 │   │   └── __init__.py
 │   ├── examples
@@ -373,9 +389,9 @@ content ...
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
-- **integrations\monitoring\integration_health.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 
 
 ## Detailed Code Analysis
@@ -2046,6 +2062,46 @@ Includes admin roles, MFA support, and permission checks.
 
 
 
+### app\core\monitoring\metrics.py
+
+**Description:**
+
+System Metrics & Alert Manager — AeroLearn AI
+Save at: /app/core/monitoring/metrics.py
+
+Features:
+- Define metrics types and schema
+- Register/report metrics for components
+- Threshold-based alerting (with callback hooks)
+- Real-time status query API
+
+**Classes:**
+
+- `MetricType`
+ (inherits from: Enum)
+
+
+- `AlertLevel`
+ (inherits from: Enum)
+
+
+- `Metric`
+
+
+  Methods: `__init__()`, `to_dict()`
+
+- `MetricAlert`
+
+
+  Methods: `__init__()`
+
+- `SystemMetricsManager`
+
+
+  Methods: `__new__()`, `__init__()`, `register_metric()`, `report_metric()`, `get_metric()`, ... (4 more)
+
+
+
 ### integrations\registry\interface_registry.py
 
 **Description:**
@@ -2443,6 +2499,33 @@ component dependencies and ensuring proper component initialization order.
   Utility for tracking and analyzing dependencies between components.
 
   Methods: `__init__()`, `declare_dependency()`, `has_dependency()`, `validate_dependencies()`, `detect_circular_dependencies()`, ... (6 more)
+
+
+
+### app\core\monitoring\settings_manager.py
+
+**Description:**
+
+System Settings Manager for AeroLearn AI
+Save at: /app/core/monitoring/settings_manager.py
+
+Provides:
+- Definition of global system settings (as schema)
+- Validated set/get/update methods
+- Persistence (JSON or YAML)
+- Change notification (callback/event hooks)
+- Default settings with override support
+
+**Classes:**
+
+- `SettingValidationError`
+ (inherits from: Exception)
+
+
+- `SystemSettingsManager`
+
+
+  Methods: `__new__()`, `__init__()`, `_validate()`, `_load()`, `save()`, ... (5 more)
 
 
 
@@ -3197,6 +3280,32 @@ service.uploadCompleted.connect(...)
 
 
   Methods: `__init__()`, `upload_files()`, `_enqueue_upload()`, `_start_uploads()`, `_upload_file_with_retry()`, ... (3 more)
+
+
+
+### app\ui\admin\system_config.py
+
+**Description:**
+
+Admin System Config & Monitoring UI — AeroLearn AI
+Save at: /app/ui/admin/system_config.py
+
+Connects:
+- SystemSettingsManager (from core.monitoring)
+- SystemMetricsManager (from core.monitoring)
+Provides:
+- UI for viewing/editing validated system settings
+- Interactive component dependency visualization (stub for integration)
+- Health metrics/alerts dashboard
+
+**Classes:**
+
+- `AdminSystemConfigController`
+
+
+  Controller for system settings/config and system monitoring dashboard.
+
+  Methods: `get_all_settings()`, `update_setting()`, `get_all_metrics()`, `get_alerts()`, `get_component_dependency_graph()`, ... (3 more)
 
 
 
@@ -4096,6 +4205,31 @@ Manages metadata for files and directories, including custom tags, versioning, a
 
 
 
+### tests\ui\test_system_config.py
+
+**Description:**
+
+UNIT TESTS: Admin System Config/Monitoring
+Save at: /tests/ui/test_system_config.py
+
+**Functions:**
+
+- `setup_module(module)`
+
+- `test_get_all_settings_defaults()`
+
+- `test_update_setting_valid()`
+
+- `test_update_setting_invalid()`
+
+- `test_get_all_metrics_report()`
+
+- `test_alerts_warnings_and_critical()`
+
+- `test_dependency_graph_data()`
+
+
+
 ### scripts\setup.py
 
 **Description:**
@@ -4913,123 +5047,108 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here's the architectural enhancement to add to the summary:
+Here are the additional architectural analysis sections to add to the summary:
 
-```markdown
++++ New Sections to Add +++
+
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows a distributed event-driven architecture with three main planes:
+The system follows a layered event-driven architecture with modular components:
+- **Core Layer**: Handles business logic (auth, upload, models)
+- **Integration Layer**: Manages external connections and system components (event bus, registries)
+- **Monitoring Layer**: Provides health checks and transaction tracking
+- **Interface Layer**: Defines contracts for AI and system integrations
 
-1. **Control Plane** (Component Registry + Event Bus):
-   - `ComponentRegistry` (Singleton) manages component lifecycle
-   - `EventBus` (Singleton) handles pub/sub communication
-   - Event taxonomy defined in `event_types.py` with 9 categories
-
-2. **Data Plane**:
-   - Core domain models (`course.py`, `authorization.py`)
-   - Batch processing system (`batch_controller.py`)
-   - Transaction logging infrastructure (`transaction_logger.py`)
-
-3. **Integration Plane**:
-   - Interface contracts (`base_interface.py`, `ai_interface.py`)
-   - Health monitoring (`integration_health.py`)
-   - Cross-component transaction tracking
-
-The architecture emphasizes loose coupling through:
-- Event-driven communication (200+ event types)
-- Interface-based component contracts
-- Semantic versioning for components
-- Dependency declaration system
+Key architectural flows:
+1. Event Bus → Component Registry → Interface Implementations
+2. Batch Controller → Upload Service → Event Bus → Transaction Logger
+3. AI Interface → Component Registry → Health Monitoring
 
 ### 2. Identified Design Patterns
-
-| Pattern              | Implementation Example                          | Purpose                                  |
-|----------------------|------------------------------------------------|------------------------------------------|
-| Singleton            | ComponentRegistry, EventBus                    | System-wide single instance management   |
-| Observer             | EventBus.subscribe()                           | Decoupled event notification             |
-| Registry             | ComponentRegistry.register_component()         | Central component catalog                |
-| Factory              | Component class hierarchy                      | Standardized component creation          |
-| Decorator            | @interface_method in base_interface.py         | Interface contract enforcement           |
-| Strategy             | ValidationFramework in batch_controller.py     | Interchangeable validation algorithms    |
-| State                | ComponentState in component_registry.py        | Component lifecycle management           |
-| Command              | Batch operations in batch_controller.py        | Encapsulated upload operations           |
+| Pattern             | Implementation Example                          | Purpose                                      |
+|---------------------|-------------------------------------------------|---------------------------------------------|
+| Singleton           | ComponentRegistry, EventBus                    | Global system coordination                  |
+| Publisher-Subscriber| EventBus with EventTypes                       | Loose coupling between components           |
+| Factory             | BaseInterface implementations                  | Standardized component creation             |
+| Strategy            | ValidationFramework in BatchController         | Interchangeable validation algorithms       |
+| Observer            | BatchUploadListener system                     | Progress tracking and notifications         |
+| Registry            | ComponentRegistry class                        | Central component management                |
+| Decorator           | @require_permission in authorization           | Cross-cutting security concerns             |
+| Builder             | TransactionContext in TransactionLogger        | Complex transaction object creation         |
 
 ### 3. Refactoring Opportunities
+**Event System Improvements**
+- Consolidate EventType enum with category-specific classes (SystemEventType/ContentEventType)
+- Add event versioning to Event base class for backward compatibility
+- Implement dead-letter queue for failed event deliveries
 
-1. **Event System Optimization**
-   - Current: 15 parallel event hierarchies
-   - Opportunity: Introduce generic `GenericEvent` class with typed payloads
-   - Benefit: Reduce 42% of event class boilerplate
+**Component Registry Enhancements**
+- Separate test/production APIs in ComponentRegistry
+- Add dependency resolution engine for component initialization order
+- Implement version conflict detection for interface implementations
 
-2. **Component Dependency Resolution**
-   - Current: Basic version checks in `check_component_compatibility()`
-   - Improvement: Implement topological sorting for dependency graph
-   - Impact: Better handle circular dependencies (currently manual)
+**Batch Processing Optimization**
+- Extract validation framework dependency from BatchController
+- Implement circuit breaker pattern for upload service integration
+- Add bulk operation support to TransactionLogger
 
-3. **Batch Processing**
-   - Current: Single-threaded `_process_batches()`
-   - Enhancement: Add worker pool pattern with configurable parallelism
-   - Expected Gain: 3-5x throughput improvement for large batches
-
-4. **Interface Validation**
-   - Current: Signature checking via `MethodSignature.validate_implementation()`
-   - Improvement: Add runtime type checking using type hints
-   - Benefit: Catch 25% more interface contract violations
+**Authorization System**
+- Replace Permission string checks with bitmask operations
+- Implement role inheritance graph traversal optimization
+- Add permission lifecycle management (temporary/expiring permissions)
 
 ### 4. Critical Path Analysis
+**Event Bus Critical Path**
+1. Event creation → Serialization → Priority queueing → Filtered delivery → Persistence
 
-**Key Workflow 1: Component Registration**
-```
-Component.init() → ComponentRegistry.register_component_instance() → 
-ComponentRegisteredEvent → EventBus.publish() → 
-TransactionLogger.log_transaction() → HealthMonitor.update_status()
-```
+**Batch Processing Critical Path**
+1. File validation → Metadata extraction → Chunked upload → Progress aggregation → Completion events
 
-**Key Workflow 2: Batch Upload**
-```
-BatchController.start_batch() → ValidationFramework.validate() → 
-UploadService.upload_file() → EventBus.notify_subscriber() → 
-TransactionLogger.start_transaction() → IntegrationHealth.collect_metrics()
-```
+**Component Initialization Critical Path**
+1. Registry startup → Dependency resolution → Interface verification → Health checks → Event subscription
 
-**Key Workflow 3: AI Processing**
-```
-AIInterface.execute() → EventBus.publish(AIEvent) → 
-ComponentRegistry.get_interface_providers() → 
-TransactionLogger.create_timer_metric() → 
-IntegrationHealth.update_metrics()
-```
+**AI Operation Critical Path**
+1. Request validation → Model selection → Cost calculation → Async processing → Result caching
 
 ### 5. Class/Module Relationships
-
 ```mermaid
 graph TD
-    EventBus --> ComponentRegistry
-    ComponentRegistry --> TransactionLogger
-    TransactionLogger --> IntegrationHealth
+    classDef event fill:#f9d5e5,stroke:#c81d77
+    classDef component fill:#d5e8d4,stroke:#82b366
+    classDef interface fill:#dae8fc,stroke:#6c8ebf
+    
+    Event[Event Base Class]:::event
+    Component[Component Base]:::component
+    BaseInterface[BaseInterface]:::interface
+    
+    Event --> SystemEvent
+    Event --> ContentEvent
+    Event --> AIEvent
+    
+    Component --> ComponentRegistry
+    Component --> TransactionLogger
+    Component --> IntegrationHealth
+    
     BaseInterface --> AIInterface
-    AIInterface --> ContentAnalysisInterface
+    BaseInterface --> StorageInterface
+    
+    ComponentRegistry --> EventBus
+    EventBus --> TransactionLogger
     BatchController --> UploadService
     BatchController --> EventBus
+    Authorization --> UserPermissions
     CourseModel --> EventBus
-    Authorization --> ComponentRegistry
-    
-    classDef core fill:#e6f3ff,stroke:#3385ff;
-    classDef integration fill:#ffe6e6,stroke:#ff3333;
-    classDef data fill:#e6ffe6,stroke:#33cc33;
-    
-    class EventBus,ComponentRegistry,TransactionLogger integration;
-    class BatchController,CourseModel,Authorization core;
-    class UploadService,IntegrationHealth data;
+    AIInterface --> ComponentRegistry
 ```
 
-**Key Relationships:**
-- `EventBus` is the central nervous system (89 direct dependencies)
-- `ComponentRegistry` tracks 23 component types across 4 categories
-- `BaseInterface` has 12 concrete implementations (including AIInterface)
-- `BatchController` coordinates 5 subcomponents during upload workflows
-- Transaction system spans 4 modules with circular health checks
-```
+**Key Relationships**
+- **Event System**: 15+ specialized events inherit from base Event class
+- **Component Registry**: Manages all Component subclasses and their dependencies
+- **Batch Controller**: Coordinates with 3 external systems (UploadService, ValidationFramework, EventBus)
+- **Authorization**: Integrates with User model through Permission/Role hierarchy
+- **AI Interfaces**: 4 specialized interfaces extend BaseInterface with versioning
 
-This addition provides architectural context while maintaining focus on the technical details from the provided code analysis. Would you like me to expand on any particular aspect?
++++ End of Additions +++
+
+These sections provide architectural depth while maintaining focus on the system's unique characteristics revealed in the code analysis. Would you like me to elaborate on any particular aspect?
