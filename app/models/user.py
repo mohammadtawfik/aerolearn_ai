@@ -1,50 +1,88 @@
 """
 User model for AeroLearn AI.
 
-Location: app/models/user.py
-Depends on: app/core/db/schema.py, integrations/events/event_bus.py
+Location: /app/models/user.py (canonical User model for FK integrity)
+This must be the single source of User ORM, with __tablename__ = 'user'
+All FK and relationship references must import/use this model and tablename.
 
 Implements validation, event integration, and serialization.
 Includes admin roles, MFA support, and permission checks.
 """
 
-from app.core.db.schema import User as SAUser, UserProfile
+from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey
+from sqlalchemy.orm import relationship
+from app.models.base import Base
 from integrations.events.event_bus import EventBus
 from integrations.events.event_types import UserEvent, UserEventType, EventPriority
 from datetime import datetime
 import re
 
+class User(Base):
+    """Canonical User model with tablename 'user' for FK references."""
+    __tablename__ = 'user'  # SINGULAR: Canonical for FK use (e.g. 'enrollment.user_id')
+    
+    id = Column(Integer, primary_key=True)
+    username = Column(String(50), unique=True, nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    is_active = Column(Boolean, default=True)
+    role = Column(String(20), default='user')
+    mfa_secret = Column(String(100), nullable=True)
+    password_hash = Column(String(255), nullable=True)
+    
+    # Relationships
+    profiles = relationship("UserProfile", back_populates="user")
+    enrollments = relationship("Enrollment", back_populates="user")
+    
+    def __repr__(self):
+        return f"<User(id={self.id}, username='{self.username}')>"
+
+
+class UserProfile(Base):
+    """User profile information."""
+    __tablename__ = 'user_profiles'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)  # FK uses canonical tablename
+    full_name = Column(String(100), nullable=True)
+    bio = Column(Text, nullable=True)
+    expertise_level = Column(String(20), default='beginner')
+    
+    # Relationships
+    user = relationship("User", back_populates="profiles")
+
+
 class UserModel:
-    def __init__(self, sa_user: SAUser):
-        self.sa_user = sa_user
+    """Wrapper class for User entity with business logic."""
+    def __init__(self, user: User):
+        self.user = user
 
     @property
     def id(self):
-        return self.sa_user.id
+        return self.user.id
 
     @property
     def username(self):
-        return self.sa_user.username
+        return self.user.username
 
     @property
     def email(self):
-        return self.sa_user.email
+        return self.user.email
 
     @property
     def is_active(self):
-        return self.sa_user.is_active
+        return self.user.is_active
         
     @property
     def role(self):
-        return getattr(self.sa_user, 'role', 'user')
+        return self.user.role
         
     @property
     def mfa_secret(self):
-        return getattr(self.sa_user, 'mfa_secret', None)
+        return self.user.mfa_secret
         
     @property
     def password_hash(self):
-        return getattr(self.sa_user, 'password_hash', None)
+        return self.user.password_hash
 
     def serialize(self):
         """Convert user and profiles to dict representation for API use."""
@@ -62,7 +100,7 @@ class UserModel:
                     "bio": profile.bio,
                     "expertise_level": profile.expertise_level,
                 }
-                for profile in self.sa_user.profiles
+                for profile in self.user.profiles
             ]
         }
 
@@ -77,7 +115,7 @@ class UserModel:
     async def on_login(self, source="auth"):
         """Emit event on user login."""
         bus = EventBus()
-        if hasattr(bus, "publish") and bus._is_running:
+        if hasattr(bus, "publish") and getattr(bus, "_is_running", False):
             event = UserEvent(
                 event_type=UserEventType.LOGGED_IN,
                 source_component=source,
@@ -90,7 +128,7 @@ class UserModel:
     async def on_profile_update(self, source="profile"):
         """Emit event on user profile update."""
         bus = EventBus()
-        if hasattr(bus, "publish") and bus._is_running:
+        if hasattr(bus, "publish") and getattr(bus, "_is_running", False):
             event = UserEvent(
                 event_type=UserEventType.PROFILE_UPDATED,
                 source_component=source,
@@ -119,12 +157,13 @@ class UserModel:
     @classmethod
     async def get_user_by_username(cls, username: str):
         """Retrieve user by username from database."""
-        # This should be implemented with actual database query
-        # Placeholder implementation
         from app.core.db.session import get_session
         async with get_session() as session:
-            query = session.query(SAUser).filter(SAUser.username == username)
-            sa_user = await query.first()
-            if sa_user:
-                return cls(sa_user)
+            query = session.query(User).filter(User.username == username)
+            user = await query.first()
+            if user:
+                return cls(user)
         return None
+
+# Note: This file is the ONLY place the canonical User ORM definition should reside.
+# All FK relationships (e.g., Enrollment, UserProfile) must reference __tablename__ = 'user'.

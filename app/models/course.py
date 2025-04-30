@@ -9,15 +9,14 @@ Covers ORM models, relationships, validation, serialization, and event emission.
 
 from sqlalchemy import (
     Column, Integer, String, ForeignKey, Boolean,
-    Table, Text, UniqueConstraint
+    Table, Text, UniqueConstraint, DateTime
 )
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, backref, Session
+from app.models.base import Base
 from integrations.events.event_bus import EventBus
 from integrations.events.event_types import ContentEvent, ContentEventType, EventPriority
 import re
-
-Base = declarative_base()
+import datetime
 
 # Association table for course prerequisites (M2M self-relationship)
 course_prerequisite = Table(
@@ -69,6 +68,12 @@ class Course(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text)
     order = Column(Integer, default=0)  # for ordering among courses
+    
+    # Template and archiving fields
+    is_template = Column(Boolean, default=False)
+    template_parent_id = Column(Integer, ForeignKey('course.id'), nullable=True)
+    is_archived = Column(Boolean, default=False)
+    archived_at = Column(DateTime, nullable=True)
 
     # Modules (hierarchical organization)
     modules = relationship('Module', back_populates='course', order_by="Module.order")
@@ -81,6 +86,12 @@ class Course(Base):
         secondaryjoin=id == course_prerequisite.c.prerequisite_id,
         backref='dependent_courses'
     )
+    
+    # Template parent relationship
+    template_parent = relationship("Course", remote_side=[id], foreign_keys=[template_parent_id])
+    
+    # Enrollments relationship
+    enrollments = relationship("Enrollment", back_populates="course")
 
     # Category and Tag relationships
     categories = relationship('Category', secondary=course_category_link, back_populates='courses')
@@ -96,7 +107,11 @@ class Course(Base):
             "title": self.title,
             "description": self.description,
             "modules": [module.serialize() for module in self.modules],
-            "prerequisites": [{"id": course.id, "title": course.title} for course in self.prerequisites]
+            "prerequisites": [{"id": course.id, "title": course.title} for course in self.prerequisites],
+            "is_template": self.is_template,
+            "template_parent_id": self.template_parent_id,
+            "is_archived": self.is_archived,
+            "archived_at": self.archived_at.isoformat() if self.archived_at else None
         }
 
     def validate(self):
@@ -118,6 +133,78 @@ class Course(Base):
                 is_persistent=True
             )
             await bus.publish(event)
+            
+    def archive(self, session: Session):
+        """Archive this course."""
+        self.is_archived = True
+        self.archived_at = datetime.datetime.utcnow()
+        session.commit()
+        
+    def restore(self, session: Session):
+        """Restore an archived course."""
+        self.is_archived = False
+        self.archived_at = None
+        session.commit()
+        
+    def create_from_template(self, session: Session):
+        """Create a course instance copying from this template."""
+        if not self.is_template:
+            raise ValueError("Can only create from a template course")
+            
+        new_course = Course(
+            title=f"Copy of {self.title}",
+            description=self.description,
+            is_template=False,
+            template_parent_id=self.id,
+            order=self.order
+        )
+        session.add(new_course)
+        session.flush()  # assign id
+
+        # Copy modules, lessons, etc.
+        for module in self.modules:
+            module_copy = Module(
+                course_id=new_course.id,
+                title=module.title,
+                description=module.description,
+                order=module.order
+            )
+            session.add(module_copy)
+            session.flush()
+            
+            # Copy lessons
+            for lesson in module.lessons:
+                lesson_copy = Lesson(
+                    module_id=module_copy.id,
+                    title=lesson.title,
+                    description=lesson.description,
+                    content=lesson.content,
+                    order=lesson.order
+                )
+                session.add(lesson_copy)
+                
+        session.commit()
+        return new_course
+        
+    def enroll_bulk(self, session: Session, user_ids: list[int]):
+        """Bulk enroll users; skip already-enrolled."""
+        from sqlalchemy import select
+        
+        for user_id in user_ids:
+            # Check if enrollment already exists
+            existing = session.execute(
+                select(Enrollment).filter_by(user_id=user_id, course_id=self.id)
+            ).first()
+            
+            if not existing:
+                enrollment = Enrollment(
+                    user_id=user_id, 
+                    course_id=self.id, 
+                    enrolled_at=datetime.datetime.utcnow()
+                )
+                session.add(enrollment)
+                
+        session.commit()
 
 # Module prerequisites (self-ref)
 module_prerequisite = Table(
@@ -162,6 +249,16 @@ class Module(Base):
             "lessons": [lesson.serialize() for lesson in self.lessons],
             "prerequisites": [{"id": module.id, "title": module.title} for module in self.prerequisites]
         }
+        
+    def copy(self, new_course_id):
+        """Create a copy of this module for template cloning."""
+        new_module = Module(
+            course_id=new_course_id,
+            title=self.title,
+            description=self.description,
+            order=self.order
+        )
+        return new_module
 
 class Lesson(Base):
     __tablename__ = 'lesson'
@@ -190,6 +287,22 @@ class Lesson(Base):
             "content": self.content,
             "order": self.order
         }
+
+class Enrollment(Base):
+    """Enrollment model for tracking user enrollments in courses."""
+    __tablename__ = 'enrollment'
+    id = Column(Integer, primary_key=True)
+    course_id = Column(Integer, ForeignKey('course.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
+    enrolled_at = Column(DateTime, default=datetime.datetime.utcnow)
+    
+    # Relationship to course
+    course = relationship("Course", back_populates="enrollments")
+    # Relationship to user
+    user = relationship("User", back_populates="enrollments")
+    
+    def __repr__(self):
+        return f"<Enrollment(id={self.id}, user_id={self.user_id}, course_id={self.course_id})>"
 
 # CourseModel for backward compatibility
 class CourseModel:

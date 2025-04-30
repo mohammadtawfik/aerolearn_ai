@@ -2,9 +2,7 @@
 
 from sqlalchemy import Column, Integer, String, Text, ForeignKey
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from app.models.base import Base
 
 class Category(Base):
     __tablename__ = 'category'

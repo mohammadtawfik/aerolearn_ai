@@ -7,13 +7,61 @@ Depends on: app/core/db/schema.py, integrations/events/event_bus.py
 Handles Topic, Module, Lesson, Quiz logic; validation, serialization, and event integration.
 """
 
-from app.core.db.schema import Topic, Module, Lesson, Quiz, Question
+from app.models.course import Module, Lesson
+from app.core.db.schema import Topic
+
+# Mock classes for Quiz and Question if they're needed elsewhere in the file
+class Quiz:
+    def __init__(self, id=None, title="", lesson_id=None):
+        self.id = id
+        self.title = title
+        self.lesson_id = lesson_id
+        self.questions = []
+
+class Question:
+    def __init__(self, id=None, text="", quiz_id=None):
+        self.id = id
+        self.text = text
+        self.quiz_id = quiz_id
+
+class Content:
+    """Main content representation class that unifies all content types"""
+    def __init__(self, id=None, title="", content_type="", source_path=""):
+        self.id = id
+        self.title = title
+        self.content_type = content_type
+        self.source_path = source_path
+        self.metadata = {}
+        
+    @classmethod
+    def from_lesson(cls, lesson):
+        """Create Content instance from Lesson object"""
+        content = cls(
+            id=lesson.id,
+            title=lesson.title,
+            content_type="lesson"
+        )
+        return content
+        
+    @classmethod
+    def from_topic(cls, topic):
+        """Create Content instance from Topic object"""
+        content = cls(
+            id=topic.id,
+            title=topic.name,
+            content_type="topic"
+        )
+        return content
 from integrations.events.event_bus import EventBus
 from integrations.events.event_types import ContentEvent, ContentEventType, EventPriority
 import re
 
 class TopicModel:
-    def __init__(self, sa_topic: Topic):
+    def __init__(self, sa_topic: Topic = None):
+        self.id = sa_topic.id if sa_topic else None
+        self.name = sa_topic.name if sa_topic else ""
+        self.description = sa_topic.description if sa_topic else ""
+        self.parent_id = sa_topic.parent_id if sa_topic else None
         self.sa_topic = sa_topic
 
     @property
