@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 179
+Total Python files: 187
 
 ## Table of Contents
 
@@ -48,7 +48,8 @@ Total Python files: 179
 │   │   ├── ai
 │   │   │   ├── __init__.py
 │   │   │   ├── embedding.py
-│   │   │   └── content_similarity.py
+│   │   │   ├── content_similarity.py
+│   │   │   └── preprocessing.py
 │   │   ├── api
 │   │   │   ├── api_client.py
 │   │   │   ├── deepseek_client.py
@@ -66,6 +67,11 @@ Total Python files: 179
 │   │   │   └── metrics.py
 │   │   ├── config
 
+│   │   ├── extraction
+│   │   │   ├── __init__.py
+│   │   │   ├── structured_data_extractor.py
+│   │   │   ├── text_extractor.py
+│   │   │   └── multimedia_metadata_extractor.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -226,9 +232,13 @@ Total Python files: 179
 │   │   ├── test_user_ops.py
 │   │   └── test_course_admin.py
 │   ├── core
-│   │   └── ai
-│   │       ├── test_embedding.py
-│   │       └── test_content_similarity.py
+│   │   ├── ai
+│   │   │   ├── test_embedding.py
+│   │   │   └── test_content_similarity.py
+│   │   └── extraction
+│   │       ├── test_text_extractor.py
+│   │       ├── test_structured_data_extractor.py
+│   │       └── test_multimedia_metadata_extractor.py
 │   ├── __init__.py
 │   ├── conftest.py
 │   └── metadata_store_tests.py
@@ -397,9 +407,9 @@ content ...
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
-- **integrations\monitoring\integration_health.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 
 
 ## Detailed Code Analysis
@@ -3336,6 +3346,23 @@ Location: /app/core/db/content_db.py
 
 
 
+### app\core\extraction\structured_data_extractor.py
+
+**Classes:**
+
+- `StructuredDataExtractionError`
+ (inherits from: Exception)
+
+
+- `StructuredDataExtractor`
+
+
+  Extracts tabular data from PDF, DOCX, and PPTX files.
+
+  Methods: `extract_tables()`, `_extract_tables_from_pdf()`, `_extract_tables_from_docx()`, `_extract_tables_from_pptx()`, `extract_diagrams()`
+
+
+
 ### app\ui\professor\upload_service.py
 
 **Description:**
@@ -3487,6 +3514,23 @@ Handles conflict resolution, batch sync, and uses MetadataManager for change det
 
 
   Methods: `__init__()`, `validate()`, `get_field()`, `get_required_fields()`, `get_optional_fields()`
+
+
+
+### app\core\extraction\text_extractor.py
+
+**Classes:**
+
+- `TextExtractionError`
+ (inherits from: Exception)
+
+
+- `TextExtractor`
+
+
+  Extracts raw text from various document formats including PDF, DOCX, and PPTX.
+
+  Methods: `extract_text()`, `_extract_text_from_pdf()`, `_extract_text_from_docx()`, `_extract_text_from_pptx()`
 
 
 
@@ -3648,6 +3692,23 @@ Handles conflict resolution, batch sync, and uses MetadataManager for change det
   Concrete API client for Google Drive services.
 
   Methods: `__init__()`, `authenticate()`, `_do_request()`
+
+
+
+### app\core\extraction\multimedia_metadata_extractor.py
+
+**Classes:**
+
+- `MultimediaMetadataExtractionError`
+ (inherits from: Exception)
+
+
+- `MultimediaMetadataExtractor`
+
+
+  Extracts metadata from images, audio, and video files as much as supported.
+
+  Methods: `extract_image_metadata()`, `extract_audio_metadata()`, `extract_video_metadata()`
 
 
 
@@ -4604,6 +4665,19 @@ Setup script for AeroLearn AI development environment.
 
 
 
+### app\core\ai\preprocessing.py
+
+**Classes:**
+
+- `ContentPreprocessor`
+
+
+  Performs basic content preprocessing for AI analysis.
+
+  Methods: `clean_text()`, `preprocess_batch()`
+
+
+
 ### app\core\upload\test_upload_service.py
 
 **Functions:**
@@ -4776,6 +4850,18 @@ This module is part of the AeroLearn AI project.
 
 
 
+### tests\core\extraction\test_multimedia_metadata_extractor.py
+
+**Functions:**
+
+- `test_image_metadata_importerror(monkeypatch)`
+
+- `test_audio_metadata_not_implemented()`
+
+- `test_video_metadata_not_implemented()`
+
+
+
 ### tools\auto_patch_test_root_import.py
 
 **Description:**
@@ -4905,6 +4991,16 @@ Requires: event bus to be started (`await EventBus().start()`).
 
 
 
+### tests\core\extraction\test_structured_data_extractor.py
+
+**Functions:**
+
+- `test_extract_tables_unsupported()`
+
+- `test_extract_diagrams_placeholder()`
+
+
+
 ### scripts\admin_interface_selftest.py
 
 **Description:**
@@ -5009,6 +5105,14 @@ Main entry point for the AeroLearn AI application.
 
 
 
+### tests\core\extraction\test_text_extractor.py
+
+**Functions:**
+
+- `test_extract_text_unsupported()`
+
+
+
 ### setup.py
 
 
@@ -5065,6 +5169,16 @@ This module is part of the AeroLearn AI project.
 
 
 ### app\core\upload\__init__.py
+
+
+
+### app\core\extraction\__init__.py
+
+**Description:**
+
+AeroLearn AI Content Extraction Package Init
+
+Exports primary extractors for use elsewhere in the pipeline.
 
 
 
@@ -5250,128 +5364,138 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional architectural analysis sections to add:
+Here are the additional architectural sections to enhance the summary:
 
-## Architectural Insights
+### 6. Architectural Overview
 
-### 1. High-Level Architectural Overview
-The system follows an event-driven architecture with modular components organized in three primary layers:
+**Core Architectural Pattern:** Event-Driven Microservices Architecture with Modular Components
 
-**Core System Architecture**
 ```
-                     +-------------------+
-                     |   Event Bus       |
-                     +-------------------+
-                            ^  ^  ^
-                            |  |  |
-+------------+       +------+--+--+------+       +------------+
-| Components |<----->| Component Registry |<----->| Interfaces |
-+------------+       +-------------------+       +------------+
-     ^                      ^  ^  ^                      ^
-     |                      |  |  |                      |
-+----+-----+          +-----+--+--+-----+          +-----+-------+
-|   App    |          | Integrations    |          | External    |
-|  Core    |          | Framework       |          | Systems     |
-+----------+          +-----------------+          +-------------+
-```
-
-Key architectural characteristics:
-- Event Bus acts as central nervous system (handles 50+ event types)
-- Registry pattern implementation for component discovery
-- Strict interface contracts between subsystems
-- Async-capable communication layer
-- Monitoring built into core components
-
-### 2. Identified Design Patterns
-
-| Pattern                | Implementation Examples                          | Purpose                                  |
-|------------------------|--------------------------------------------------|------------------------------------------|
-| Singleton              | EventBus, ComponentRegistry                     | System-wide single access points         |
-| Observer               | EventBus subscribers                            | Loose coupling for event handling        |
-| Registry               | ComponentRegistry                               | Central component management             |
-| Decorator              | @interface_method in base_interface.py          | Interface validation                     |
-| Factory                | Event class hierarchy                           | Flexible event object creation           |
-| Strategy               | AIInterface implementations                     | Interchangeable AI providers             |
-| Composite              | Course->Module->Lesson structure                | Hierarchical content modeling            |
-| State                  | ComponentState transitions                      | Lifecycle management                     |
-
-### 3. Refactoring Opportunities
-
-**Event System Improvements**
-- Redundant event type definitions (EventType enum vs category-specific classes)
-- Potential for protocol buffers for event serialization
-- Missing event versioning in Event base class
-
-**Component Registry**
-- Tight coupling between Component class and registry
-- No dependency resolution strategy for component initialization order
-- Missing bulk registration/initialization capabilities
-
-**Batch Processing**
-- BatchController has multiple responsibilities (coordination, progress tracking, validation)
-- No circuit breaker pattern for error handling
-- Limited retry mechanisms for failed uploads
-
-**General Improvements**
-- Inconsistent docstring coverage in interfaces
-- Missing type hints in older modules
-- Limited error recovery in transaction_logger.py
-- No bulk operations in authorization.py
-
-### 4. Critical Path Analysis
-
-**Event Bus Notification Flow**
-```
-Event Creation -> Serialization -> Priority Queue -> Subscriber Matching 
--> Async Dispatch -> Error Handling -> Persistence (for critical events)
+                      +-------------------+
+                      |  Event Bus        |
+                      | (Pub/Sub System)  |
+                      +---------+---------+
+                                |
+          +---------------------+---------------------+
+          |                     |                     |
++---------v---------+ +---------v---------+ +---------v---------+
+|  Core Services    | |  Integrations     | |   UI Components    |
+| - Auth System     | | - AI Providers    | | - Batch Upload     |
+| - Content Mgmt    | | - Storage Adapters| | - Course Editor    |
+| - Batch Processing| | - Monitoring      | | - Metadata Tools   |
++---------+---------+ +---------+---------+ +---------+---------+
+          |                     |                     |
+          +---------------------+---------------------+
+                                |
+                      +---------v---------+
+                      |  Component Registry|
+                      | (Dependency Mgmt) |
+                      +-------------------+
 ```
 
-**Component Registration Critical Path**
-```
-Component Init -> Dependency Check -> Version Validation 
--> Interface Verification -> Registry Update -> Event Emission
+Key Characteristics:
+- Event bus acts as central nervous system (160+ event types defined)
+- Component registry enables loose coupling (71 component types registered)
+- Vertical slicing by domain (Content, User, AI, Batch)
+- Horizontal layers for cross-cutting concerns (Auth, Monitoring, Events)
+
+### 7. Identified Design Patterns
+
+| Pattern              | Implementation Example                          | Purpose                                      |
+|----------------------|-------------------------------------------------|----------------------------------------------|
+| Singleton            | ComponentRegistry, EventBus                    | Global access to core services               |
+| Observer             | EventBus subscribers, Batch listeners          | Decoupled event notifications                |
+| Factory              | BaseInterface implementations                  | Component instantiation management           |
+| Strategy             | AIInterface method implementations             | Algorithm swapping at runtime                |
+| Decorator            | @require_permission, @interface_method         | Adding cross-cutting concerns                |
+| Registry             | ComponentRegistry                              | Central component management                 |
+| Template Method      | BatchUploadController._process_batch           | Standardized batch processing workflow       |
+| Composite            | Course → Module → Lesson hierarchy             | Tree structure for educational content       |
+
+### 8. Refactoring Opportunities
+
+1. **Component Initialization**
+   - Current: Mixed initialization patterns across components
+   - Improvement: Implement Builder pattern for complex component setup
+
+2. **Event Hierarchy**
+   - Issue: Duplicate __init__ in SystemEvent/ContentEvent
+   - Solution: Create EventBuilder factory class
+
+3. **Batch Processing**
+   - Problem: BatchController manages both workflow and state
+   - Refactor: Split into BatchOrchestrator and BatchStateMachine
+
+4. **Interface Validation**
+   - Current: Manual signature checking in BaseInterface
+   - Improvement: Introduce runtime type validation using type hints
+
+5. **Component Registry**
+   - Issue: Global singleton with coarse-grained locking
+   - Enhancement: Shard registry by component type with fine-grained locks
+
+### 9. Critical Path Analysis
+
+**Key System Flows:**
+
+1. Content Upload Pipeline:
+   ``` 
+   UI → BatchController → ValidationFramework → UploadService → 
+   EventBus (CONTENT_CREATED) → ContentDB → AIInterface (analysis)
+   ```
+
+2. Component Initialization:
+   ```
+   Component.__init__() → Registry.register() → 
+   EventBus.publish(COMPONENT_REGISTERED) → 
+   DependencyTracker.resolve_dependencies()
+   ```
+
+3. AI Request Processing:
+   ```
+   API → AuthZ → AIInterface → ModelProvider → 
+   TransactionLogger → Monitoring → Response
+   ```
+
+4. Course Publishing:
+   ```
+   Course.validate() → ContentEvent(CONTENT_UPDATED) → 
+   IndexingService → AvailabilityCheck → UI Notification
+   ```
+
+### 10. Class/Module Relationships
+
+```mermaid
+graph TD
+    A[Event] --> B[SystemEvent]
+    A --> C[ContentEvent]
+    A --> D[AIEvent]
+    B --> E[ComponentRegisteredEvent]
+    
+    F[ComponentRegistry] -->|publishes| E
+    F -->|depends on| G[EventBus]
+    
+    H[BatchController] -->|uses| I[UploadService]
+    H -->|emits| J[BatchEvent]
+    J -->|published via| G
+    
+    K[Course] -->|composes| L[Module]
+    L -->|composes| M[Lesson]
+    
+    N[BaseInterface] -->|implemented by| O[AIModelProviderInterface]
+    N -->|implemented by| P[ContentAnalysisInterface]
+    
+    Q[AuthorizationManager] -->|secures| R[BatchController]
+    Q -->|protects| S[Course]
+    
+    T[TransactionLogger] -->|logs| U[ComponentRegistry]
+    T -->|monitors| V[IntegrationHealth]
 ```
 
-**Batch Upload Process**
-```
-File Validation -> Metadata Extraction -> Chunking -> Parallel Upload 
--> Progress Aggregation -> Completion Handling -> Cleanup
-```
-
-**Course Model Lifecycle**
-```
-ORM Create -> Validation -> DB Persistence -> Indexing 
--> Event Emission -> UI Synchronization
-```
-
-### 5. Component Relationships
-
-**Key Class Dependencies**
-```
-EventBus <-> ComponentRegistry (bidirectional)
-  ↑           ↑
-  │           └── Component
-  │               ↑
-  └── Event <─────┴── SystemEvent/ContentEvent/etc.
-          ↑
-BatchController ────> UploadService
-  ↑                       ↑
-CourseModel ──────────────┘
-  ↑
-Module ───> Lesson
-```
-
-**Module Interaction Map**
-```
-+--------------+       +--------------+       +--------------+
-|   app/core   |<----->| integrations |<----->|  app/models  |
-+------+-------+       +------+-------+       +------+-------+
-       ↑                      ↑                      ↑
-       +----------------------+----------------------+
-                    ↓
-             +-------------+
-             | Event Bus   |
-             +-------------+
-```
-
-This analysis shows a strongly event-coupled architecture with clear separation between core business logic (app), infrastructure components (integrations), and data modeling (models). The registry pattern serves as the glue between these layers while maintaining loose coupling.
+Key Relationships:
+- Event hierarchy forms foundation of system communication
+- ComponentRegistry ↔ EventBus circular dependency for lifecycle management
+- BatchController coordinates across UploadService/ValidationFramework
+- Course model aggregates multiple domain entities
+- Interfaces define contracts between core and integration components
+- Monitoring system observes all critical components via health checks
