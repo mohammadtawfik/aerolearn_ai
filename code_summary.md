@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 175
+Total Python files: 179
 
 ## Table of Contents
 
@@ -46,7 +46,9 @@ Total Python files: 175
 │   │   │   ├── metadata_store.py
 │   │   │   └── metadata_persistence_manager.py
 │   │   ├── ai
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   ├── embedding.py
+│   │   │   └── content_similarity.py
 │   │   ├── api
 │   │   │   ├── api_client.py
 │   │   │   ├── deepseek_client.py
@@ -223,6 +225,10 @@ Total Python files: 175
 │   │   ├── test_category_tag_ops.py
 │   │   ├── test_user_ops.py
 │   │   └── test_course_admin.py
+│   ├── core
+│   │   └── ai
+│   │       ├── test_embedding.py
+│   │       └── test_content_similarity.py
 │   ├── __init__.py
 │   ├── conftest.py
 │   └── metadata_store_tests.py
@@ -391,9 +397,9 @@ content ...
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
-- **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **integrations\monitoring\integration_health.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
 
 
 ## Detailed Code Analysis
@@ -2711,6 +2717,50 @@ SyncManager for AeroLearn AI
 
 
 
+### app\core\ai\embedding.py
+
+**Description:**
+
+File Location: app/core/ai/embedding.py
+
+Purpose: This module provides embedding generation for various content types 
+(text, document, multimedia), supporting the AeroLearn AI content analysis system.
+
+**Classes:**
+
+- `BaseEmbedder`
+
+
+  Abstract base class for content embedders.
+
+  Methods: `embed()`
+
+- `TextEmbedder`
+ (inherits from: BaseEmbedder)
+
+
+  Embeds plain text into a dense vector using simple bag-of-words or a 
+
+  Methods: `embed()`
+
+- `DocumentEmbedder`
+ (inherits from: BaseEmbedder)
+
+
+  Embeds a document (could be PDF, DOCX, etc.) by processing its text content.
+
+  Methods: `__init__()`, `embed()`
+
+- `MultimediaEmbedder`
+ (inherits from: BaseEmbedder)
+
+
+  Embeds multimedia (video, audio, image) using placeholder logic.
+
+  Methods: `embed()`
+
+
+
 ### app\ui\admin\user_management.py
 
 **Description:**
@@ -3367,6 +3417,36 @@ Provides:
 
 
 
+### tests\core\ai\test_embedding.py
+
+**Description:**
+
+File Location: tests/core/ai/test_embedding.py
+
+Purpose: Unit tests for TextEmbedder, DocumentEmbedder, and MultimediaEmbedder.
+
+**Classes:**
+
+- `TestTextEmbedder`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `test_text_embed_shape()`, `test_text_embed_repeatability()`, `test_empty_text()`
+
+- `TestDocumentEmbedder`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `test_document_embedding()`
+
+- `TestMultimediaEmbedder`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `test_multimedia_embedding()`
+
+
+
 ### app\core\drive\sync_manager.py
 
 **Description:**
@@ -3688,6 +3768,30 @@ Features:
 
 
 
+### tests\core\ai\test_content_similarity.py
+
+**Description:**
+
+File Location: tests/core/ai/test_content_similarity.py
+
+Purpose: Unit tests for content similarity and recommendation logic.
+
+**Classes:**
+
+- `TestSimilarityCalculator`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `test_cosine_similarity_self()`, `test_cosine_similarity_orthogonal()`, `test_jaccard_similarity()`
+
+- `TestSimilarityFunctions`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `test_calculate_similarity_threshold()`, `test_cross_content_similarity_matrix()`, `test_recommendations()`
+
+
+
 ### app\core\db\event_hooks.py
 
 **Description:**
@@ -3724,6 +3828,40 @@ This uses real project models (User, Module, Lesson, etc).
   Simple file-based persistence for demonstration.
 
   Methods: `__init__()`, `_load()`, `_save()`, `save_metadata()`, `get_metadata()`, ... (3 more)
+
+
+
+### app\core\ai\content_similarity.py
+
+**Description:**
+
+File Location: app/core/ai/content_similarity.py
+
+Purpose: Implements similarity detection for educational content, including
+vector similarity metrics, thresholding, and recommendation heuristics.
+
+**Classes:**
+
+- `SimilarityCalculator`
+
+
+  Provides static methods for common similarity metrics.
+
+  Methods: `cosine_similarity()`, `jaccard_similarity()`
+
+**Functions:**
+
+- `calculate_similarity(content_a, content_b, content_type, metric, threshold)`
+
+  Embeds and compares two pieces of content (text, document, multimedia).
+
+- `cross_content_similarity(content_list_a, content_list_b, content_type, metric, threshold)`
+
+  Given two lists (e.g. lessons from two courses), computes pairwise similarity 
+
+- `get_content_recommendations(target_content, candidate_contents, content_type, metric, top_k, threshold)`
+
+  Recommends the top-K most similar items from candidate_contents to target_content.
 
 
 
@@ -5112,119 +5250,128 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional architectural sections to add to the summary:
+Here are the additional architectural analysis sections to add:
 
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows an event-driven microkernel architecture with modular components:
+The system follows an event-driven architecture with modular components organized in three primary layers:
 
+**Core System Architecture**
 ```
-[User Interface] ↔ [Core Application] ↔ [Event Bus]
-                      |           |
-                [Component Registry]  [Integration Layer]
-                          |
-         [Monitoring][Storage][AI Services][Auth]
+                     +-------------------+
+                     |   Event Bus       |
+                     +-------------------+
+                            ^  ^  ^
+                            |  |  |
++------------+       +------+--+--+------+       +------------+
+| Components |<----->| Component Registry |<----->| Interfaces |
++------------+       +-------------------+       +------------+
+     ^                      ^  ^  ^                      ^
+     |                      |  |  |                      |
++----+-----+          +-----+--+--+-----+          +-----+-------+
+|   App    |          | Integrations    |          | External    |
+|  Core    |          | Framework       |          | Systems     |
++----------+          +-----------------+          +-------------+
 ```
 
 Key architectural characteristics:
-- **Event-Centric Communication**: 85% of cross-component interaction via EventBus
-- **Layered Dependencies**: 
-  - App layer depends on Integrations layer
-  - Integrations layer has no upward dependencies
-- **Component Lifecycle**: Managed through ComponentRegistry with 6 defined states
-- **Cross-Cutting Concerns**:
-  - Transaction logging (TransactionLogger)
-  - Health monitoring (IntegrationHealth)
-  - Authorization (AuthorizationManagerClass)
+- Event Bus acts as central nervous system (handles 50+ event types)
+- Registry pattern implementation for component discovery
+- Strict interface contracts between subsystems
+- Async-capable communication layer
+- Monitoring built into core components
 
 ### 2. Identified Design Patterns
 
-| Pattern             | Implementation Example                          | Usage Frequency |
-|---------------------|------------------------------------------------|-----------------|
-| Singleton           | EventBus, ComponentRegistry                   | High (8 instances)|
-| Observer            | EventBus subscribers                          | Ubiquitous       |
-| Registry            | ComponentRegistry, InterfaceRegistry          | Core pattern     |
-| Factory             | Component instantiation via Registry          | Moderate         |
-| Decorator           | @interface_method in BaseInterface            | Low              |
-| Strategy            | BatchController's upload strategies           | Emerging         |
-| Composite           | Course→Module→Lesson hierarchy                | Domain-specific  |
+| Pattern                | Implementation Examples                          | Purpose                                  |
+|------------------------|--------------------------------------------------|------------------------------------------|
+| Singleton              | EventBus, ComponentRegistry                     | System-wide single access points         |
+| Observer               | EventBus subscribers                            | Loose coupling for event handling        |
+| Registry               | ComponentRegistry                               | Central component management             |
+| Decorator              | @interface_method in base_interface.py          | Interface validation                     |
+| Factory                | Event class hierarchy                           | Flexible event object creation           |
+| Strategy               | AIInterface implementations                     | Interchangeable AI providers             |
+| Composite              | Course->Module->Lesson structure                | Hierarchical content modeling            |
+| State                  | ComponentState transitions                      | Lifecycle management                     |
 
 ### 3. Refactoring Opportunities
 
-1. **Event Type Consolidation**
-   - Problem: Duplicate event definitions (EventType enum vs category-specific classes)
-   - Solution: Create event type registry with hierarchical organization
+**Event System Improvements**
+- Redundant event type definitions (EventType enum vs category-specific classes)
+- Potential for protocol buffers for event serialization
+- Missing event versioning in Event base class
 
-2. **Interface Abstraction**
-   - Problem: BaseInterface uses concrete ComponentRegistry dependency
-   - Solution: Introduce AbstractComponentRegistry using ABC
+**Component Registry**
+- Tight coupling between Component class and registry
+- No dependency resolution strategy for component initialization order
+- Missing bulk registration/initialization capabilities
 
-3. **Async Optimization**
-   - Problem: Mixed sync/async in EventBus._notify_subscriber_threadsafe
-   - Solution: Standardize on asyncio with dedicated event loop
+**Batch Processing**
+- BatchController has multiple responsibilities (coordination, progress tracking, validation)
+- No circuit breaker pattern for error handling
+- Limited retry mechanisms for failed uploads
 
-4. **Dependency Injection**
-   - Problem: Tight coupling in BatchController (direct UploadService usage)
-   - Solution: Introduce UploadStrategy interface
-
-5. **Batch Processing**
-   - Problem: BatchController manages both control and execution
-   - Solution: Split into BatchOrchestrator and BatchWorker
+**General Improvements**
+- Inconsistent docstring coverage in interfaces
+- Missing type hints in older modules
+- Limited error recovery in transaction_logger.py
+- No bulk operations in authorization.py
 
 ### 4. Critical Path Analysis
 
-**Primary Critical Path (Batch Upload):**
-```mermaid
-graph TD
-  A[BatchController.start_batch] --> B[ValidationFramework]
-  B --> C[UploadService]
-  C --> D[EventBus.publish]
-  D --> E[TransactionLogger]
-  E --> F[IntegrationHealth]
+**Event Bus Notification Flow**
+```
+Event Creation -> Serialization -> Priority Queue -> Subscriber Matching 
+-> Async Dispatch -> Error Handling -> Persistence (for critical events)
 ```
 
-Key Bottlenecks:
-1. Synchronous validation in ValidationFramework
-2. EventBus persistence I/O operations
-3. TransactionLogger's in-memory storage (max_transactions limit)
-
-### 5. Class/Module Relationships
-
-```python
-# Core Relationship Map
-class Event:  # Base for all events
-    pass
-
-class ComponentRegistry:  # Singleton
-    components: Dict[Component]
-    ← EventBus
-    → Component
-
-class EventBus:  # Singleton
-    ← EventTypes
-    → TransactionLogger
-    → IntegrationHealth
-
-class BatchController:
-    → UploadService
-    → ValidationFramework
-    → EventBus
-
-class Course(Model):
-    → Module
-    ← EventBus (ContentEvents)
-
-class BaseInterface(ABC):
-    → ComponentRegistry
-    ← AIInterface
-
-class TransactionLogger:
-    → EventBus
-    ← IntegrationHealth
+**Component Registration Critical Path**
+```
+Component Init -> Dependency Check -> Version Validation 
+-> Interface Verification -> Registry Update -> Event Emission
 ```
 
-Key Cross-Module Dependencies:
-- 78% of Integration layer modules depend on ComponentRegistry
-- App→Integration coupling ratio: 1:3 (App modules have 3x integration dependencies)
-- EventBus serves as the central nervous system with 92% modules as either producers or consumers
+**Batch Upload Process**
+```
+File Validation -> Metadata Extraction -> Chunking -> Parallel Upload 
+-> Progress Aggregation -> Completion Handling -> Cleanup
+```
+
+**Course Model Lifecycle**
+```
+ORM Create -> Validation -> DB Persistence -> Indexing 
+-> Event Emission -> UI Synchronization
+```
+
+### 5. Component Relationships
+
+**Key Class Dependencies**
+```
+EventBus <-> ComponentRegistry (bidirectional)
+  ↑           ↑
+  │           └── Component
+  │               ↑
+  └── Event <─────┴── SystemEvent/ContentEvent/etc.
+          ↑
+BatchController ────> UploadService
+  ↑                       ↑
+CourseModel ──────────────┘
+  ↑
+Module ───> Lesson
+```
+
+**Module Interaction Map**
+```
++--------------+       +--------------+       +--------------+
+|   app/core   |<----->| integrations |<----->|  app/models  |
++------+-------+       +------+-------+       +------+-------+
+       ↑                      ↑                      ↑
+       +----------------------+----------------------+
+                    ↓
+             +-------------+
+             | Event Bus   |
+             +-------------+
+```
+
+This analysis shows a strongly event-coupled architecture with clear separation between core business logic (app), infrastructure components (integrations), and data modeling (models). The registry pattern serves as the glue between these layers while maintaining loose coupling.
