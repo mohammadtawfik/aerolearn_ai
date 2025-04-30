@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 187
+Total Python files: 194
 
 ## Table of Contents
 
@@ -49,7 +49,8 @@ Total Python files: 187
 │   │   │   ├── __init__.py
 │   │   │   ├── embedding.py
 │   │   │   ├── content_similarity.py
-│   │   │   └── preprocessing.py
+│   │   │   ├── preprocessing.py
+│   │   │   └── vector_index.py
 │   │   ├── api
 │   │   │   ├── api_client.py
 │   │   │   ├── deepseek_client.py
@@ -72,6 +73,11 @@ Total Python files: 187
 │   │   │   ├── structured_data_extractor.py
 │   │   │   ├── text_extractor.py
 │   │   │   └── multimedia_metadata_extractor.py
+│   │   ├── vector_db
+│   │   │   ├── vector_db_client.py
+│   │   │   ├── schema.py
+│   │   │   ├── index_manager.py
+│   │   │   └── sync_manager.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -234,11 +240,14 @@ Total Python files: 187
 │   ├── core
 │   │   ├── ai
 │   │   │   ├── test_embedding.py
-│   │   │   └── test_content_similarity.py
-│   │   └── extraction
-│   │       ├── test_text_extractor.py
-│   │       ├── test_structured_data_extractor.py
-│   │       └── test_multimedia_metadata_extractor.py
+│   │   │   ├── test_content_similarity.py
+│   │   │   └── test_vector_index.py
+│   │   ├── extraction
+│   │   │   ├── test_text_extractor.py
+│   │   │   ├── test_structured_data_extractor.py
+│   │   │   └── test_multimedia_metadata_extractor.py
+│   │   └── vector_db
+│   │       └── test_vector_db.py
 │   ├── __init__.py
 │   ├── conftest.py
 │   └── metadata_store_tests.py
@@ -408,8 +417,8 @@ content ...
 Key file relationships (files with most dependencies):
 
 - **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
-- **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **integrations\monitoring\integration_health.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
 
 
 ## Detailed Code Analysis
@@ -2990,6 +2999,40 @@ Edit DB_URL in schema.py as required for different environments.
 
 
 
+### app\core\vector_db\vector_db_client.py
+
+**Description:**
+
+Vector database client for AeroLearn AI.
+
+Handles connection, insertion, retrieval, search, deletion, and schema operations for vector storage.
+Abstraction allows plugging in different engines (e.g., FAISS, Milvus, Pinecone).
+
+**Classes:**
+
+- `VectorDBClient`
+
+
+  Methods: `__init__()`, `add_vector()`, `add_bulk()`, `search()`, `update_vector()`, ... (6 more)
+
+
+
+### app\core\vector_db\index_manager.py
+
+**Description:**
+
+Vector index management for AeroLearn AI.
+Handles creation, rebuilding, update and optimization of vector indices for efficient search.
+
+**Classes:**
+
+- `VectorIndexManager`
+
+
+  Methods: `__init__()`, `build_index()`, `search()`, `update_index()`, `delete_from_index()`, ... (3 more)
+
+
+
 ### tests\unit\core\upload\test_batch_controller.py
 
 **Classes:**
@@ -4152,6 +4195,27 @@ Uses events to notify about operations and errors. Metadata updates handled via 
 
 
 
+### app\core\vector_db\schema.py
+
+**Description:**
+
+Vector DB schema definitions for AeroLearn AI.
+Defines standard metadata fields, vector index configuration, and filter rules.
+
+**Classes:**
+
+- `VectorEntry`
+
+
+  Methods: `__init__()`, `to_dict()`
+
+- `VectorDBIndexConfig`
+
+
+  Methods: `__init__()`, `as_dict()`
+
+
+
 ### app\ui\common\content_browser.py
 
 **Description:**
@@ -4256,6 +4320,22 @@ Location: /app/core/validation/main.py
 
 
   Methods: `__init__()`, `infer_validator()`, `check()`
+
+
+
+### app\core\vector_db\sync_manager.py
+
+**Description:**
+
+Handles synchronization and persistence for AeroLearn AI vector DB.
+Features local file backup/restore, and (if extended) remote sync with a production vector DB.
+
+**Classes:**
+
+- `VectorDBSyncManager`
+
+
+  Methods: `__init__()`, `start_auto_sync()`, `stop_auto_sync()`, `_run()`, `persist()`, ... (1 more)
 
 
 
@@ -4473,6 +4553,31 @@ Save at: /tests/ui/test_system_config.py
 - `test_alerts_warnings_and_critical()`
 
 - `test_dependency_graph_data()`
+
+
+
+### tests\core\vector_db\test_vector_db.py
+
+**Description:**
+
+Unit and integration tests for VectorDBClient and VectorIndexManager in AeroLearn AI.
+Covers vector CRUD, index building, search, update, delete, filter, and persistence.
+
+**Functions:**
+
+- `test_vector_db_crud_operations()`
+
+- `test_vector_db_bulk_and_search()`
+
+- `test_vector_db_search_with_filter()`
+
+- `test_vector_db_persistence_and_load(tmp_path)`
+
+- `test_index_manager_build_and_search()`
+
+- `test_index_manager_update_and_delete()`
+
+- `test_index_manager_persist_and_load(tmp_path)`
 
 
 
@@ -4850,6 +4955,57 @@ This module is part of the AeroLearn AI project.
 
 
 
+### app\core\ai\__init__.py
+
+**Description:**
+
+AeroLearn AI - Aerospace Engineering Education Platform
+Created: 2025-04-24
+
+This module is part of the AeroLearn AI project.
+
+
+
+### app\core\ai\vector_index.py
+
+**Description:**
+
+AI utility for interacting with the AeroLearn AI Vector DB index.
+Provides functions to instantiate and use vector managers at any embedding dimension (testable and modular).
+
+**Functions:**
+
+- `get_vector_index(embedding_dim, backend)`
+
+  Factory for creating a new VectorIndexManager.
+
+- `add_content_embedding(vector_index, content_id, vector, metadata)`
+
+  Add content embedding and associated metadata to the vector DB.
+
+- `query_similar_content(vector_index, query_vector, top_k, filter_metadata)`
+
+  Find similar content using vector search, filter with metadata if needed.
+
+
+
+### tests\core\ai\test_vector_index.py
+
+**Description:**
+
+Tests for high-level AeroLearn AI vector index interface.
+Uses local index with fixed test dimension, NO dependency on production singleton.
+
+**Functions:**
+
+- `make_test_index()`
+
+- `test_add_content_embedding_and_query()`
+
+- `test_query_similar_content_with_metadata_filter()`
+
+
+
 ### tests\core\extraction\test_multimedia_metadata_extractor.py
 
 **Functions:**
@@ -5157,17 +5313,6 @@ This module is part of the AeroLearn AI project.
 
 
 
-### app\core\ai\__init__.py
-
-**Description:**
-
-AeroLearn AI - Aerospace Engineering Education Platform
-Created: 2025-04-24
-
-This module is part of the AeroLearn AI project.
-
-
-
 ### app\core\upload\__init__.py
 
 
@@ -5364,138 +5509,132 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional architectural sections to enhance the summary:
+Here's the architectural enhancement to add to the summary:
 
-### 6. Architectural Overview
+## Architectural Insights
 
-**Core Architectural Pattern:** Event-Driven Microservices Architecture with Modular Components
+### 1. High-Level Architectural Overview
+The system follows a modular event-driven architecture with three primary layers:
 
-```
-                      +-------------------+
-                      |  Event Bus        |
-                      | (Pub/Sub System)  |
-                      +---------+---------+
-                                |
-          +---------------------+---------------------+
-          |                     |                     |
-+---------v---------+ +---------v---------+ +---------v---------+
-|  Core Services    | |  Integrations     | |   UI Components    |
-| - Auth System     | | - AI Providers    | | - Batch Upload     |
-| - Content Mgmt    | | - Storage Adapters| | - Course Editor    |
-| - Batch Processing| | - Monitoring      | | - Metadata Tools   |
-+---------+---------+ +---------+---------+ +---------+---------+
-          |                     |                     |
-          +---------------------+---------------------+
-                                |
-                      +---------v---------+
-                      |  Component Registry|
-                      | (Dependency Mgmt) |
-                      +-------------------+
-```
+1. **Core Infrastructure Layer**:
+   - Event Bus (Pub/Sub system)
+   - Component Registry (Dependency Management)
+   - Transaction Logger (Cross-component monitoring)
+   - Authorization System (RBAC with permission inheritance)
 
-Key Characteristics:
-- Event bus acts as central nervous system (160+ event types defined)
-- Component registry enables loose coupling (71 component types registered)
-- Vertical slicing by domain (Content, User, AI, Batch)
-- Horizontal layers for cross-cutting concerns (Auth, Monitoring, Events)
+2. **Application Layer**:
+   - Batch Processing System (Stateful controller with listener pattern)
+   - Content Management (SQLAlchemy-based ORM with event hooks)
+   - AI Operations (Interface-driven service architecture)
 
-### 7. Identified Design Patterns
+3. **Integration Layer**:
+   - Plugin System (BaseInterface/Component model)
+   - Health Monitoring (Metric-based status tracking)
+   - Event Persistence (Critical event journaling)
 
-| Pattern              | Implementation Example                          | Purpose                                      |
-|----------------------|-------------------------------------------------|----------------------------------------------|
-| Singleton            | ComponentRegistry, EventBus                    | Global access to core services               |
-| Observer             | EventBus subscribers, Batch listeners          | Decoupled event notifications                |
-| Factory              | BaseInterface implementations                  | Component instantiation management           |
-| Strategy             | AIInterface method implementations             | Algorithm swapping at runtime                |
-| Decorator            | @require_permission, @interface_method         | Adding cross-cutting concerns                |
-| Registry             | ComponentRegistry                              | Central component management                 |
-| Template Method      | BatchUploadController._process_batch           | Standardized batch processing workflow       |
-| Composite            | Course → Module → Lesson hierarchy             | Tree structure for educational content       |
+The architecture emphasizes loose coupling through:
+- Event-driven communication (200+ event types)
+- Interface contracts (BaseInterface implementations)
+- Semantic versioning for components
+- Dependency declaration system
 
-### 8. Refactoring Opportunities
+### 2. Identified Design Patterns
+| Pattern             | Implementation Examples                          | Purpose                                      |
+|---------------------|--------------------------------------------------|----------------------------------------------|
+| Singleton           | ComponentRegistry, EventBus                     | Single instance management                   |
+| Observer            | EventBus subscribers                            | Decoupled event notification                 |
+| Registry            | ComponentRegistry                               | Central component management                 |
+| Decorator           | @require_permission, @interface_method          | Cross-cutting concerns                       |
+| Factory             | Component instantiation via registry            | Dynamic component creation                   |
+| Strategy            | ValidationFramework in BatchController          | Interchangeable algorithms                   |
+| State               | BatchStatus, ComponentState                     | Stateful behavior management                 |
+| Composite           | Course->Module->Lesson hierarchy                | Tree structure representation                |
 
-1. **Component Initialization**
-   - Current: Mixed initialization patterns across components
-   - Improvement: Implement Builder pattern for complex component setup
+### 3. Refactoring Opportunities
+1. **Event Type Hierarchy**:
+   - Current: Duplicated constants (EventType vs ContentEventType)
+   - Proposed: Single source hierarchy using protobuf-like enum extensions
 
-2. **Event Hierarchy**
-   - Issue: Duplicate __init__ in SystemEvent/ContentEvent
-   - Solution: Create EventBuilder factory class
+2. **Component Registration**:
+   - Current: Dual registration APIs (instance vs metadata)
+   - Proposed: Unified ComponentDescriptor pattern
 
-3. **Batch Processing**
-   - Problem: BatchController manages both workflow and state
-   - Refactor: Split into BatchOrchestrator and BatchStateMachine
+3. **Batch Processing**:
+   - Current: Tight coupling with UploadService
+   - Proposed: Introduce AbstractUploadOperator interface
 
-4. **Interface Validation**
-   - Current: Manual signature checking in BaseInterface
-   - Improvement: Introduce runtime type validation using type hints
+4. **Transaction Persistence**:
+   - Current: In-memory storage with print-based persistence
+   - Proposed: Implement StorageInterface pluggable backend
 
-5. **Component Registry**
-   - Issue: Global singleton with coarse-grained locking
-   - Enhancement: Shard registry by component type with fine-grained locks
+5. **Serialization**:
+   - Current: Ad-hoc serialize() methods
+   - Proposed: Protocol-based serialization registry
 
-### 9. Critical Path Analysis
-
-**Key System Flows:**
-
-1. Content Upload Pipeline:
-   ``` 
-   UI → BatchController → ValidationFramework → UploadService → 
-   EventBus (CONTENT_CREATED) → ContentDB → AIInterface (analysis)
-   ```
-
-2. Component Initialization:
-   ```
-   Component.__init__() → Registry.register() → 
-   EventBus.publish(COMPONENT_REGISTERED) → 
-   DependencyTracker.resolve_dependencies()
-   ```
-
-3. AI Request Processing:
-   ```
-   API → AuthZ → AIInterface → ModelProvider → 
-   TransactionLogger → Monitoring → Response
-   ```
-
-4. Course Publishing:
-   ```
-   Course.validate() → ContentEvent(CONTENT_UPDATED) → 
-   IndexingService → AvailabilityCheck → UI Notification
-   ```
-
-### 10. Class/Module Relationships
-
+### 4. Critical Path Analysis
 ```mermaid
 graph TD
-    A[Event] --> B[SystemEvent]
-    A --> C[ContentEvent]
-    A --> D[AIEvent]
-    B --> E[ComponentRegisteredEvent]
+    A[User Action] --> B[BatchController]
+    B --> C[UploadService]
+    C --> D[EventBus]
+    D --> E[(TransactionLogger)]
+    D --> F[ComponentRegistry]
+    F --> G[AIInterface]
+    G --> H[VectorDB]
+    H --> I[ContentSimilarity]
+    I --> J[EventBus]
+```
+
+Key Path Characteristics:
+- **Batch Upload Path**: 65ms timeout window for validation events
+- **AI Processing Path**: Depends on model loading via ComponentRegistry
+- **Event Propagation**: Priority-based handling (CRITICAL events sync-processed)
+- **Dependency Resolution**: Registry validates semver constraints pre-registration
+
+### 5. Class/Module Relationships
+```mermaid
+classDiagram
+    class EventBus {
+        +get() Singleton
+        +subscribe()
+        +publish()
+    }
     
-    F[ComponentRegistry] -->|publishes| E
-    F -->|depends on| G[EventBus]
+    class Component {
+        +declare_dependency()
+        +provide_interface()
+    }
     
-    H[BatchController] -->|uses| I[UploadService]
-    H -->|emits| J[BatchEvent]
-    J -->|published via| G
+    class BatchController {
+        +add_listener()
+        +start_batch()
+    }
     
-    K[Course] -->|composes| L[Module]
-    L -->|composes| M[Lesson]
+    class TransactionLogger {
+        +create_transaction()
+        +log_transaction()
+    }
     
-    N[BaseInterface] -->|implemented by| O[AIModelProviderInterface]
-    N -->|implemented by| P[ContentAnalysisInterface]
+    class BaseInterface {
+        +register_interface()
+        +validate_implementation()
+    }
     
-    Q[AuthorizationManager] -->|secures| R[BatchController]
-    Q -->|protects| S[Course]
-    
-    T[TransactionLogger] -->|logs| U[ComponentRegistry]
-    T -->|monitors| V[IntegrationHealth]
+    EventBus --> ComponentRegistry : Notifies component changes
+    ComponentRegistry --> BaseInterface : Manages interface implementations
+    BatchController --> EventBus : Emits progress events
+    TransactionLogger --> Component : Inherits from
+    AIInterface --> BaseInterface : Implements
+    Course --> Module : 1..*
+    Module --> Lesson : 1..*
+    UserPermissions --> Role : Aggregates
 ```
 
 Key Relationships:
-- Event hierarchy forms foundation of system communication
-- ComponentRegistry ↔ EventBus circular dependency for lifecycle management
-- BatchController coordinates across UploadService/ValidationFramework
-- Course model aggregates multiple domain entities
-- Interfaces define contracts between core and integration components
-- Monitoring system observes all critical components via health checks
+- **Event Flow**: ComponentRegistry → EventBus → TransactionLogger
+- **Dependency Chain**: BatchController → UploadService → ValidationFramework → AIInterface
+- **Interface Hierarchy**: 14 BaseInterface implementations with version constraints
+- **Data Model**: Course aggregation tree with SQLAlchemy relationships
+- **Authorization**: Role-based permissions with inheritance (DAG structure)
+
+This architecture analysis reveals a well-structured system with strong emphasis on observability and extensibility, particularly through its eventing and component registration systems. The main architectural debt appears in the event type hierarchy and serialization approaches, which could benefit from standardization.
