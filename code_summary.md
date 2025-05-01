@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 266
+Total Python files: 272
 
 ## Table of Contents
 
@@ -330,6 +330,13 @@ Total Python files: 266
 │   │   │   ├── test_parser.py
 │   │   │   └── __init__.py
 │   │   └── __init__.py
+│   ├── comprehensive
+│   │   ├── __init__.py
+│   │   ├── test_end_to_end_workflows.py
+│   │   ├── test_load_simulation.py
+│   │   ├── test_security_checks.py
+│   │   ├── test_data_consistency.py
+│   │   └── conftest.py
 │   ├── __init__.py
 │   ├── conftest.py
 │   └── metadata_store_tests.py
@@ -505,9 +512,9 @@ Depends on: app/models/topic.py, integrations/events/ev...
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
-- **app\models\content.py** depends on: integrations\events\event_bus.py, app\models\course.py, integrations\events\event_types.py
+- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **app\models\content.py** depends on: integrations\events\event_types.py, app\models\course.py, integrations\events\event_bus.py
 
 
 ## Detailed Code Analysis
@@ -1379,6 +1386,54 @@ by orchestration and integration components.
 
 
 
+### app\core\auth\authentication.py
+
+**Classes:**
+
+- `AuthEvent`
+ (inherits from: Event)
+
+
+  Event representing authentication-related changes (login, logout, failure).
+
+  Methods: `__init__()`
+
+- `AuthenticationProvider`
+ (inherits from: ABC)
+
+
+  Interface for authentication providers.
+
+  Methods: `authenticate()`
+
+- `LocalAuthenticationProvider`
+ (inherits from: AuthenticationProvider)
+
+
+  Simple authentication provider with in-memory user verification and event emission.
+
+  Methods: `__init__()`, `authenticate()`, `logout()`
+
+- `MFAProvider`
+
+
+  Simple TOTP-like provider for MFA codes — placeholder, extend for hardware, SMS/email.
+
+  Methods: `__init__()`, `generate_code()`, `verify_code()`
+
+- `AdminAuthService`
+
+
+  Methods: `__init__()`, `authenticate_admin()`, `log_activity()`, `enforce_permission()`, `get_activity_log()`
+
+- `AdminRoles`
+
+
+- `AdminPermissions`
+
+
+
+
 ### app\models\metadata_manager.py
 
 **Classes:**
@@ -1461,54 +1516,6 @@ and operational capability.
   System for tracking component status changes over time.
 
   Methods: `__init__()`, `register_status_provider()`, `unregister_status_provider()`, `update_component_status()`, `update_all_statuses()`, ... (8 more)
-
-
-
-### app\core\auth\authentication.py
-
-**Classes:**
-
-- `AuthEvent`
- (inherits from: Event)
-
-
-  Event representing authentication-related changes (login, logout, failure).
-
-  Methods: `__init__()`
-
-- `AuthenticationProvider`
- (inherits from: ABC)
-
-
-  Interface for authentication providers.
-
-  Methods: `authenticate()`
-
-- `LocalAuthenticationProvider`
- (inherits from: AuthenticationProvider)
-
-
-  Simple authentication provider with in-memory user verification and event emission.
-
-  Methods: `__init__()`, `authenticate()`, `logout()`
-
-- `MFAProvider`
-
-
-  Simple TOTP-like provider for MFA codes — placeholder, extend for hardware, SMS/email.
-
-  Methods: `__init__()`, `generate_code()`, `verify_code()`
-
-- `AdminAuthService`
-
-
-  Methods: `__init__()`, `authenticate_admin()`, `log_activity()`, `enforce_permission()`, `get_activity_log()`
-
-- `AdminRoles`
-
-
-- `AdminPermissions`
-
 
 
 
@@ -6265,6 +6272,27 @@ for resource discovery integration testing.
 
 
 
+### tests\comprehensive\test_load_simulation.py
+
+**Description:**
+
+Load & Concurrency Simulation Tests
+-------------------------------------
+Simulate multiple users, bulk uploads, concurrent AI queries, etc.
+Designed for performance and stress testing (with or without pytest-xdist).
+
+**Functions:**
+
+- `simulate_user_enrollment(user_id)`
+
+- `test_bulk_user_enrollment(monkeypatch)`
+
+- `simulate_ai_chat_session(user_id, message)`
+
+- `test_concurrent_ai_sessions()`
+
+
+
 ### app\core\db\__init__.py
 
 **Description:**
@@ -6386,6 +6414,26 @@ This file should be saved as /tests/core/search/test_semantic_backend.py accordi
 - `test_shortening_applies_if_context_requests()`
 
 - `test_no_shortening_if_length_ok()`
+
+
+
+### tests\comprehensive\conftest.py
+
+**Description:**
+
+Shared Fixtures for Comprehensive Test Suite
+---------------------------------------------
+This file provides shared pytest fixtures for authentication, user and admin
+setup, test data (courses, content), and API clients.
+All tests in /tests/comprehensive/ can use these.
+
+**Functions:**
+
+- `student_user()`
+
+- `admin_user()`
+
+- `auth_client()`
 
 
 
@@ -6537,6 +6585,57 @@ Requires: event bus to be started (`await EventBus().start()`).
 - `test_extract_tables_unsupported()`
 
 - `test_extract_diagrams_placeholder()`
+
+
+
+### tests\comprehensive\test_end_to_end_workflows.py
+
+**Description:**
+
+Comprehensive End-to-End Workflow Tests
+-----------------------------------------
+Covers real user stories that exercise the entire stack,
+including authentication, content, upload, AI, and admin flows.
+
+**Functions:**
+
+- `test_student_course_enrollment_and_quiz_flow()`
+
+- `test_admin_uploads_and_searchable_content_flow()`
+
+
+
+### tests\comprehensive\test_security_checks.py
+
+**Description:**
+
+Security & Permission Tests for Admin/API Interfaces
+-----------------------------------------------------
+- Tests for privilege escalation, forbidden actions, API/data leaks, etc.
+- Leverage app.core.auth.authorization and API endpoints.
+
+**Functions:**
+
+- `test_forbidden_admin_action_as_student()`
+
+- `test_api_endpoint_requires_authentication()`
+
+
+
+### tests\comprehensive\test_data_consistency.py
+
+**Description:**
+
+Cross-Component Data Consistency Tests
+----------------------------------------
+Validate that transactions and updates propagate correctly across subsystems:
+- Database, event bus, cache, UI reflection, search index coherence, etc.
+
+**Functions:**
+
+- `test_enrollment_consistency_across_system()`
+
+- `test_role_change_propagates_to_permissions_and_ui()`
 
 
 
@@ -7053,6 +7152,10 @@ to support pytest discovery and modular test extensions.
 
 
 
+### tests\comprehensive\__init__.py
+
+
+
 ### tools\integration_monitor\__init__.py
 
 **Description:**
@@ -7095,140 +7198,130 @@ Here's the architectural enhancement to add to the summary:
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows an event-driven microservices architecture with modular components. Key architectural characteristics:
+The system follows a layered event-driven architecture with modular components:
 
-- **Core Pillars**:
-  - Event Bus (Pub/Sub) - Central nervous system using EventBus singleton
-  - Component Registry - Global service directory via ComponentRegistry
-  - Modular Interfaces - Pluggable components using BaseInterface hierarchy
-  - Batch Processing - Asynchronous pipeline architecture in BatchController
+```
+┌───────────────────────┐
+│       App Layer       │
+│  (Domain Models/UI)   │  ← Course/Content Models, Authorization
+└───────────┬───────────┘
+            │
+┌───────────▼───────────┐
+│ Integration Layer     │  ← Event Bus, Component Registry
+│  (Cross-Cutting)      │  ← Interfaces, Monitoring
+└───────────┬───────────┘
+            │
+┌───────────▼───────────┐
+│ Core Services Layer   │  ← Batch Processing, AI Services
+│ (Infrastructure)      │  ← Persistence, Transaction Management
+└───────────────────────┘
+```
 
-- **Data Flow**:
-  1. UI/External Triggers → Event Bus → Component Registry → AI Services
-  2. Batch Operations → Transaction Logger → Event Bus → Monitoring
-
-- **Critical Subsystems**:
-  - Event System (35+ event types across 9 categories)
-  - Component Lifecycle Management
-  - Educational Content Graph (Course→Module→Lesson→Quiz)
-  - AI Service Orchestration
-  - Distributed Transaction Tracking
-
-- **Cross-Cutting Concerns**:
-  - Transaction Logger (ACID-compliant operation tracking)
-  - Semantic Versioning (ComponentRegistry + InterfaceVersion)
-  - Hierarchical Authorization (RBAC with inheritance)
+Key Architectural Characteristics:
+- Event-driven communication via central EventBus (publish-subscribe)
+- Component-based architecture with registry pattern (ComponentRegistry)
+- Plugin architecture through Interface implementations
+- Horizontal layers with vertical integration domains (AI, Storage, Auth)
+- Asynchronous batch processing with progress tracking
+- Type-safe event system with hierarchical categories
 
 ### 2. Identified Design Patterns
-| Pattern                | Implementation Examples                          | Purpose                                      |
-|------------------------|-------------------------------------------------|----------------------------------------------|
-| Singleton              | EventBus, ComponentRegistry                    | System-wide single instance management       |
-| Publisher-Subscriber   | EventBus with 35+ event types                   | Decoupled component communication           |
-| Registry               | ComponentRegistry with 71 registration logic    | Central service discovery                   |
-| Abstract Factory       | BaseInterface → AIInterface implementations     | Cross-provider AI service abstraction        |
-| Strategy               | ValidationFramework in BatchController         | Interchangeable validation algorithms       |
-| Decorator              | @require_permission in authorization.py         | Dynamic permission checks                   |
-| Observer               | BatchUploadListener ←→ BatchController         | Progress monitoring                         |
-| State                  | ComponentState (6 lifecycle states)            | Component lifecycle management              |
-| Composite              | Course→Module→Lesson hierarchy                 | Educational content representation          |
 
-### 3. Refactoring Opportunities
-1. **Event System Consolidation**:
-   - Merge EventType enum (98 LOC) with category-specific classes
-   - Create EventTypeBuilder for dynamic event registration
-   - Add event schema versioning to Event base class
+| Pattern             | Implementation Examples                          | Purpose                                      |
+|---------------------|--------------------------------------------------|----------------------------------------------|
+| Singleton           | EventBus, ComponentRegistry                     | System-wide single instance management       |
+| Observer            | EventBus subscribers                            | Loose coupling for event notifications       |
+| Registry            | ComponentRegistry                               | Central component management                 |
+| Strategy            | AIInterface implementations                     | Interchangeable AI algorithms                |
+| Decorator           | @require_permission in authorization            | Dynamic authorization checks                 |
+| Factory             | Component creation via registry                 | Standardized component instantiation         |
+| Template Method     | BatchController processing steps                | Reusable batch operation workflow            |
+| Composite           | Course->Module->Lesson hierarchy                | Tree structure for educational content       |
+| Memento             | TransactionLogger snapshots                     | Transaction state preservation               |
 
-2. **Component Registry Improvements**:
-   - Unify register_component/register_component_instance methods
-   - Add dependency resolution graph visualization
-   - Implement component sandboxing for safe unregistering
+### 3. Refactoring & Improvement Opportunities
 
-3. **Model Layer Optimization**:
-   - Combine Course ↔ CourseModel duplicate representations
-   - Add ContentVersioning mixin for audit trails
-   - Implement SQLAlchemy event hooks for auto-indexing
+1. **Event System Consolidation**
+- Problem: Duplication between EventType enum and category-specific classes
+- Solution: Convert to hierarchical enum structure with auto-registration
 
-4. **Batch Processing**:
-   - Extract validation framework dependency
-   - Add circuit breaker pattern for upload failures
-   - Implement chunked upload strategy for large files
+2. **Component Lifecycle Management**
+- Problem: Mixed test/production APIs in ComponentRegistry
+- Solution: Introduce ComponentFactory with strict interface
 
-5. **Interface System**:
-   - Add interface compatibility matrix
-   - Implement automatic version negotiation
-   - Add interface health monitoring
+3. **Batch Processing Optimization**
+- Problem: Mixed sync/async in BatchController
+- Solution: Implement pure async pipeline with backpressure control
+
+4. **Model Serialization**
+- Problem: Inconsistent serialize() methods across models
+- Solution: Introduce unified SerializationStrategy interface
+
+5. **Event Type Safety**
+- Problem: String-based event type references
+- Solution: Generate protocol buffers/pydantic models from EventType
+
+6. **Dependency Management**
+- Problem: Direct EventBus references in models
+- Solution: Introduce dependency injection container
 
 ### 4. Critical Path Analysis
-**Key Execution Paths**:
-1. Content Creation Flow:
-   UI → Course.create_from_template() → EventBus (CONTENT_CREATED) → 
-   AIInterface.content_analyzed() → VectorIndex.update()
 
-2. Batch Upload Critical Path:
-   BatchController.start_batch() → ValidationFramework.validate() → 
-   UploadService.upload() → TransactionLogger.persist_transaction()
+**Core System Initialization:**
+```
+ComponentRegistry → EventBus → Auth System → AI Interfaces → Batch Controllers
+```
 
-3. Component Initialization:
-   Component.__init__() → ComponentRegistry.register_component() → 
-   DependencyResolver.check_compatibility() → InterfaceBinding
+**Content Modification Flow:**
+```
+Course.update() → ContentEvent → EventBus → [Indexer, Analytics, Notifications]
+```
 
-4. AI Request Flow:
-   AIInterface → ModelProvider → CostCalculator → 
-   UsageTracker → ResponseFormatter
+**Batch Upload Process:**
+```
+BatchController → ValidationFramework → UploadService → EventBus → TransactionLogger
+```
 
-**Bottleneck Analysis**:
-- EventBus._notify_subscriber_threadsafe() shows mixed sync/async patterns
-- ComponentRegistry.check_component_compatibility() O(n²) complexity
-- Course.serialize() recursive model serialization
-- BatchController._process_batch() I/O-bound without parallelism
+**AI Request Handling:**
+```
+AIInterface → ModelProvider → UsageTracker → ResponseFormatter → EventBus
+```
 
-### 5. Class Relationships
+Key Performance Constraints:
+- EventBus thread contention during peak loads
+- Component dependency resolution during registration
+- Batch validation I/O bottlenecks
+- AI model cold-start latency
+
+### 5. Class/Module Relationships
 
 ```mermaid
 graph TD
-    %% Event System
-    Event --> SystemEvent
-    Event --> ContentEvent
-    Event --> AIEvent
-    EventBus -.-> ComponentRegistry
-    EventType -->|Used by| Event
+    EB[EventBus] -->|notifies| CR[ComponentRegistry]
+    CR -->|manages| COMP[Component]
+    COMP -->|implements| INTERFACE[BaseInterface]
+    INTERFACE -->|inherits| AI_INT[AIInterface]
     
-    %% Core Components
-    ComponentRegistry --> Component
-    Component -->|Depends on| BaseInterface
-    BaseInterface -->|Implemented by| AIInterface
+    COURSE[Course] -->|contains| MODULE[Module]
+    MODULE -->|contains| LESSON[Lesson]
     
-    %% Educational Model
-    Course --> Module
-    Module --> Lesson
-    Lesson --> Content
-    Content -->|Generates| ContentEvent
+    AUTH[Authorization] -->|uses| PERM[Permission]
+    AUTH -->|manages| ROLE[Role]
     
-    %% Batch Processing
-    BatchController --> UploadService
-    BatchController --> ValidationFramework
-    BatchController -->|Notifies| BatchUploadListener
+    BATCH[BatchController] -->|raises| BATCH_EV[BatchEvent]
+    BATCH_EV -->|inherits| EVENT[Event]
     
-    %% Authorization
-    AuthorizationManager --> Role
-    Role --> Permission
-    UserPermissions -->|Contains| Role
+    TRANS_LOG[TransactionLogger] -->|records| TRANS[Transaction]
+    TRANS -->|triggers| TRANS_EV[TransactionEvent]
     
-    %% Monitoring
-    TransactionLogger --> Transaction
-    Transaction -->|Generates| TransactionEvent
-    
-    %% AI System
-    AIInterface --> AIModelMetadata
-    AIInterface --> AIRequest
-    AIRequest -->|Processed by| AIModelProvider
+    INTERFACE -->|versioned by| IV[InterfaceVersion]
+    COMP -->|depends on| IV
 ```
 
-**Key Relationships**:
-- **Event System**: 15 event types inherit from base Event class
-- **Component Registry**: Manages 1:many relationships between Components
-- **Model Layer**: Course aggregates 3 levels of content (Module→Lesson→Content)
-- **Batch Processing**: Controller coordinates between 4 services
-- **AI System**: Interface hierarchy supports 5+ AI provider types
-- **Authorization**: Role-based permissions with inheritance
+Key Relationships:
+- Event hierarchy: Event ← SystemEvent/ContentEvent/AIEvent
+- Component dependencies: Registry → Component → Interfaces
+- Authorization chain: User → Role → Permission
+- Content aggregation: Course → Module → Lesson → Quiz
+- AI workflow: Request → Model → Response → Tracking
 ```
