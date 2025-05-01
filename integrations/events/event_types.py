@@ -57,6 +57,12 @@ class EventType(enum.Enum):
     BATCH_PROGRESS = "batch.progress"
     BATCH_COMPLETED = "batch.completed"
     BATCH_VALIDATION_FAILED = "batch.validation_failed"
+    
+    # Enrollment events
+    ENROLLMENT_REQUESTED = "enrollment.requested"
+    ENROLLMENT_APPROVED = "enrollment.approved"
+    ENROLLMENT_REJECTED = "enrollment.rejected"
+    ENROLLMENT_CANCELLED = "enrollment.cancelled"
 
 
 class EventPriority(enum.IntEnum):
@@ -78,6 +84,7 @@ class EventCategory(enum.Enum):
     AUTH = "auth"
     INTEGRATION = "integration"
     BATCH = "batch"
+    ENROLLMENT = "enrollment"
 
 
 @dataclass
@@ -204,6 +211,20 @@ class UIEvent(Event):
         )
 
 
+# Enrollment Events
+@dataclass
+class EnrollmentEvent(Event):
+    """Events related to course enrollment processes."""
+    def __init__(self, event_type: str, source_component: str, data: Dict[str, Any], **kwargs):
+        super().__init__(
+            event_type=event_type,
+            category=EventCategory.ENROLLMENT,
+            source_component=source_component,
+            data=data,
+            **kwargs
+        )
+
+
 # Common System Events
 class SystemEventType:
     """Common system event type constants."""
@@ -252,3 +273,12 @@ class BatchEventType:
     PROGRESS = "batch.progress"
     COMPLETED = "batch.completed"
     VALIDATION_FAILED = "batch.validation_failed"
+
+
+# Common Enrollment Events
+class EnrollmentEventType:
+    """Common enrollment event type constants."""
+    REQUESTED = "enrollment.requested"
+    APPROVED = "enrollment.approved"
+    REJECTED = "enrollment.rejected"
+    CANCELLED = "enrollment.cancelled"

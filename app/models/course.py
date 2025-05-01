@@ -2,14 +2,14 @@
 Course model for AeroLearn AI.
 
 Location: app/models/course.py
-Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
+Depends on: integrations/events/event_bus.py, integrations/events/event_types.py, app/models/user.py
 
 Covers ORM models, relationships, validation, serialization, and event emission.
 """
 
 from sqlalchemy import (
     Column, Integer, String, ForeignKey, Boolean,
-    Table, Text, UniqueConstraint, DateTime
+    Table, Text, UniqueConstraint, DateTime, Enum as SQLEnum, JSON
 )
 from sqlalchemy.orm import relationship, backref, Session
 from app.models.base import Base
@@ -17,6 +17,15 @@ from integrations.events.event_bus import EventBus
 from integrations.events.event_types import ContentEvent, ContentEventType, EventPriority
 import re
 import datetime
+import enum
+from typing import List, Optional, Dict
+
+class EnrollmentStatus(enum.Enum):
+    """Status of an enrollment request."""
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    CANCELLED = "cancelled"
 
 # Association table for course prerequisites (M2M self-relationship)
 course_prerequisite = Table(
@@ -111,7 +120,8 @@ class Course(Base):
             "is_template": self.is_template,
             "template_parent_id": self.template_parent_id,
             "is_archived": self.is_archived,
-            "archived_at": self.archived_at.isoformat() if self.archived_at else None
+            "archived_at": self.archived_at.isoformat() if self.archived_at else None,
+            "enrollment_count": len([e for e in self.enrollments if e.status == EnrollmentStatus.APPROVED])
         }
 
     def validate(self):
@@ -186,7 +196,7 @@ class Course(Base):
         session.commit()
         return new_course
         
-    def enroll_bulk(self, session: Session, user_ids: list[int]):
+    def enroll_bulk(self, session: Session, user_ids: list[int], approver_id: int = None):
         """Bulk enroll users; skip already-enrolled."""
         from sqlalchemy import select
         
@@ -200,11 +210,121 @@ class Course(Base):
                 enrollment = Enrollment(
                     user_id=user_id, 
                     course_id=self.id, 
-                    enrolled_at=datetime.datetime.utcnow()
+                    enrolled_at=datetime.datetime.utcnow(),
+                    status=EnrollmentStatus.APPROVED if approver_id else EnrollmentStatus.PENDING,
+                    approved_by=approver_id,
+                    status_history=[{
+                        "status": EnrollmentStatus.APPROVED.value if approver_id else EnrollmentStatus.PENDING.value,
+                        "at": datetime.datetime.utcnow().isoformat(),
+                        "by": approver_id
+                    }]
                 )
                 session.add(enrollment)
                 
         session.commit()
+        
+    def request_enrollment(self, session: Session, user_id: int):
+        """Request enrollment in this course."""
+        from sqlalchemy import select
+        
+        # Check if enrollment already exists
+        existing = session.execute(
+            select(Enrollment).filter_by(user_id=user_id, course_id=self.id)
+        ).first()
+        
+        if existing:
+            return existing[0]  # Return existing enrollment
+            
+        enrollment = Enrollment(
+            user_id=user_id,
+            course_id=self.id,
+            enrolled_at=datetime.datetime.utcnow(),
+            status=EnrollmentStatus.PENDING,
+            status_history=[{
+                "status": EnrollmentStatus.PENDING.value,
+                "at": datetime.datetime.utcnow().isoformat(),
+                "by": user_id
+            }]
+        )
+        session.add(enrollment)
+        session.commit()
+        return enrollment
+        
+    def approve_enrollment(self, session: Session, enrollment_id: int, approver_id: int):
+        """Approve an enrollment request."""
+        from sqlalchemy import select
+        
+        enrollment = session.execute(
+            select(Enrollment).filter_by(id=enrollment_id, course_id=self.id)
+        ).scalar_one_or_none()
+        
+        if enrollment and enrollment.status == EnrollmentStatus.PENDING:
+            enrollment.approve(approver_id)
+            session.commit()
+            return enrollment
+        return None
+        
+    def reject_enrollment(self, session: Session, enrollment_id: int, approver_id: int):
+        """Reject an enrollment request."""
+        from sqlalchemy import select
+        
+        enrollment = session.execute(
+            select(Enrollment).filter_by(id=enrollment_id, course_id=self.id)
+        ).scalar_one_or_none()
+        
+        if enrollment and enrollment.status == EnrollmentStatus.PENDING:
+            enrollment.reject(approver_id)
+            session.commit()
+            return enrollment
+        return None
+        
+    def cancel_enrollment(self, session: Session, enrollment_id: int, user_id: int):
+        """Cancel an enrollment request."""
+        from sqlalchemy import select
+        
+        enrollment = session.execute(
+            select(Enrollment).filter_by(id=enrollment_id, course_id=self.id)
+        ).scalar_one_or_none()
+        
+        if enrollment and enrollment.status == EnrollmentStatus.PENDING:
+            enrollment.cancel(user_id)
+            session.commit()
+            return enrollment
+        return None
+        
+    def get_enrollment_requests(self, session: Session, status: EnrollmentStatus = None):
+        """Get all enrollment requests for this course, optionally filtered by status."""
+        from sqlalchemy import select
+        
+        query = select(Enrollment).filter_by(course_id=self.id)
+        if status:
+            query = query.filter_by(status=status)
+            
+        return session.execute(query).scalars().all()
+        
+    def is_enrolled(self, session: Session, user_id: int) -> bool:
+        """Check if a user is enrolled in this course."""
+        from sqlalchemy import select
+        
+        enrollment = session.execute(
+            select(Enrollment).filter_by(
+                user_id=user_id, 
+                course_id=self.id,
+                status=EnrollmentStatus.APPROVED
+            )
+        ).scalar_one_or_none()
+        
+        return enrollment is not None
+        
+    def enrollment_status(self, session: Session, user_id: int) -> Optional[EnrollmentStatus]:
+        """Get enrollment status for a user."""
+        from sqlalchemy import select
+        
+        enrollment = session.execute(
+            select(Enrollment).filter_by(user_id=user_id, course_id=self.id)
+        ).scalar_one_or_none()
+        
+        return enrollment.status if enrollment else None
 
 # Module prerequisites (self-ref)
 module_prerequisite = Table(
@@ -295,14 +415,70 @@ class Enrollment(Base):
     course_id = Column(Integer, ForeignKey('course.id'))
     user_id = Column(Integer, ForeignKey('user.id'))
     enrolled_at = Column(DateTime, default=datetime.datetime.utcnow)
+    status = Column(SQLEnum(EnrollmentStatus), default=EnrollmentStatus.PENDING)
+    approved_by = Column(Integer, ForeignKey('user.id'), nullable=True)
+    status_history = Column(JSON, default=list)
     
     # Relationship to course
     course = relationship("Course", back_populates="enrollments")
-    # Relationship to user
-    user = relationship("User", back_populates="enrollments")
+    # Relationship to user (student)
+    user = relationship("User", 
+                        back_populates="enrollments", 
+                        foreign_keys=[user_id])
+    # Relationship to approver (professor/admin)
+    approver = relationship("User", 
+                           back_populates="approved_enrollments", 
+                           foreign_keys=[approved_by])
     
     def __repr__(self):
-        return f"<Enrollment(id={self.id}, user_id={self.user_id}, course_id={self.course_id})>"
+        return f"<Enrollment(id={self.id}, user_id={self.user_id}, course_id={self.course_id}, status={self.status})>"
+    
+    def approve(self, approver_id: int):
+        """Approve an enrollment request."""
+        self.status = EnrollmentStatus.APPROVED
+        self.approved_by = approver_id
+        if not self.status_history:
+            self.status_history = []
+        self.status_history.append({
+            "status": self.status.value,
+            "at": datetime.datetime.utcnow().isoformat(),
+            "by": approver_id
+        })
+    
+    def reject(self, approver_id: int):
+        """Reject an enrollment request."""
+        self.status = EnrollmentStatus.REJECTED
+        self.approved_by = approver_id
+        if not self.status_history:
+            self.status_history = []
+        self.status_history.append({
+            "status": self.status.value,
+            "at": datetime.datetime.utcnow().isoformat(),
+            "by": approver_id
+        })
+    
+    def cancel(self, user_id: int):
+        """Cancel an enrollment request."""
+        self.status = EnrollmentStatus.CANCELLED
+        if not self.status_history:
+            self.status_history = []
+        self.status_history.append({
+            "status": self.status.value,
+            "at": datetime.datetime.utcnow().isoformat(),
+            "by": user_id
+        })
+    
+    def serialize(self):
+        """Serialize enrollment."""
+        return {
+            "id": self.id,
+            "course_id": self.course_id,
+            "user_id": self.user_id,
+            "enrolled_at": self.enrolled_at.isoformat() if self.enrolled_at else None,
+            "status": self.status.value,
+            "approved_by": self.approved_by,
+            "status_history": self.status_history
+        }
 
 # CourseModel for backward compatibility
 class CourseModel:

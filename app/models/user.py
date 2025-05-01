@@ -31,7 +31,18 @@ class User(Base):
     
     # Relationships
     profiles = relationship("UserProfile", back_populates="user")
-    enrollments = relationship("Enrollment", back_populates="user")
+    # Disambiguate relationship (multiple FKs to user.id in Enrollment: user_id and approved_by)
+    enrollments = relationship(
+        "Enrollment", 
+        back_populates="user",
+        foreign_keys="Enrollment.user_id"      # only where user is the student
+    )
+    # For enrollments approved by this user (as approver):
+    approved_enrollments = relationship(
+        "Enrollment",
+        back_populates="approver",
+        foreign_keys="Enrollment.approved_by"
+    )
     
     def __repr__(self):
         return f"<User(id={self.id}, username='{self.username}')>"

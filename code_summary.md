@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 281
+Total Python files: 284
 
 ## Table of Contents
 
@@ -60,7 +60,8 @@ Total Python files: 281
 │   │   │   ├── api_client.py
 │   │   │   ├── deepseek_client.py
 │   │   │   ├── google_drive_client.py
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   └── course_api.py
 │   │   ├── upload
 │   │   │   ├── test_upload_service.py
 │   │   │   ├── __init__.py
@@ -121,6 +122,8 @@ Total Python files: 281
 │   │   ├── integration
 │   │   │   ├── integration_coordinator.py
 │   │   │   └── __init__.py
+│   │   ├── enrollment
+│   │   │   └── enrollment_service.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -277,7 +280,8 @@ Total Python files: 281
 │   │   ├── test_relationship_mapping_integration.py
 │   │   ├── test_semantic_search_integration.py
 │   │   ├── test_resource_discovery_integration.py
-│   │   └── test_week2_integration.py
+│   │   ├── test_week2_integration.py
+│   │   └── test_enrollment.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -421,9 +425,20 @@ Event type definitions for the AeroLearn AI event system.
 This module defines the event classes and types used throughout the system for
 inter-compon...
 
-- Classes: 15
+- Classes: 17
 - Functions: 0
-- Dependency Score: 98.00
+- Dependency Score: 105.00
+
+### app\models\course.py
+
+Course model for AeroLearn AI.
+
+Location: app/models/course.py
+Depends on: integrations/events/event_bus.py, integrations/events/event_types.py, app/m...
+
+- Classes: 6
+- Functions: 0
+- Dependency Score: 91.00
 
 ### integrations\registry\component_registry.py
 
@@ -435,19 +450,6 @@ tracking their lifecycle, depe...
 - Classes: 6
 - Functions: 0
 - Dependency Score: 71.00
-
-### app\models\course.py
-
-Course model for AeroLearn AI.
-
-Location: app/models/course.py
-Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
-
-Cover...
-
-- Classes: 5
-- Functions: 0
-- Dependency Score: 68.00
 
 ### integrations\events\event_bus.py
 
@@ -521,9 +523,9 @@ making it easier t...
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **app\core\auth\authentication.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
+- **app\core\auth\authentication.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
 
 
 ## Detailed Code Analysis
@@ -616,6 +618,14 @@ organizational clarity.
 
   Methods: `__init__()`
 
+- `EnrollmentEvent`
+ (inherits from: Event)
+
+
+  Events related to course enrollment processes.
+
+  Methods: `__init__()`
+
 - `SystemEventType`
 
 
@@ -640,6 +650,63 @@ organizational clarity.
 
 
   Common batch processing event type constants.
+
+- `EnrollmentEventType`
+
+
+  Common enrollment event type constants.
+
+
+
+### app\models\course.py
+
+**Description:**
+
+Course model for AeroLearn AI.
+
+Location: app/models/course.py
+Depends on: integrations/events/event_bus.py, integrations/events/event_types.py, app/models/user.py
+
+Covers ORM models, relationships, validation, serialization, and event emission.
+
+**Classes:**
+
+- `EnrollmentStatus`
+ (inherits from: enum.Enum)
+
+
+  Status of an enrollment request.
+
+- `Course`
+ (inherits from: Base)
+
+
+  Methods: `__repr__()`, `serialize()`, `validate()`, `archive()`, `restore()`, ... (9 more)
+
+- `Module`
+ (inherits from: Base)
+
+
+  Methods: `__repr__()`, `serialize()`, `copy()`
+
+- `Lesson`
+ (inherits from: Base)
+
+
+  Methods: `__repr__()`, `serialize()`
+
+- `Enrollment`
+ (inherits from: Base)
+
+
+  Enrollment model for tracking user enrollments in courses.
+
+  Methods: `__repr__()`, `approve()`, `reject()`, `cancel()`, `serialize()`
+
+- `CourseModel`
+
+
+  Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
 
 
 
@@ -696,52 +763,6 @@ tracking their lifecycle, dependencies, and version information.
   Central registry for AeroLearn AI system components.
 
   Methods: `__new__()`, `__init__()`, `register_component()`, `register_component_instance()`, `unregister_component()`, ... (8 more)
-
-
-
-### app\models\course.py
-
-**Description:**
-
-Course model for AeroLearn AI.
-
-Location: app/models/course.py
-Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
-
-Covers ORM models, relationships, validation, serialization, and event emission.
-
-**Classes:**
-
-- `Course`
- (inherits from: Base)
-
-
-  Methods: `__repr__()`, `serialize()`, `validate()`, `archive()`, `restore()`, ... (2 more)
-
-- `Module`
- (inherits from: Base)
-
-
-  Methods: `__repr__()`, `serialize()`, `copy()`
-
-- `Lesson`
- (inherits from: Base)
-
-
-  Methods: `__repr__()`, `serialize()`
-
-- `Enrollment`
- (inherits from: Base)
-
-
-  Enrollment model for tracking user enrollments in courses.
-
-  Methods: `__repr__()`
-
-- `CourseModel`
-
-
-  Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
 
 
 
@@ -1694,6 +1715,44 @@ and handle events from the event bus. It also defines the EventFilter interface 
 
 
 
+### app\models\user.py
+
+**Description:**
+
+User model for AeroLearn AI.
+
+Location: /app/models/user.py (canonical User model for FK integrity)
+This must be the single source of User ORM, with __tablename__ = 'user'
+All FK and relationship references must import/use this model and tablename.
+
+Implements validation, event integration, and serialization.
+Includes admin roles, MFA support, and permission checks.
+
+**Classes:**
+
+- `User`
+ (inherits from: Base)
+
+
+  Canonical User model with tablename 'user' for FK references.
+
+  Methods: `__repr__()`
+
+- `UserProfile`
+ (inherits from: Base)
+
+
+  User profile information.
+
+- `UserModel`
+
+
+  Wrapper class for User entity with business logic.
+
+  Methods: `__init__()`, `id()`, `username()`, `email()`, `is_active()`, ... (8 more)
+
+
+
 ### tests\integration\interfaces\test_storage_interface.py
 
 **Classes:**
@@ -1996,44 +2055,6 @@ Integration: Hooks into EventBus system for notification and validation events.
 **Functions:**
 
 - `_add_project_root_to_syspath()`
-
-
-
-### app\models\user.py
-
-**Description:**
-
-User model for AeroLearn AI.
-
-Location: /app/models/user.py (canonical User model for FK integrity)
-This must be the single source of User ORM, with __tablename__ = 'user'
-All FK and relationship references must import/use this model and tablename.
-
-Implements validation, event integration, and serialization.
-Includes admin roles, MFA support, and permission checks.
-
-**Classes:**
-
-- `User`
- (inherits from: Base)
-
-
-  Canonical User model with tablename 'user' for FK references.
-
-  Methods: `__repr__()`
-
-- `UserProfile`
- (inherits from: Base)
-
-
-  User profile information.
-
-- `UserModel`
-
-
-  Wrapper class for User entity with business logic.
-
-  Methods: `__init__()`, `id()`, `username()`, `email()`, `is_active()`, ... (8 more)
 
 
 
@@ -3434,6 +3455,29 @@ Location: /app/core/db/content_db.py
 
 
 
+### app\core\enrollment\enrollment_service.py
+
+**Description:**
+
+Location: /app/core/enrollment/enrollment_service.py
+
+Handles all business logic and orchestration for course enrollment workflow.
+
+**Classes:**
+
+- `EnrollmentService`
+
+
+  Service class for managing course enrollments and enrollment requests.
+
+  Methods: `__init__()`, `browse_courses()`, `search_courses()`, `request_enrollment()`, `approve_enrollment()`, ... (4 more)
+
+
+
+### app\models\base.py
+
+
+
 ### tests\ui\test_component_architecture.py
 
 **Classes:**
@@ -3918,10 +3962,6 @@ Typical usage:
 - `score_resource(resource, course)`
 
   Compute a relevance/quality score between this resource and the course.
-
-
-
-### app\models\base.py
 
 
 
@@ -5141,6 +5181,34 @@ Purpose:
 
 
 
+### tests\integration\test_enrollment.py
+
+**Functions:**
+
+- `db_session()`
+
+  Creates a new database session (and schema) for each test.
+
+- `dummy_user(db_session)`
+
+- `dummy_approver(db_session)`
+
+- `dummy_course(db_session)`
+
+- `service(db_session, dummy_course)`
+
+- `test_request_enrollment(service, db_session, dummy_user, dummy_course)`
+
+- `test_approve_enrollment(service, db_session, dummy_user, dummy_approver, dummy_course)`
+
+- `test_reject_enrollment(service, db_session, dummy_user, dummy_approver, dummy_course)`
+
+- `test_cancel_enrollment(service, db_session, dummy_user, dummy_course)`
+
+- `test_get_enrollment_status(service, db_session, dummy_user, dummy_approver, dummy_course)`
+
+
+
 ### app\core\db\schema.py
 
 **Description:**
@@ -5632,6 +5700,47 @@ Per project structure (see code_summary.md), all test content/data factories go 
 - `create_sample_repositories()`
 
   Returns (repositories, users_dict, auth_manager_mock) for semantic search integration tests.
+
+
+
+### app\core\api\course_api.py
+
+**Description:**
+
+Location: /app/core/api/course_api.py (NEW FILE)
+
+Provides REST API endpoints for course browsing, searching, enrollment request/approval/cancel,
+integrating with EnrollmentService and Course model.
+
+**Functions:**
+
+- `browse_courses()`
+
+  Browse all courses.
+
+- `search_courses(query)`
+
+  Search courses by keyword.
+
+- `request_enrollment(course_id, user_id)`
+
+  Request enrollment in a course.
+
+- `approve_enrollment(course_id, user_id, approver_id)`
+
+  Approve a pending enrollment request.
+
+- `reject_enrollment(course_id, user_id, approver_id)`
+
+  Reject an enrollment request.
+
+- `cancel_enrollment(course_id, user_id)`
+
+  Cancel an enrollment request (by student).
+
+- `get_enrollment_status(course_id, user_id)`
+
+  Get current enrollment status for this user/course.
 
 
 
@@ -7400,141 +7509,124 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here's the architectural enhancement to add to the summary:
+Here's the architectural enhancement to be added to the summary:
 
-```markdown
+---
+
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows a modular event-driven architecture with three main layers:
+The system follows a layered event-driven architecture with modular components:
 
-1. **Core Application Layer**:
-   - Domain models (Course, Module, Lesson)
-   - Business logic services (Authentication, BatchController)
-   - Data persistence (SQLAlchemy models)
-
-2. **Integration Layer**:
-   - Event Bus (pub/sub system)
-   - Component Registry (service discovery)
-   - Interface System (contract-first implementations)
-   - Monitoring (TransactionLogger)
-
-3. **AI/ML Layer**:
-   - Model providers (via AIInterface)
-   - Content analysis pipelines
-   - Recommendation systems
+```
+[Presentation Layer] 
+    └─ UI Components → 
+        [Application Layer] 
+            ├─ Course Management 
+            ├─ Auth Services 
+            ├─ Batch Processing 
+            └─ AI Integration →
+                [Domain Layer] 
+                    ├─ Event Bus (Pub/Sub)
+                    ├─ Component Registry 
+                    ├─ Transaction Monitor 
+                    └─ Core Models →
+                        [Infrastructure Layer] 
+                            ├─ Database Abstraction 
+                            ├─ File Storage 
+                            └─ External Service Integration
+```
 
 Key architectural characteristics:
-- Event-driven communication between components
-- Strong component isolation via interface contracts
-- Semantic versioning for component dependencies
-- Hybrid sync/async operation support
-- Transactional integrity through cross-component logging
+- **Event-Carried State Transfer** through EventBus (integrations/events)
+- **Component Discovery Pattern** via ComponentRegistry (integrations/registry)
+- **Hexagonal Architecture** for AI integrations (interfaces/base_interface)
+- **CQRS Pattern** in batch processing (core/upload/batch_controller)
 
 ### 2. Identified Design Patterns
 
-| Pattern            | Implementation Examples                          | Purpose                                      |
-|--------------------|--------------------------------------------------|---------------------------------------------|
-| Singleton          | ComponentRegistry, EventBus                     | System-wide service access                  |
-| Observer           | EventBus subscribers                            | Decoupled event notification                |
-| Factory            | Event type hierarchy                            | Polymorphic event creation                  |
-| Strategy           | AIInterface implementations                     | Interchangeable AI providers                |
-| Decorator          | @require_permission, InterfaceImplementation    | Dynamic behavior extension                  |
-| Command            | BatchController operations                      | Encapsulate upload requests                 |
-| Registry           | ComponentRegistry                               | Central component management                |
-| Template Method     | BaseInterface.validate_implementation           | Enforcement of interface contracts          |
+| Pattern              | Implementation Example                          | Purpose                                                                 |
+|----------------------|-------------------------------------------------|-------------------------------------------------------------------------|
+| Singleton            | ComponentRegistry, EventBus                    | System-wide single instance management                                  |
+| Observer             | EventBus subscribers                           | Decoupled event notification system                                    |
+| Strategy             | AIInterface implementations                    | Interchangeable AI model providers                                      |
+| Factory              | Event class hierarchy                          | Polymorphic event creation based on category                           |
+| Decorator            | @interface_method in base_interface            | Method signature validation for interface implementations              |
+| Registry             | ComponentRegistry                              | Central component lifecycle management                                 |
+| Template Method      | BatchController processing pipeline            | Standardized batch validation/upload workflow                          |
 
 ### 3. Refactoring Opportunities
 
-1. **Event System Improvements**:
-   - Consolidate EventType enum and category-specific classes
-   - Add event versioning for schema evolution
-   - Implement dead-letter queue for failed event processing
+**Structural Improvements:**
+1. Event Inheritance Hierarchy
+   - Current: Duplicated constructor signatures in SystemEvent/ContentEvent
+   - Proposed: Abstract Base Event class with common fields + mixins
 
-2. **Component Registry Enhancements**:
-   - Split test-friendly APIs from production code
-   - Add dependency resolution engine
-   - Implement component health monitoring
+2. Component Registry Dependencies
+   - Issue: Tight coupling with EventBus for state notifications
+   - Solution: Introduce RegistryObserver interface
 
-3. **Interface System**:
-   - Separate interface registration from validation
-   - Add interface compatibility checks
-   - Implement automatic interface discovery
+3. Batch Processing Validation
+   - Current: ValidationFramework direct dependency in BatchController
+   - Better: Validation Strategy pattern with pluggable validators
 
-4. **Batch Processing**:
-   - Decouple validation from upload logic
-   - Add retry policies with exponential backoff
-   - Implement chunked processing for large batches
-
-5. **Authentication Flow**:
-   - Add protocol for OAuth/OIDC integration
-   - Implement credential rotation system
-   - Add session encryption support
+**Code Quality Improvements:**
+- Introduce EventSchema class (similar to CourseModel) for serialization validation
+- Replace multiple `select()` imports in course.py with consolidated SQLAlchemy import
+- Implement Circuit Breaker pattern in AIInterface for model availability
 
 ### 4. Critical Path Analysis
 
-**Key System Flows**:
-
-1. Event Processing Critical Path:
-```
-Event Producer → EventBus → Priority Queue → Subscriber Matching 
-→ Async/Sync Handler → TransactionLogger → (Optional) Persistence
-```
-
-2. Component Registration Flow:
-```
-Component Init → Registry Registration → Dependency Validation 
-→ Interface Binding → SystemEvent Emission → Availability Notification
-```
-
-3. Batch Upload Critical Path:
-```
-File Add → Validation Framework → Metadata Extraction → 
-Chunking → Parallel Upload → Progress Aggregation → 
-Cleanup → Completion Event
+**Core Flow: Content Modification**
+```mermaid
+graph TD
+    A[Course Modification] --> B[SQLAlchemy ORM]
+    B --> C[Emit ContentEvent]
+    C --> D[EventBus Distribution]
+    D --> E[Indexing Service]
+    D --> F[Notification Service]
+    D --> G[Audit Logger]
+    E --> H[VectorDB Update]
+    F --> I[User Notifications]
 ```
 
-**Performance Sensitive Areas**:
-- EventBus thread contention during peak loads
-- Component dependency resolution complexity (O(n²) potential)
-- BatchController's synchronous validation step
-- TransactionLogger's in-memory storage scaling
+**Key Integration Points:**
+1. EventBus throughput (67 handlers in event_bus.py)
+2. ComponentRegistry dependency resolution (71 component tracking)
+3. BatchController's thread safety in upload processing (65 concurrent operations)
+4. Authentication/AuthZ chain (62 auth handlers + 61 permission checks)
 
 ### 5. Class/Module Relationships
 
 ```mermaid
-graph TD
-    %% Core Relationships
-    EventBus -->|notifies| ComponentRegistry
-    ComponentRegistry -->|manages| Component
-    Component -->|implements| BaseInterface
-    BaseInterface -->|versioned by| InterfaceVersion
+graph LR
+    EventBus --> ComponentRegistry
+    ComponentRegistry --> AIInterface
+    ComponentRegistry --> BaseInterface
+    Course --> EventBus
+    Course --> Enrollment
+    BatchController --> UploadService
+    BatchController --> ValidationFramework
+    Authentication --> Authorization
+    Authentication --> EventBus
+    TransactionLogger --> ComponentRegistry
+    TransactionLogger --> EventBus
     
-    %% Domain Model Connections
-    Course -->|emits| ContentEvent
-    ContentEvent -->|published via| EventBus
-    Authentication -->|emits| AuthEvent
-    AuthEvent -->|handled by| Authorization
+    classDef core fill:#e6f3ff,stroke:#333;
+    classDef integration fill:#ffe6e6,stroke:#333;
+    classDef data fill:#e6ffe6,stroke:#333;
     
-    %% AI Subsystem
-    AIInterface -->|implemented by| AIModelProvider
-    AIModelProvider -->|uses| TransactionLogger
-    BatchController -->|depends on| AIInterface
-    
-    %% Infrastructure
-    TransactionLogger -->|logs to| ComponentRegistry
-    EventBus -->|persists via| TransactionLogger
-    
-    %% Cross-Cutting
-    ComponentRegistry -->|depends on| EventTypes
-    EventBus -->|uses| EventTypes
-    BaseInterface -->|validated by| ComponentRegistry
+    class EventBus,ComponentRegistry,BaseInterface integration
+    class Course,Enrollment,Authentication core
+    class BatchController,UploadService,ValidationFramework data
 ```
 
-**Key Relationships**:
-- EventBus acts as central nervous system connecting all components
-- ComponentRegistry serves as the system's service discovery hub
-- TransactionLogger provides cross-cutting observability
-- BaseInterface implementations form contract boundaries
-- Course model acts as core domain entity with event emission
-```
+**Key Dependencies:**
+- `EventBus` is the central nervous system (67 subscribers, 105 event types)
+- `ComponentRegistry` manages 71+ component relationships
+- `Course` model has 9 SQLAlchemy relationships and 14 management methods
+- `AIInterface` hierarchy supports 7 model types and 11 capabilities
+
+---
+
+This enhancement focuses on architectural patterns and system dynamics while avoiding duplication of the existing file structure documentation. Would you like me to expand on any particular aspect?
