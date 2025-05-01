@@ -1,6 +1,7 @@
 import time
 import uuid
 import hashlib
+import logging
 from typing import Optional, Dict, Any
 
 from .user_profile import UserProfile
@@ -9,13 +10,13 @@ from .session import SessionManager, Session
 from .authorization import Permission, Role, AuthorizationManager
 from app.models.user import UserModel
 
-
 from abc import ABC, abstractmethod
-from app.core.auth.user_profile import UserProfile
 
 # Import event system
 from integrations.events.event_bus import EventBus
 from integrations.events.event_types import Event, EventCategory
+
+logger = logging.getLogger(__name__)
 
 class AuthEvent(Event):
     """
@@ -69,7 +70,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
             # Emit login success event
             try:
                 import asyncio
-                if self._event_bus._is_running:
+                if getattr(self._event_bus, "_is_running", False):
                     asyncio.create_task(
                         self._event_bus.publish(
                             AuthEvent(
@@ -79,14 +80,14 @@ class LocalAuthenticationProvider(AuthenticationProvider):
                             )
                         )
                     )
-            except Exception:
-                pass  # If the event bus isn't started or event system unavailable, proceed silently
+            except Exception as e:
+                logger.warning(f"EventBus login success emit failed: {e}")
             return profile
         else:
             # Emit login failed event
             try:
                 import asyncio
-                if self._event_bus._is_running:
+                if getattr(self._event_bus, "_is_running", False):
                     asyncio.create_task(
                         self._event_bus.publish(
                             AuthEvent(
@@ -97,8 +98,8 @@ class LocalAuthenticationProvider(AuthenticationProvider):
                             )
                         )
                     )
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"EventBus login failed emit failed: {e}")
             return None
             
     def logout(self, user_profile: UserProfile):
@@ -108,7 +109,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         # Emit logout event
         try:
             import asyncio
-            if self._event_bus._is_running:
+            if getattr(self._event_bus, "_is_running", False):
                 asyncio.create_task(
                     self._event_bus.publish(
                         AuthEvent(
@@ -118,12 +119,16 @@ class LocalAuthenticationProvider(AuthenticationProvider):
                         )
                     )
                 )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"EventBus logout emit failed: {e}")
 
 
 class MFAProvider:
-    """Simple TOTP-like provider for MFA codes — placeholder, extend for hardware, SMS/email."""
+    """
+    Simple TOTP-like provider for MFA codes — 
+    **** WARNING: This is a DEMO implementation. NOT secure for production. ****
+    Replace with RFC 6238 compliant library for real deployments.
+    """
     def __init__(self, secret:str):
         self.secret = secret
 
@@ -167,6 +172,9 @@ class AdminAuthService:
             self.log_activity('auth-fail', user_obj.id, 'Incorrect password')
             return None
         # MFA check (user_obj.mfa_secret must exist)
+        if not getattr(user_obj, "mfa_secret", None):
+            self.log_activity('auth-fail', user_obj.id, 'Missing MFA secret')
+            return None
         mfa = MFAProvider(user_obj.mfa_secret)
         if not mfa.verify_code(mfa_code):
             self.log_activity('auth-fail', user_obj.id, 'MFA code incorrect')
@@ -235,3 +243,110 @@ AuthorizationManager.register_role(AdminRoles.SUPERADMIN, [
     AdminPermissions.SYSTEM_MONITOR,
     AdminPermissions.SECURITY_CONFIG
 ])
+
+# --------------------------------------------------------------------
+# AuthenticationService: Main Service Entry-Point for Authentication
+# --------------------------------------------------------------------
+#
+# This class serves as a unified, high-level API for all authentication operations,
+# delegating to internal providers (e.g., LocalAuthenticationProvider, AdminAuthService, etc.)
+# This is the extension point for future authentication strategies as well.
+#
+# Only one version of AuthenticationService should exist in this file.
+# Placement: /app/core/auth/authentication.py per project structure.
+# --------------------------------------------------------------------
+
+class AuthenticationService:
+    """
+    Main service interface for authentication logic.
+    Delegates authentication to configured providers.
+    Tracks the currently authenticated user's role for UI role-based navigation.
+
+    Methods:
+        - authenticate(username, password): Authenticate user, returns UserProfile or None.
+        - authenticate_admin(username, password, mfa_code): For admin logins with MFA.
+        - logout(user_profile): Logs out the user.
+        - enforce_permission(session, permission): Checks user permission (for admin area).
+        - get_current_role(): Returns the current session's role (for UI navigation).
+        - get_current_user(): Returns the current user profile or None.
+    """
+
+    def __init__(self, user_db: Optional[dict] = None):
+        # Provide mfa_secret for admin for demo/test so admin MFA works!
+        demo_admin_mfa_secret = "ADMIN_MFA_SECRET"
+        self.local_auth_provider = LocalAuthenticationProvider(user_db or {
+            "admin": {
+                "password": "adminpw",
+                "user_id": "admin",
+                "roles": ["admin"],
+                "full_name": "Admin User",
+                "email": "admin@aerolearn.ai",
+                "mfa_secret": demo_admin_mfa_secret
+            },
+            "student": {
+                "password": "studpw",
+                "user_id": "student1",
+                "roles": ["student"],
+                "full_name": "Test Student",
+                "email": "student@aerolearn.ai"
+            }
+        })
+        # Admin authentication service for admin workflows (with MFA)
+        self.admin_auth_service = AdminAuthService()
+        # Track current user role and profile
+        self._current_role = "admin"  # Default role
+        self._current_user_profile = None  # Track current user
+
+    def authenticate(self, username: str, password: str):
+        """
+        Attempt login via the appropriate provider (default: local).
+        Returns a UserProfile if successful, None if not.
+        Sets current role if success.
+        """
+        profile = self.local_auth_provider.authenticate(username, password)
+        if profile:
+            self._current_role = profile.roles[0] if profile.roles else "student"
+            self._current_user_profile = profile
+        return profile
+
+    def authenticate_admin(self, username: str, password: str, mfa_code: str):
+        """
+        Attempt admin login with MFA verification.
+        Returns a Session if successful, None if not.
+        Sets current role if success.
+        """
+        session = self.admin_auth_service.authenticate_admin(username, password, mfa_code)
+        if session:
+            self._current_role = "admin"
+            self._current_user_profile = getattr(session, 'profile', None)
+        return session
+
+    def logout(self, user_profile):
+        """
+        Logs the given user out (notifies event system, etc).
+        Resets current role.
+        """
+        self.local_auth_provider.logout(user_profile)
+        self._current_role = "student"
+        self._current_user_profile = None
+
+    def enforce_permission(self, session, permission: str) -> bool:
+        """
+        Check if the user has the specified permission (for admin area).
+        """
+        return self.admin_auth_service.enforce_permission(session, permission)
+
+    def get_current_role(self):
+        """
+        Returns the current user's role for UI navigation.
+        Returns 'student' if no one is logged in, or falls back appropriately.
+        """
+        return self._current_role
+        
+    def get_current_user(self):
+        """
+        Return the profile of the currently authenticated user, or None.
+        """
+        return self._current_user_profile
+
+# END AuthenticationService

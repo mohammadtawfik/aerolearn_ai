@@ -1,0 +1,48 @@
+{
+  "APP_NAME": "AeroLearn AI",
+  "VERSION": "0.1.0",
+  "LOG_LEVEL": "INFO",
+  "API_KEY": "sk-da8169d57c5b4bf6812a02b924492b09",
+  "DEFAULT_LANGUAGE": "en",
+  "THEME": "light",
+
+  "DATABASE": {
+    "ENGINE": "sqlite",
+    "NAME": "aerolearn_ai.db",
+    "USER": "",
+    "PASSWORD": "",
+    "HOST": "",
+    "PORT": ""
+  },
+
+  "UPLOAD": {
+    "MAX_SIZE_MB": 250,
+    "ALLOWED_FORMATS": ["pdf", "mp4", "docx", "pptx", "jpg", "png"],
+    "STORAGE_PATH": "./uploads"
+  },
+
+  "AI_MODEL_PROVIDER": {
+    "PROVIDER": "openai",
+    "MODEL": "gpt-4-turbo",
+    "EMBEDDINGS_MODEL": "text-embedding-ada-002"
+  },
+
+  "FEATURE_FLAGS": {
+    "ENABLE_ADMIN": true,
+    "ENABLE_STUDENT_DASHBOARD": true,
+    "ENABLE_PROFESSOR_DASHBOARD": true,
+    "ENABLE_SEMANTIC_SEARCH": true,
+    "ENABLE_AI_ASSISTANT": true
+  },
+
+  "EXTERNAL_SERVICES": {
+    "GOOGLE_DRIVE_API_KEY": "",
+    "OTHER_API_KEYS": []
+  },
+
+  "UI": {
+    "WINDOW_WIDTH": 1200,
+    "WINDOW_HEIGHT": 800,
+    "SHOW_WELCOME_DIALOG": true
+  }
+}
