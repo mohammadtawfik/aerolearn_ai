@@ -2,13 +2,13 @@
 Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
 
 Location: app/models/content.py
-Depends on: app/core/db/schema.py, integrations/events/event_bus.py
+Depends on: app/models/topic.py, integrations/events/event_bus.py
 
 Handles Topic, Module, Lesson, Quiz logic; validation, serialization, and event integration.
 """
 
 from app.models.course import Module, Lesson
-from app.core.db.schema import Topic
+from app.models.topic import Topic
 
 # Mock classes for Quiz and Question if they're needed elsewhere in the file
 class Quiz:

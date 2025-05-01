@@ -2,9 +2,25 @@
 INTEGRATION TEST
 File: /tests/integration/test_relationship_mapping_integration.py
 
-Covers: Extraction from content, population of knowledge graph, and navigation recommendations.
+Purpose:
+    This file contains the integration test suite for content relationship mapping,
+    as required by Day 13.2 of the project plan (/docs/development/day13_plan.md).
 
-Required for Day 13.2 review.
+    It covers:
+      - Extraction of domain concepts from content
+      - Population and validation of the knowledge graph (nodes, edges, relationships)
+      - Navigation/recommendation using the modeled relationships
+      - DOT export for visualization of graph structure
+
+Test Placement Rationale:
+    This test MUST be located at /tests/integration/ per the AeroLearn AI
+    project structure policy (see /code_summary.md: 'tests/integration/').
+    Integration tests validate cross-module workflows, here spanning concept extraction,
+    relationships, and navigation, with coverage of real code paths and system states.
+
+    Always include an explicit rationale and file path in new test or code files.
+
+Requirements traceability: Day 13.2 (see /docs/development/day13_plan.md)
 """
 
 import pytest
@@ -13,8 +29,9 @@ from app.core.ai.concept_extraction import DomainConceptExtractor, extract_conce
 from app.core.relationships.knowledge_graph import KnowledgeGraph, Node, Edge
 from app.core.relationships.navigation import RelationshipNavigator
 
-# DummyContent model for test, simulating lesson etc.
+# Simulate a simplified content fragment
 class DummyContent:
+    """A stand-in class for lessons, modules, or other course content for extraction tests."""
     def __init__(self, id, title="", description="", body="", text=""):
         self.id = id
         self.title = title
@@ -24,7 +41,7 @@ class DummyContent:
 
 @pytest.fixture
 def test_contents():
-    # Simulated learning materials
+    """Provides several learning material examples across multiple physics domains."""
     return [
         DummyContent(
             id="lesson1",
@@ -47,8 +64,19 @@ def test_contents():
     ]
 
 def test_relationship_integration(test_contents):
-    # 1. Extract concepts for all content
-    extractor = DomainConceptExtractor(domain_terms=["energy", "quantum", "wave", "entropy", "force", "motion", "heat", "schrodinger"])
+    """
+    INTEGRATION: Concept Extraction, Knowledge Graph Construction, Navigation
+
+    - Extract domain concepts from multiple contents
+    - Map nodes and relationships into the knowledge graph
+    - Validate relationship creation and navigation logic
+    - Confirm recommendations and DOT graph exports
+    """
+
+    # --- 1. Concept Extraction and Graph Population ---
+    extractor = DomainConceptExtractor(domain_terms=[
+        "energy", "quantum", "wave", "entropy", "force", "motion", "heat", "schrodinger"
+    ])
     graph = KnowledgeGraph()
 
     # Map content and concepts, and add nodes/relationships to the graph
@@ -64,38 +92,38 @@ def test_relationship_integration(test_contents):
             # Link: content_id "covers" concept_id
             graph.add_edge(Edge(content.id, cid, "covers"))
 
-    # Confirm nodes and edges exist as expected (content and concept nodes)
+    # Validate node creation for both content and domain concepts
     for content in test_contents:
         assert content.id in graph.nodes
     for expected_concept in ["quantum", "wave", "energy", "schrodinger", "entropy", "motion", "heat", "force"]:
         assert expected_concept in graph.nodes
 
-    # Confirm at least one edge from each content to at least one concept
+    # Ensure each content maps to at least one concept via "covers"
     for content in test_contents:
         covers_edges = [e for e in graph.edges if e.source == content.id and e.relation == "covers"]
         assert len(covers_edges) >= 1
 
-    # 2. Test navigation/recommendation layer
+    # --- 2. Navigation and Recommendation Layer ---
     navigator = RelationshipNavigator(graph)
-    # E.g., lesson2 should recommend "energy" as related concept
+    
+    # Validate: lesson2 should recommend "energy" as a related concept
     related_concepts = navigator.get_related_concepts("lesson2")
     related_names = {c.label.lower() for c in related_concepts}
     assert "energy" in related_names
 
-    # path (lesson1 -> "energy") exists via some edge
+    # Validate: A path exists from lesson1 to "energy"
     path = navigator.find_path("lesson1", "energy", max_depth=2)
     assert path and path[0] == "lesson1" and path[-1] == "energy"
 
-    # 3. Recommendations for lesson1 (other lessons covering related concepts)
+    # Validate: Recommendations for lesson1 include another lesson (e.g., lesson3) that covers energy
     recommendations = navigator.get_recommendations_for_content("lesson1")
-    # lesson3 should also cover "energy", and be recommended if not the current lesson
     rec_ids = {n.id for n in recommendations}
     assert "lesson3" in rec_ids
 
-    # 4. DOT export available / includes expected nodes
+    # --- 3. Visualization (DOT Export) ---
     dot_repr = graph.to_dot()
     assert "lesson1" in dot_repr and "energy" in dot_repr
 
-    # Optional: Print output for review/debugging
+    # (Optional for CI review - print output)
     print("Graph DOT output:\n", dot_repr)
     print("Recommendations for lesson1: ", rec_ids)

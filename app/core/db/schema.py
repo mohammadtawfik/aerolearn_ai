@@ -1,6 +1,9 @@
 """
-Schema configuration for AeroLearn AI: PRUNED VERSION
-Defines only test/demo objects not participating in app-wide FKs.
+Schema configuration for AeroLearn AI: DECOUPLED VERSION
+No ORM Topic class defined here; it is now in app/models/topic.py.
+This avoids circular import with app.models.content and enables clean layering.
+
+Location: /app/core/db/schema.py (per code_summary.md: schema/config belong here.)
 """
 import os
 from dotenv import load_dotenv
@@ -12,6 +15,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Text, Boolean, DateT
 from sqlalchemy.orm import declarative_base, relationship
 # If you need the User model, import from app.models.user:
 from app.models.user import User
+# To use Topic, import from app.models.topic
 
 # Use SQLite for development; replace with production DB URL as needed
 # Replace the former hardcoded DB_URL with:
@@ -19,20 +23,14 @@ DB_URL = os.getenv("DB_URL", "sqlite:///app_database.db")  # fallback stays comp
 
 Base = declarative_base()
 
-# Content models for testing/demo purposes only
-class Topic(Base):
-    __tablename__ = 'topics'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    description = Column(Text)
-    parent_id = Column(Integer, ForeignKey('topics.id'), nullable=True)
-    
-    # Self-referential relationship
-    subtopics = relationship("Topic", backref="parent", remote_side=[id])
+# Remove Topic from here—use:
+#   from app.models.topic import Topic
+# wherever the Topic ORM model is needed
 
 # Example usage:
-# from app.core.db.schema import Base, Topic
+# from app.core.db.schema import Base
 # from app.models.user import User
+# from app.models.topic import Topic
 # 
 # # Create a new topic
 # new_topic = Topic(name="Aerodynamics", description="Study of air movement")

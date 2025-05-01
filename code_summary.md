@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 243
+Total Python files: 249
 
 ## Table of Contents
 
@@ -107,6 +107,10 @@ Total Python files: 243
 │   │   │   ├── providers.py
 │   │   │   ├── scoring.py
 │   │   │   └── workflow.py
+│   │   ├── conversation
+│   │   │   ├── handlers
+│   │   │   │   └── __init__.py
+│   │   │   └── __init__.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -153,7 +157,8 @@ Total Python files: 243
 │   │   ├── category_suggestion.py
 │   │   ├── tag_suggestion.py
 │   │   ├── tag_search.py
-│   │   └── base.py
+│   │   ├── base.py
+│   │   └── topic.py
 │   ├── utils
 │   │   ├── __init__.py
 │   │   └── crypto.py
@@ -247,7 +252,9 @@ Total Python files: 243
 │   │   ├── test_content_management_workflow.py
 │   │   ├── test_admin_integration.py
 │   │   ├── test_content_analysis_integration.py
-│   │   └── test_relationship_mapping_integration.py
+│   │   ├── test_relationship_mapping_integration.py
+│   │   ├── test_semantic_search_integration.py
+│   │   └── test_resource_discovery_integration.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -262,7 +269,8 @@ Total Python files: 243
 │   │   └── test_system_config.py
 │   ├── fixtures
 │   │   ├── sample_content
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   └── repositories.py
 │   │   └── __init__.py
 │   ├── examples
 │   │   └── event_bus_example.py
@@ -461,16 +469,16 @@ content ...
 - Functions: 1
 - Dependency Score: 56.00
 
-### integrations\monitoring\integration_health.py
+### app\models\content.py
 
-Integration health monitoring for the AeroLearn AI system.
+Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
 
-This module provides health metric collection, status tracking, and visualization
-data str...
+Location: app/models/content.py
+Depends on: app/models/topic.py, integrations/events/ev...
 
-- Classes: 7
+- Classes: 8
 - Functions: 0
-- Dependency Score: 54.00
+- Dependency Score: 55.00
 
 ## Dependencies
 
@@ -478,7 +486,7 @@ Key file relationships (files with most dependencies):
 
 - **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
 - **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
-- **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **app\models\content.py** depends on: app\models\course.py, integrations\events\event_bus.py, integrations\events\event_types.py
 
 
 ## Detailed Code Analysis
@@ -1079,6 +1087,63 @@ content analysis, question answering, and recommendation systems.
 
 
 
+### app\models\content.py
+
+**Description:**
+
+Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
+
+Location: app/models/content.py
+Depends on: app/models/topic.py, integrations/events/event_bus.py
+
+Handles Topic, Module, Lesson, Quiz logic; validation, serialization, and event integration.
+
+**Classes:**
+
+- `Quiz`
+
+
+  Methods: `__init__()`
+
+- `Question`
+
+
+  Methods: `__init__()`
+
+- `Content`
+
+
+  Main content representation class that unifies all content types
+
+  Methods: `__init__()`, `from_lesson()`, `from_topic()`
+
+- `TopicModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `ModuleModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `LessonModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `QuizModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `QuestionModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+
+
 ### integrations\monitoring\integration_health.py
 
 **Description:**
@@ -1138,63 +1203,6 @@ data structures for monitoring the health of system integrations.
   Central system for tracking integration health across components.
 
   Methods: `__init__()`, `register_health_provider()`, `unregister_health_provider()`, `collect_metrics()`, `_update_metrics()`, ... (10 more)
-
-
-
-### app\models\content.py
-
-**Description:**
-
-Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
-
-Location: app/models/content.py
-Depends on: app/core/db/schema.py, integrations/events/event_bus.py
-
-Handles Topic, Module, Lesson, Quiz logic; validation, serialization, and event integration.
-
-**Classes:**
-
-- `Quiz`
-
-
-  Methods: `__init__()`
-
-- `Question`
-
-
-  Methods: `__init__()`
-
-- `Content`
-
-
-  Main content representation class that unifies all content types
-
-  Methods: `__init__()`, `from_lesson()`, `from_topic()`
-
-- `TopicModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
-
-- `ModuleModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
-
-- `LessonModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
-
-- `QuizModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
-
-- `QuestionModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
 
 
 
@@ -2732,6 +2740,60 @@ This script:
 
 
 
+### app\core\ai\resource_discovery.py
+
+**Classes:**
+
+- `ResourceResult`
+
+
+  Standardized resource result format as expected by tests.
+
+  Methods: `__init__()`, `__eq__()`, `__hash__()`
+
+- `ResourceDiscoveryOrchestrator`
+
+
+  Coordinates resource discovery from multiple providers,
+
+  Methods: `__init__()`, `find_relevant_resources()`
+
+- `ResourceDiscovery`
+
+
+  Legacy class maintained for backward compatibility.
+
+  Methods: `__init__()`, `discover_resources()`, `integrate_resources()`
+
+
+
+### app\core\external_resources\providers.py
+
+**Classes:**
+
+- `BaseResourceProvider`
+
+
+  Abstract external resource provider.
+
+  Methods: `load_default_providers()`, `fetch_resources()`, `find_resources()`
+
+- `DeepSeekResourceProvider`
+ (inherits from: BaseResourceProvider)
+
+
+  Methods: `fetch_resources()`
+
+- `MockProvider`
+ (inherits from: BaseResourceProvider)
+
+
+  A mock provider returning deterministic, static resources for use in tests.
+
+  Methods: `fetch_resources()`
+
+
+
 ### integrations\registry\dependency_tracker.py
 
 **Description:**
@@ -2993,6 +3055,38 @@ SyncManager for AeroLearn AI
   Manage synchronization between the local cache and remote (cloud/server).
 
   Methods: `__init__()`, `go_offline()`, `go_online()`, `sync()`, `resolve_conflict()`, ... (2 more)
+
+
+
+### app\core\ai\conversation.py
+
+**Description:**
+
+Conversation logic for AeroLearn AI —
+Implements Conversation, ConversationManager, and start_new_conversation
+Save this file as: /app/core/ai/conversation.py
+
+**Classes:**
+
+- `Conversation`
+
+
+  Represents a single conversation session.
+
+  Methods: `__init__()`, `add_message()`, `end()`
+
+- `ConversationManager`
+
+
+  Manages active and past conversations.
+
+  Methods: `__init__()`, `create_conversation()`, `get_conversation()`, `list_active()`
+
+**Functions:**
+
+- `start_new_conversation(user_id)`
+
+  Fast API to create new conversation and return its ID.
 
 
 
@@ -3293,38 +3387,6 @@ Edit DB_URL in schema.py as required for different environments.
 
 
 
-### app\core\ai\conversation.py
-
-**Description:**
-
-Conversation logic for AeroLearn AI —
-Implements Conversation, ConversationManager, and start_new_conversation
-Save this file as: /app/core/ai/conversation.py
-
-**Classes:**
-
-- `Conversation`
-
-
-  Represents a single conversation session.
-
-  Methods: `__init__()`, `add_message()`, `end()`
-
-- `ConversationManager`
-
-
-  Manages active and past conversations.
-
-  Methods: `__init__()`, `create_conversation()`, `get_conversation()`, `list_active()`
-
-**Functions:**
-
-- `start_new_conversation(user_id)`
-
-  Fast API to create new conversation and return its ID.
-
-
-
 ### tests\unit\core\upload\test_batch_controller.py
 
 **Classes:**
@@ -3599,21 +3661,6 @@ Intended for PyQt5/PySide2, but UI toolkit can be swapped.
 
 
 
-### app\core\db\schema.py
-
-**Description:**
-
-Schema configuration for AeroLearn AI: PRUNED VERSION
-Defines only test/demo objects not participating in app-wide FKs.
-
-**Classes:**
-
-- `Topic`
- (inherits from: Base)
-
-
-
-
 ### app\core\db\content_db.py
 
 **Description:**
@@ -3630,6 +3677,62 @@ Location: /app/core/db/content_db.py
 
 
   Methods: `__init__()`, `mark_uploaded()`, `is_uploaded()`
+
+
+
+### app\core\ai\semantic_search.py
+
+**Description:**
+
+File: /app/core/ai/semantic_search.py
+Purpose: Core logic for hybrid semantic and keyword search with permission filtering and aggregation.
+
+Save and update at /app/core/ai/semantic_search.py according to the project structure.
+
+Implements:
+- Hybrid keyword+semantic search logic
+- Result aggregation and deduplication
+- Component-specific target search
+- Permission filtering
+- Customizable scoring and rank boosting
+
+Typical usage:
+    search = HybridSemanticSearch(keyword_backend=KeywordSearch())
+    results = search.search(query, targets, context, user_id)
+
+**Classes:**
+
+- `PermissionDenied`
+ (inherits from: Exception)
+
+
+  Exception raised when a user doesn't have permission to access content
+
+- `HybridSemanticSearch`
+
+
+  Unified search interface combining keyword and semantic strategies,
+
+  Methods: `__init__()`, `search()`, `search_legacy()`
+
+
+
+### app\core\external_resources\scoring.py
+
+**Classes:**
+
+- `ResourceScorer`
+
+
+  Class encapsulating resource scoring and filtering logic.
+
+  Methods: `score()`, `filter_by_score()`
+
+**Functions:**
+
+- `score_resource(resource, course)`
+
+  Compute a relevance/quality score between this resource and the course.
 
 
 
@@ -3767,6 +3870,27 @@ Location: /app/core/db/content_db.py
   Extracts tabular data from PDF, DOCX, and PPTX files.
 
   Methods: `extract_tables()`, `_extract_tables_from_pdf()`, `_extract_tables_from_docx()`, `_extract_tables_from_pptx()`, `extract_diagrams()`
+
+
+
+### app\core\search\keyword_search.py
+
+**Description:**
+
+File: /app/core/search/keyword_search.py
+Purpose: Keyword-based search backend for AeroLearn AI
+
+This file should be saved as /app/core/search/keyword_search.py according to the project structure.
+
+**Classes:**
+
+- `KeywordSearch`
+ (inherits from: SearchBackend)
+
+
+  Concrete implementation of a keyword-based search backend.
+
+  Methods: `search()`, `_compute_score()`
 
 
 
@@ -4091,43 +4215,6 @@ Covers extraction logic, domain term bias, extraction-to-relationship mapping, a
 
 
 
-### app\core\ai\semantic_search.py
-
-**Description:**
-
-File: /app/core/ai/semantic_search.py
-Purpose: Core logic for hybrid semantic and keyword search with permission filtering and aggregation.
-
-Save and update at /app/core/ai/semantic_search.py according to the project structure.
-
-Implements:
-- Hybrid keyword+semantic search logic
-- Result aggregation and deduplication
-- Component-specific target search
-- Permission filtering
-- Customizable scoring and rank boosting
-
-Typical usage:
-    search = HybridSemanticSearch(keyword_backend=KeywordSearch())
-    results = search.search(query, targets, context, user_id)
-
-**Classes:**
-
-- `PermissionDenied`
- (inherits from: Exception)
-
-
-  Exception raised when a user doesn't have permission to access content
-
-- `HybridSemanticSearch`
-
-
-  Unified search interface combining keyword and semantic strategies,
-
-  Methods: `__init__()`, `search()`, `search_legacy()`
-
-
-
 ### app\core\api\deepseek_client.py
 
 **Classes:**
@@ -4207,25 +4294,6 @@ This file should be saved as /app/core/search/semantic_backend.py according to t
   Improved dummy embedding: Bag-of-characters (lowercase a-z and space).
 
 - `cosine_similarity(vec1, vec2)`
-
-
-
-### app\core\external_resources\providers.py
-
-**Classes:**
-
-- `BaseResourceProvider`
-
-
-  Abstract external resource provider.
-
-  Methods: `load_default_providers()`, `fetch_resources()`
-
-- `DeepSeekResourceProvider`
- (inherits from: BaseResourceProvider)
-
-
-  Methods: `fetch_resources()`
 
 
 
@@ -4428,27 +4496,6 @@ This uses real project models (User, Module, Lesson, etc).
   Simple file-based persistence for demonstration.
 
   Methods: `__init__()`, `_load()`, `_save()`, `save_metadata()`, `get_metadata()`, ... (3 more)
-
-
-
-### app\core\search\keyword_search.py
-
-**Description:**
-
-File: /app/core/search/keyword_search.py
-Purpose: Keyword-based search backend for AeroLearn AI
-
-This file should be saved as /app/core/search/keyword_search.py according to the project structure.
-
-**Classes:**
-
-- `KeywordSearch`
- (inherits from: SearchBackend)
-
-
-  Concrete implementation of a keyword-based search backend.
-
-  Methods: `search()`, `_compute_score()`
 
 
 
@@ -4751,6 +4798,58 @@ Extensible to work with actual content models/data sources.
 
 
 
+### tests\integration\test_semantic_search_integration.py
+
+**Description:**
+
+INTEGRATION TEST
+File: /tests/integration/test_semantic_search_integration.py
+
+Purpose:
+    Integration test for hybrid semantic search with correct predicate-based permission filtering
+    for each result. Uses a per-result predicate function matching HybridSemanticSearch's expected filter.
+    All test assertions use r["data"][...] fields.
+
+    Place in /tests/integration/ as per code_summary.md and roadmap.
+
+**Functions:**
+
+- `permission_filter_predicate(user, result)`
+
+  Permission filter for a SINGLE result dict, to match HybridSemanticSearch usage.
+
+- `sample_env()`
+
+- `dummy_user(sample_env)`
+
+- `test_context(sample_env)`
+
+- `test_hybrid_search_permission_filtering_and_aggregation(sample_env)`
+
+- `test_semantic_vs_keyword_results(sample_env)`
+
+- `test_aggregation_and_deduplication(sample_env)`
+
+- `test_empty_query_returns_nothing(sample_env)`
+
+- `test_search_accuracy_edge_case(sample_env)`
+
+- `test_semantic_search_with_test_context(dummy_user, test_context)`
+
+
+
+### app\core\db\schema.py
+
+**Description:**
+
+Schema configuration for AeroLearn AI: DECOUPLED VERSION
+No ORM Topic class defined here; it is now in app/models/topic.py.
+This avoids circular import with app.models.content and enables clean layering.
+
+Location: /app/core/db/schema.py (per code_summary.md: schema/config belong here.)
+
+
+
 ### app\core\db\migrations.py
 
 **Description:**
@@ -4815,17 +4914,6 @@ Provides a VectorIndex class that adapts the VectorIndexManager for easier use.
 - `query_similar_content(vector_index, query_vector, top_k, filter_metadata)`
 
   Find similar content using vector search, filter with metadata if needed.
-
-
-
-### app\core\ai\resource_discovery.py
-
-**Classes:**
-
-- `ResourceDiscovery`
-
-
-  Methods: `__init__()`, `discover_resources()`, `integrate_resources()`
 
 
 
@@ -5093,13 +5181,34 @@ Identifies relationships between extracted concepts/content.
 
 
 
-### app\core\external_resources\scoring.py
+### tests\fixtures\sample_content\repositories.py
+
+**Description:**
+
+File: /tests/fixtures/sample_content/repositories.py
+
+Purpose:
+    Provides create_sample_repositories() for semantic search and integration tests.
+    - Returns repositories (dict), users (dict by role), and a mock AuthorizationManagerClass
+    - Ensures repositories contain the science content and keywords the tests check for
+    - Content in flat dicts, not nested under 'data'
+
+Per project structure (see code_summary.md), all test content/data factories go here.
+
+**Classes:**
+
+- `MockAuthorizationManager`
+
+
+  Minimal mock of AuthorizationManagerClass—expand as needed for search permission logic.
+
+  Methods: `has_permission()`
 
 **Functions:**
 
-- `score_resource(resource, course)`
+- `create_sample_repositories()`
 
-  Compute a relevance/quality score between this resource and the course.
+  Returns (repositories, users_dict, auth_manager_mock) for semantic search integration tests.
 
 
 
@@ -5251,6 +5360,23 @@ Setup script for AeroLearn AI development environment.
 
 
 
+### app\models\topic.py
+
+**Description:**
+
+File: /app/models/topic.py
+Purpose: Defines the SQLAlchemy ORM Topic class for use in content-related models and schema.
+Rationale: Moved out of /app/core/db/schema.py to break circular import (between content.py and schema.py).
+           Per project structure in /code_summary.md, ORM models should reside in /app/models/.
+
+**Classes:**
+
+- `Topic`
+ (inherits from: Base)
+
+
+
+
 ### tests\unit\test_crypto.py
 
 **Classes:**
@@ -5350,14 +5476,32 @@ Setup script for AeroLearn AI development environment.
 INTEGRATION TEST
 File: /tests/integration/test_relationship_mapping_integration.py
 
-Covers: Extraction from content, population of knowledge graph, and navigation recommendations.
+Purpose:
+    This file contains the integration test suite for content relationship mapping,
+    as required by Day 13.2 of the project plan (/docs/development/day13_plan.md).
 
-Required for Day 13.2 review.
+    It covers:
+      - Extraction of domain concepts from content
+      - Population and validation of the knowledge graph (nodes, edges, relationships)
+      - Navigation/recommendation using the modeled relationships
+      - DOT export for visualization of graph structure
+
+Test Placement Rationale:
+    This test MUST be located at /tests/integration/ per the AeroLearn AI
+    project structure policy (see /code_summary.md: 'tests/integration/').
+    Integration tests validate cross-module workflows, here spanning concept extraction,
+    relationships, and navigation, with coverage of real code paths and system states.
+
+    Always include an explicit rationale and file path in new test or code files.
+
+Requirements traceability: Day 13.2 (see /docs/development/day13_plan.md)
 
 **Classes:**
 
 - `DummyContent`
 
+
+  A stand-in class for lessons, modules, or other course content for extraction tests.
 
   Methods: `__init__()`
 
@@ -5365,7 +5509,44 @@ Required for Day 13.2 review.
 
 - `test_contents()`
 
+  Provides several learning material examples across multiple physics domains.
+
 - `test_relationship_integration(test_contents)`
+
+  INTEGRATION: Concept Extraction, Knowledge Graph Construction, Navigation
+
+
+
+### tests\integration\test_resource_discovery_integration.py
+
+**Description:**
+
+File: /tests/integration/test_resource_discovery_integration.py
+
+Purpose:
+    Integration tests for the external resource discovery API, tying together course content,
+    resource provider(s), scoring, filtering, end-to-end deduplication and relevance logic.
+    As required by /docs/development/day13_plan.md.
+
+Requires:
+    - /app/core/ai/resource_discovery.py (ResourceDiscoveryOrchestrator)
+    - /app/core/external_resources/providers.py (provider classes)
+    - /app/core/external_resources/scoring.py (scoring/filtering)
+    - /tests/fixtures/sample_content.py, plus external resource mocks
+
+**Functions:**
+
+- `resource_env()`
+
+- `test_basic_resource_discovery(resource_env)`
+
+- `test_resource_scoring_and_filtering(resource_env)`
+
+- `test_provider_deduplication(resource_env)`
+
+- `test_quality_and_metadata_fields(resource_env)`
+
+- `test_full_integration_flow_with_edge_cases(resource_env)`
 
 
 
@@ -5742,6 +5923,21 @@ If your conversation module is elsewhere (e.g., core/conversation/), update the 
 - `test_template_creation(session)`
 
 - `test_bulk_enroll(session)`
+
+
+
+### tests\fixtures\sample_content\__init__.py
+
+**Description:**
+
+Provides test fixtures: create_sample_course_content and external_resource_fixtures
+for resource discovery integration testing.
+
+**Functions:**
+
+- `create_sample_course_content()`
+
+  Returns a list of sample course content items,
 
 
 
@@ -6275,6 +6471,23 @@ and enables relative imports within the core relationships subsystem.
 
 
 
+### app\core\conversation\__init__.py
+
+**Description:**
+
+Conversation components and extension points for Conversational AI.
+Import conversation classes and helpers here for use elsewhere.
+
+
+
+### app\core\conversation\handlers\__init__.py
+
+**Description:**
+
+Placeholder for modular conversation handler subclasses/components.
+
+
+
 ### app\ui\common\__init__.py
 
 **Description:**
@@ -6422,10 +6635,6 @@ Integration tests package initialization.
 
 
 
-### tests\fixtures\sample_content\__init__.py
-
-
-
 ### tests\core\__init__.py
 
 
@@ -6485,123 +6694,120 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional architectural analysis sections to add to the summary:
+Here's the architectural enhancement to be added to the summary:
 
-## Architectural Overview
+```markdown
+## Architectural Insights
 
-**Core Architectural Pillars:**
-1. **Event-Driven Architecture** - Central Event Bus (`event_bus.py`) facilitates loose coupling between components with 25+ system-defined event types
-2. **Component-Based Design** - Registry pattern (`component_registry.py`) manages 243+ components with versioned dependencies and lifecycle states
-3. **Layered Structure:**
-   - **Integration Layer**: Handles external services and event persistence
-   - **Core Services**: Auth, batch processing, and monitoring subsystems
-   - **Domain Model**: Course/content hierarchy with SQLAlchemy ORM mapping
-   - **Interface Abstraction**: Base interface contracts with version validation
+### 1. High-Level Architectural Overview
+The system follows a modular event-driven architecture with three main layers:
 
-**Key Data Flows:**
-1. Component Registration → Dependency Resolution → Health Monitoring
-2. Content Modification → Event Emission → Indexing/Analysis Pipelines
-3. Batch Upload → Validation → Event Chaining → Storage+Notification
+1. **Core System**:
+   - Event Bus (Pub/Sub pattern)
+   - Component Registry (Singleton)
+   - Interface Contracts
+   - Transaction Monitoring
 
-## Design Patterns Identified
+2. **Application Layer**:
+   - Course/Content Management (ORM Models)
+   - Batch Processing
+   - Authorization System
+   - AI Integration
 
-| Pattern              | Implementation Examples                              | Purpose                                      |
-|----------------------|-----------------------------------------------------|---------------------------------------------|
-| Singleton            | ComponentRegistry, EventBus                         | System-wide service access                  |
-| Observer             | EventBus.subscribe()                                | Decoupled event notification                |
-| Strategy             | ValidationFramework in batch_controller.py          | Interchangeable validation algorithms       |
-| Factory              | BaseInterface.get_interface()                       | Interface implementation discovery          |
-| Decorator            | @require_permission in authorization.py             | Cross-cutting security concerns             |
-| Registry             | ComponentRegistry.register_component_instance()      | Central component management                |
-| Template Method      | TransactionContext.__exit__()                       | Consistent transaction completion handling  |
+3. **Integration Layer**:
+   - Event Type Definitions
+   - Monitoring & Logging
+   - Interface Implementations
+   - Registry Services
 
-## Refactoring Opportunities
+Key architectural flows:
+- Event-driven communication between decoupled components
+- Strong type safety through enumerated event types
+- Versioned component registration/dependency management
+- Transactional awareness across operations
 
-1. **Event Type Consolidation**
-   - **File**: `event_types.py`
-   - **Issue**: Duplication between `EventType` enum and category-specific classes
-   - **Improvement**: Convert to hierarchical enum structure using Python 3.11+ Enum features
+### 2. Identified Design Patterns
 
-2. **Component Registry API Separation**
-   - **File**: `component_registry.py`
-   - **Issue**: Mixed test/production APIs (`register_component` vs `register_component_instance`)
-   - **Improvement**: Implement adapter pattern for test-specific interfaces
+| Pattern              | Implementation Examples                          | Purpose                                      |
+|----------------------|--------------------------------------------------|---------------------------------------------|
+| Observer             | EventBus ↔ ComponentRegistry                    | Decoupled event notifications               |
+| Singleton            | ComponentRegistry, EventBus                     | System-wide single instance management      |
+| Abstract Factory     | BaseInterface → AIInterface implementations     | Interface contract enforcement              |
+| Decorator            | @require_permission, @interface_method         | Cross-cutting concerns                      |
+| Command              | BatchController operations                      | Encapsulate upload requests as objects      |
+| Facade               | TransactionLogger                               | Simplified transaction monitoring interface |
 
-3. **Batch State Management**
-   - **File**: `batch_controller.py`
-   - **Issue**: Complex state transitions handled through multiple boolean flags
-   - **Improvement**: Implement state machine pattern with explicit transition rules
+### 3. Refactoring Opportunities
 
-4. **Model Serialization**
-   - **File**: `course.py`
-   - **Issue**: Manual serialize() methods in ORM classes
-   - **Improvement**: Introduce marshmallow-sqlalchemy for schema-driven serialization
+1. **Event System**:
+   - Consolidate duplicate event type definitions between EventType enum and category-specific classes
+   - Implement event schema versioning for backward compatibility
 
-## Critical Path Analysis
+2. **Component Registry**:
+   - Add dependency injection support
+   - Replace Singleton pattern with dependency management
 
-1. **Content Modification Flow**
-   ```mermaid
-   graph TD
-     A[Course.save()] --> B[ContentEvent.CREATED]
-     B --> C[EventBus.publish()]
-     C --> D[IndexingService.on_event()]
-     D --> E[VectorDB.update_embeddings()]
-     E --> F[TransactionLogger.complete()]
-   ```
+3. **Batch Processing**:
+   - Separate validation framework from upload controller
+   - Implement async/await pattern consistently
 
-2. **Component Initialization Sequence**
-   ```
-   1. Registry Initialization → 2. Interface Registration → 3. Dependency Check → 
-   4. Health Monitoring Setup → 5. Event Bus Subscription → 6. State Transition to READY
-   ```
+4. **ORM Models**:
+   - Extract repository pattern from direct SQLAlchemy usage
+   - Add unit-of-work pattern for complex operations
 
-3. **Batch Upload Critical Path**
-   - Validation → Chunking → Parallel Upload → Metadata Association → Completion Event
-   - Bottleneck: Synchronous validation step (68ms/file avg)
-   - Optimization: Pre-validation caching and async I/O
+5. **Interface System**:
+   - Implement automatic interface discovery
+   - Add version compatibility checking
 
-## Class Relationships
+### 4. Critical Path Analysis
+
+1. **Event Processing Path**:
+   Event Creation → EventBus → Subscriber Notification → Transaction Logger → Component Registry Update
+
+2. **Batch Upload Critical Path**:
+   File Validation → Metadata Extraction → Async Upload → Progress Tracking → Event Emission
+
+3. **Component Lifecycle**:
+   Registration → Dependency Resolution → Interface Binding → Event Subscription → Operation Execution
+
+4. **Authorization Flow**:
+   Permission Check → Role Hierarchy Evaluation → Event Logging → Transaction Verification
+
+5. **AI Processing**:
+   Content Ingest → Embedding Generation → Vector Indexing → Similarity Analysis → Recommendation Emission
+
+### 5. Class/Module Relationships
 
 ```mermaid
-classDiagram
-    class Event {
-        +serialize()
-        +deserialize()
-    }
+graph TD
+    A[Event] --> B[SystemEvent]
+    A --> C[ContentEvent]
+    A --> D[AIEvent]
+    E[ComponentRegistry] --> F[EventBus]
+    G[Course] --> H[Module]
+    H --> I[Lesson]
+    J[BatchController] --> K[UploadService]
+    J --> L[ValidationFramework]
+    M[BaseInterface] --> N[AIModelProviderInterface]
+    M --> O[ContentAnalysisInterface]
+    P[AuthorizationManager] --> Q[Permission]
+    P --> R[Role]
     
-    class Component {
-        +declare_dependency()
-        +provide_interface()
-    }
+    classDef event fill:#f9f,stroke:#333;
+    classDef component fill:#bbf,stroke:#333;
+    classDef model fill:#bfb,stroke:#333;
+    classDef interface fill:#fbb,stroke:#333;
     
-    class EventBus {
-        -_subscribers
-        +subscribe()
-        +publish()
-    }
-    
-    class BatchController {
-        +add_listener()
-        +validate_batch()
-    }
-    
-    class Course {
-        +modules: Relationship
-        +serialize()
-    }
-    
-    Event <|-- SystemEvent
-    Event <|-- ContentEvent
-    Component <|-- TransactionLogger
-    Component <|-- IntegrationHealth
-    
-    EventBus --> ComponentRegistry : Notifies component changes
-    BatchController --> EventBus : Emits BATCH_* events
-    Course --> Event : Emits CONTENT_* events
-    IntegrationHealth o-- HealthMetric : Aggregates
-    
-    note for EventBus "Handles 1500+ events/sec\nPersists CRITICAL priority events"
-    note for ComponentRegistry "Manages 243+ components\nVersion check via semver"
+    class A,B,C,D event;
+    class E,F component;
+    class G,H,I model;
+    class M,N,O interface;
 ```
 
-This analysis reveals a sophisticated event-driven system with strong component isolation patterns. The architecture demonstrates good separation of concerns but would benefit from stricter interface enforcement between core subsystems.
+Key Relationships:
+- Event subtypes inherit from base Event class
+- ComponentRegistry coordinates with EventBus for lifecycle events
+- ORM models emit ContentEvent changes to EventBus
+- Interfaces depend on ComponentRegistry for implementation discovery
+- Authorization system integrates with EventBus for permission changes
+```
