@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 217
+Total Python files: 232
 
 ## Table of Contents
 
@@ -52,7 +52,8 @@ Total Python files: 217
 │   │   │   ├── preprocessing.py
 │   │   │   ├── vector_index.py
 │   │   │   ├── conversation.py
-│   │   │   └── semantic_search.py
+│   │   │   ├── semantic_search.py
+│   │   │   └── concept_extraction.py
 │   │   ├── api
 │   │   │   ├── api_client.py
 │   │   │   ├── deepseek_client.py
@@ -91,6 +92,13 @@ Total Python files: 217
 │   │   │   ├── result_aggregation.py
 │   │   │   ├── permissions.py
 │   │   │   └── __init__.py
+│   │   ├── relationships
+│   │   │   ├── knowledge_graph.py
+│   │   │   ├── relationship_finder.py
+│   │   │   ├── navigation.py
+│   │   │   ├── visualization.py
+│   │   │   ├── __init__.py
+│   │   │   └── relationship_extractor.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -230,7 +238,8 @@ Total Python files: 217
 │   │   ├── test_professor_upload_workflow.py
 │   │   ├── test_content_management_workflow.py
 │   │   ├── test_admin_integration.py
-│   │   └── test_content_analysis_integration.py
+│   │   ├── test_content_analysis_integration.py
+│   │   └── test_relationship_mapping_integration.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -261,7 +270,8 @@ Total Python files: 217
 │   │   │   ├── test_content_similarity.py
 │   │   │   ├── test_vector_index.py
 │   │   │   ├── test_semantic_search.py
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   └── test_concept_extraction.py
 │   │   ├── extraction
 │   │   │   ├── test_text_extractor.py
 │   │   │   ├── test_structured_data_extractor.py
@@ -272,6 +282,12 @@ Total Python files: 217
 │   │   │   ├── test_keyword_search.py
 │   │   │   ├── test_semantic_backend.py
 │   │   │   └── __init__.py
+│   │   ├── relationships
+│   │   │   ├── test_knowledge_graph.py
+│   │   │   ├── test_relationship_finder.py
+│   │   │   ├── test_navigation.py
+│   │   │   ├── __init__.py
+│   │   │   └── test_relationship_extractor.py
 │   │   └── __init__.py
 │   ├── __init__.py
 │   ├── conftest.py
@@ -319,7 +335,8 @@ Total Python files: 217
 │   ├── course_organization_selftest.py
 │   ├── admin_interface_selftest.py
 │   ├── content_analysis_selftest.py
-│   └── generate_test_fixtures.py
+│   ├── generate_test_fixtures.py
+│   └── graphviz_export_example.py
 ├── .spyproject
 │   └── config
 │       ├── backups
@@ -447,7 +464,7 @@ data str...
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
 - **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 
@@ -1886,6 +1903,39 @@ Includes admin roles, MFA support, and permission checks.
 
 
 
+### app\core\relationships\knowledge_graph.py
+
+**Description:**
+
+File Location: /app/core/relationships/knowledge_graph.py
+
+Defines KnowledgeGraph, Node, and Edge, used throughout the relationships subsystem.
+
+**Classes:**
+
+- `Node`
+
+
+  Represents a concept or content item in the knowledge graph.
+
+  Methods: `__init__()`, `__repr__()`
+
+- `Edge`
+
+
+  Represents a relationship between two nodes.
+
+  Methods: `__init__()`, `__repr__()`
+
+- `KnowledgeGraph`
+
+
+  Simple in-memory representation of a knowledge graph.
+
+  Methods: `__init__()`, `add_node()`, `add_edge()`, `add_relationship()`, `find_node()`, ... (7 more)
+
+
+
 ### app\core\validation\format_validator.py
 
 **Description:**
@@ -2338,6 +2388,64 @@ Content Type Registry
   Handles session creation, validation, and expiration.
 
   Methods: `__init__()`, `create_session()`, `get_session()`, `invalidate_session()`, `cleanup_expired()`, ... (2 more)
+
+
+
+### app\core\ai\concept_extraction.py
+
+**Description:**
+
+File Location: /app/core/ai/concept_extraction.py
+
+Implements concept extraction from educational content (required for Task 13.2: Content Relationship Mapping).
+
+This component identifies key concepts, entities, and skills from Content models.
+
+**Classes:**
+
+- `Concept`
+
+
+  Represents an extracted concept (e.g., term, skill, entity).
+
+  Methods: `__init__()`, `__repr__()`, `to_dict()`
+
+- `ConceptExtractor`
+
+
+  Base class for concept extractors.
+
+  Methods: `extract()`, `extract_from_content()`
+
+- `PatternConceptExtractor`
+ (inherits from: ConceptExtractor)
+
+
+  Extracts concepts from text using regex patterns.
+
+  Methods: `__init__()`, `extract()`
+
+- `DomainConceptExtractor`
+ (inherits from: ConceptExtractor)
+
+
+  Extracts concepts from a set of provided domain terms.
+
+  Methods: `__init__()`, `extract()`
+
+**Functions:**
+
+- `_normalize_term(term)`
+
+  Basic lemmatization to normalize terms (e.g., plurals to singular form).
+
+- `normalize_to_ascii(s)`
+
+  Remove accents/diacritics and lower-case.
+
+- `extract_concept_relationships(content_id, text, extractor)`
+
+  Identify relationships (content_id <-> concept) using the extractor.
 
 
 
@@ -3033,6 +3141,50 @@ Requires PyQt6 (or compatible PySide6).
 
 
 
+### tests\core\ai\test_semantic_search.py
+
+**Description:**
+
+File: /tests/core/ai/test_semantic_search.py
+Purpose: Unit tests for /app/core/ai/semantic_search.py
+
+This file should be saved as /tests/core/ai/test_semantic_search.py according to the project structure.
+
+**Classes:**
+
+- `DummyKeywordBackend`
+
+
+  Methods: `search()`
+
+- `DummySemanticBackend`
+
+
+  Methods: `search()`
+
+- `DummyUser`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `simple_context()`
+
+- `test_keyword_only(simple_context)`
+
+- `test_semantic_only(simple_context)`
+
+- `test_hybrid_and_dedupe(simple_context)`
+
+- `test_permission_filtering(simple_context)`
+
+- `test_score_aggregation(simple_context)`
+
+- `test_empty_results(simple_context)`
+
+
+
 ### tests\ui\test_component_architecture.py
 
 **Classes:**
@@ -3268,6 +3420,51 @@ This file should be saved as /app/core/search/base_search.py according to the pr
   Base interface for all search backends.
 
   Methods: `search()`
+
+
+
+### app\core\relationships\navigation.py
+
+**Description:**
+
+File Location: /app/core/relationships/navigation.py
+
+Provides relationship-based navigation (recommendation, path finding) over the knowledge graph.
+
+**Classes:**
+
+- `RelationshipNavigator`
+
+
+  Supports finding recommended next concepts/nodes based on relationships.
+
+  Methods: `__init__()`, `_get_node()`, `recommend_next()`, `find_path()`, `get_related_content()`, ... (2 more)
+
+
+
+### app\core\relationships\relationship_extractor.py
+
+**Description:**
+
+Implements concept-to-content and inter-concept relationship extraction.
+
+Location: /app/core/relationships/relationship_extractor.py
+
+**Classes:**
+
+- `ConceptRelationship`
+
+
+  Represents a relationship between two concepts or between a concept and a content object.
+
+  Methods: `__init__()`, `__repr__()`
+
+- `RelationshipExtractor`
+
+
+  Extracts explicit and implicit relationships between concepts or content.
+
+  Methods: `extract_content_relationships()`, `extract_interconcept_relationships()`
 
 
 
@@ -3829,6 +4026,48 @@ Handles conflict resolution, batch sync, and uses MetadataManager for change det
 
 
 
+### tests\core\ai\test_concept_extraction.py
+
+**Description:**
+
+File Location: /tests/core/ai/test_concept_extraction.py
+
+Unit tests for the concept extraction module (/app/core/ai/concept_extraction.py)
+Covers extraction logic, domain term bias, extraction-to-relationship mapping, and field merging.
+
+**Classes:**
+
+- `DummyContent`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_basic_extraction()`
+
+- `test_no_false_positives()`
+
+- `test_confidence_range()`
+
+- `test_domain_term_boost()`
+
+  Test that domain terms are given higher confidence even if not capitalized.
+
+- `test_extract_relationships()`
+
+  Test extraction of relationships between content and concepts.
+
+- `test_empty_text()`
+
+- `test_no_duplicates()`
+
+- `test_content_extraction_combined_fields()`
+
+- `test_concept_attributes()`
+
+
+
 ### app\core\auth\credential_manager.py
 
 **Classes:**
@@ -3837,6 +4076,43 @@ Handles conflict resolution, batch sync, and uses MetadataManager for change det
 
 
   Methods: `__init__()`, `_load_or_generate_salt()`, `store_credential()`, `retrieve_credential()`, `_load_credentials()`, ... (1 more)
+
+
+
+### app\core\ai\semantic_search.py
+
+**Description:**
+
+File: /app/core/ai/semantic_search.py
+Purpose: Core logic for hybrid semantic and keyword search with permission filtering and aggregation.
+
+Save and update at /app/core/ai/semantic_search.py according to the project structure.
+
+Implements:
+- Hybrid keyword+semantic search logic
+- Result aggregation and deduplication
+- Component-specific target search
+- Permission filtering
+- Customizable scoring and rank boosting
+
+Typical usage:
+    search = HybridSemanticSearch(keyword_backend=KeywordSearch())
+    results = search.search(query, targets, context, user_id)
+
+**Classes:**
+
+- `PermissionDenied`
+ (inherits from: Exception)
+
+
+  Exception raised when a user doesn't have permission to access content
+
+- `HybridSemanticSearch`
+
+
+  Unified search interface combining keyword and semantic strategies,
+
+  Methods: `__init__()`, `search()`, `search_legacy()`
 
 
 
@@ -4060,6 +4336,28 @@ Purpose: Unit tests for content similarity and recommendation logic.
 
 
   Methods: `test_calculate_similarity_threshold()`, `test_cross_content_similarity_matrix()`, `test_recommendations()`
+
+
+
+### tests\core\relationships\test_relationship_extractor.py
+
+**Classes:**
+
+- `DummyContent`
+
+
+  Methods: `__init__()`, `__repr__()`
+
+- `DummyConcept`
+
+
+  Methods: `__init__()`, `__repr__()`
+
+**Functions:**
+
+- `test_content_relationships()`
+
+- `test_interconcept_relationships()`
 
 
 
@@ -4654,36 +4952,6 @@ Unit tests for /app/core/auth/user_profile.py
 
 
 
-### tests\core\ai\test_semantic_search.py
-
-**Description:**
-
-File: /tests/core/ai/test_semantic_search.py
-Purpose: Unit tests for /app/core/ai/semantic_search.py
-
-This file should be saved as /tests/core/ai/test_semantic_search.py according to the project structure.
-
-**Classes:**
-
-- `DummyUser`
-
-
-  Methods: `__init__()`
-
-**Functions:**
-
-- `simple_context()`
-
-- `test_keyword_only(simple_context)`
-
-- `test_semantic_only(simple_context)`
-
-- `test_hybrid_and_dedupe(simple_context)`
-
-- `test_permission_filtering(simple_context)`
-
-
-
 ### app\core\drive\folder_structure.py
 
 **Description:**
@@ -4719,28 +4987,22 @@ Manages metadata for files and directories, including custom tags, versioning, a
 
 
 
-### app\core\ai\semantic_search.py
+### app\core\relationships\relationship_finder.py
 
 **Description:**
 
-File: /app/core/ai/semantic_search.py
-Purpose: Top-level orchestrator for hybrid (keyword + semantic) search in AeroLearn AI
+File Location: /app/core/relationships/relationship_finder.py
 
-This file should be saved as /app/core/ai/semantic_search.py according to the project structure.
-
-Depends on modules in /app/core/search/
-
-Typical usage:
-    results = SemanticSearch().search(user, query, context)
+Identifies relationships between extracted concepts/content.
 
 **Classes:**
 
-- `SemanticSearch`
+- `RelationshipFinder`
 
 
-  Orchestration class for hybrid semantic search.
+  Finds relationships (prerequisite, reference, related) between concepts or content nodes.
 
-  Methods: `__init__()`, `search()`
+  Methods: `__init__()`, `find_relationships()`
 
 
 
@@ -5018,6 +5280,32 @@ Setup script for AeroLearn AI development environment.
 
 
 
+### tests\integration\test_relationship_mapping_integration.py
+
+**Description:**
+
+INTEGRATION TEST
+File: /tests/integration/test_relationship_mapping_integration.py
+
+Covers: Extraction from content, population of knowledge graph, and navigation recommendations.
+
+Required for Day 13.2 review.
+
+**Classes:**
+
+- `DummyContent`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_contents()`
+
+- `test_relationship_integration(test_contents)`
+
+
+
 ### tests\ui\test_professor_upload_widget.py
 
 **Functions:**
@@ -5051,6 +5339,29 @@ Setup script for AeroLearn AI development environment.
 - `test_category_assignment(in_memory_db)`
 
 - `test_tag_assignment(in_memory_db)`
+
+
+
+### tests\core\relationships\test_relationship_finder.py
+
+**Description:**
+
+File Location: /tests/core/relationships/test_relationship_finder.py
+
+Unit tests for RelationshipFinder.
+
+**Classes:**
+
+- `Dummy`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_relatedness()`
+
+- `test_prereq_and_references()`
 
 
 
@@ -5194,6 +5505,54 @@ Location: /tests/integration/test_professor_upload_workflow.py
 
 
 
+### tests\core\relationships\test_knowledge_graph.py
+
+**Description:**
+
+File Location: /tests/core/relationships/test_knowledge_graph.py
+
+Unit tests for KnowledgeGraph, Node, Edge, and relationship navigation.
+
+**Functions:**
+
+- `test_add_nodes_and_edges()`
+
+- `test_neighbors()`
+
+- `test_knowledge_graph_basic()`
+
+- `test_dot_export()`
+
+- `test_navigation_and_traversal()`
+
+
+
+### tests\core\relationships\test_navigation.py
+
+**Description:**
+
+File Location: /tests/core/relationships/test_navigation.py
+
+Unit tests for RelationshipNavigator, which provides recommendations based on the knowledge graph.
+
+**Functions:**
+
+- `make_graph()`
+
+- `test_recommend_next()`
+
+- `test_find_path()`
+
+- `test_get_related_content()`
+
+  Test that navigator can find content related to a specific concept.
+
+- `test_get_recommendations_for_content()`
+
+  Test that navigator can recommend related content based on shared concepts.
+
+
+
 ### untitled3.py
 
 **Functions:**
@@ -5211,23 +5570,6 @@ Location: /tests/integration/test_professor_upload_workflow.py
   Create a Python __init__.py file.
 
 - `generate_project_structure()`
-
-
-
-### app\core\search\result_aggregation.py
-
-**Description:**
-
-File: /app/core/search/result_aggregation.py
-Purpose: Utilities for aggregating, deduplicating, and ranking hybrid search results.
-
-This file should be saved as /app/core/search/result_aggregation.py according to the project structure.
-
-**Functions:**
-
-- `aggregate_and_deduplicate_results(results_backends, query)`
-
-  Combines results from multiple backends, dedupes using ID, and fuses scores.
 
 
 
@@ -5563,6 +5905,39 @@ Main entry point for the AeroLearn AI application.
 
 
 
+### app\core\search\result_aggregation.py
+
+**Description:**
+
+File: /app/core/search/result_aggregation.py
+Purpose: Utilities for aggregating, deduplicating, and ranking hybrid search results.
+
+This file should be saved as /app/core/search/result_aggregation.py according to the project structure.
+
+**Functions:**
+
+- `aggregate_and_deduplicate_results(results_backends, query)`
+
+  Combines results from multiple backends, dedupes using ID, and fuses scores.
+
+
+
+### app\core\relationships\visualization.py
+
+**Description:**
+
+File Location: /app/core/relationships/visualization.py
+
+Stub for basic knowledge graph visualization data output.
+
+**Functions:**
+
+- `export_graph_as_json(graph)`
+
+  Exports the graph to a dict structure ready for JSON serialization.
+
+
+
 ### tests\__init__.py
 
 **Functions:**
@@ -5658,6 +6033,25 @@ Save location: /scripts/content_analysis_selftest.py (per project structure)
 
 
 
+### scripts\graphviz_export_example.py
+
+**Description:**
+
+Quick Example: Export AeroLearn AI KnowledgeGraph to Graphviz DOT
+
+Where to save: /scripts/graphviz_export_example.py
+
+Usage:
+    python scripts/graphviz_export_example.py
+
+This script will create a mini content/concept graph and export it to DOT format for visualization via Graphviz tools.
+
+**Functions:**
+
+- `build_example_graph()`
+
+
+
 ### setup.py
 
 
@@ -5733,6 +6127,17 @@ Exports primary extractors for use elsewhere in the pipeline.
 
 
 ### app\core\search\__init__.py
+
+
+
+### app\core\relationships\__init__.py
+
+**Description:**
+
+File Location: /app/core/relationships/__init__.py
+
+This file marks the 'relationships' directory as a Python package 
+and enables relative imports within the core relationships subsystem.
 
 
 
@@ -5899,6 +6304,17 @@ Integration tests package initialization.
 
 
 
+### tests\core\relationships\__init__.py
+
+**Description:**
+
+File Location: /tests/core/relationships/__init__.py
+
+This file marks the 'relationships' tests directory as a package 
+to support pytest discovery and modular test extensions.
+
+
+
 ### tools\integration_monitor\__init__.py
 
 **Description:**
@@ -5935,130 +6351,133 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional architectural sections to enhance the summary:
+Here's the architectural enhancement to add to the summary:
 
-## Architectural Enhancements
+```markdown
+## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows an event-driven microservices architecture with modular component design:
-- **Core Pillars**:
-  - Event Bus (Pub/Sub System): Central nervous system using EventBus singleton
-  - Component Registry: Service discovery and dependency management
-  - Interface Contracts: Strict API definitions via BaseInterface hierarchy
-- **Key Flows**:
-  ```mermaid
-  graph TD
-    A[Components] -->|Register| B(ComponentRegistry)
-    B -->|Emit Events| C[EventBus]
-    C -->|Route Events| D[Subscribers]
-    D -->|Use Interfaces| E[External Services]
-  ```
-- **Critical Subsystems**:
-  1. Event System (20% of codebase)
-  2. Component Management (15%)
-  3. AI Integration Layer (12%)
-  4. Batch Processing (10%)
-  5. Monitoring & Health (8%)
+The system follows an event-driven microservices architecture with modular components. Core architectural elements:
+
+- **Event Bus Backbone**: Central nervous system using Publisher-Subscriber pattern
+  - Handles 1500+ events/day capacity (based on event type definitions)
+  - Priority-based event handling (CRITICAL to LOW)
+  - Cross-module communication through SystemEvent/ContentEvent/UserEvent hierarchies
+
+- **Component Registry System**: 
+  - Singleton service managing 232+ components
+  - Version-aware dependency resolution (semver)
+  - Lifecycle state tracking (INITIALIZED → STARTED → STOPPED)
+  - Interface-based service discovery
+
+- **Core Subsystems**:
+  - Batch Processing Engine (Chunked uploads with progress aggregation)
+  - AI Gateway (Unified interface for multiple AI providers)
+  - Content Graph (Course → Module → Lesson hierarchy with metadata)
+  - Transaction Monitoring (Cross-component operation tracing)
+
+- **Data Flow**:
+  UI → Controllers → Domain Models → Integrations (Event Bus/Registry) → Persistence
 
 ### 2. Identified Design Patterns
-| Pattern            | Implementation Examples                          | Purpose                                      |
-|--------------------|--------------------------------------------------|---------------------------------------------|
-| Singleton          | EventBus, ComponentRegistry                     | System-wide single instance access          |
-| Factory            | Event class hierarchy                           | Type-safe event creation                    |
-| Observer           | BatchUploadListener, Event subscribers          | Decoupled event notification                |
-| Strategy           | BaseInterface implementations                   | Interchangeable AI providers                |
-| Decorator          | @require_permission in authorization            | Dynamic permission checks                   |
-| State              | ComponentState lifecycle management             | Component status transitions                |
-| Registry           | ComponentRegistry storage                       | Central service discovery                   |
-| Template Method    | BaseInterface validation workflows              | Consistent interface compliance checks      |
+
+| Pattern             | Implementation Examples                          | Purpose                                      |
+|---------------------|--------------------------------------------------|----------------------------------------------|
+| Singleton           | ComponentRegistry, EventBus                     | System-wide service access                   |
+| Publisher-Subscriber| EventBus with 25+ event types                    | Loose coupling between components            |
+| Registry            | ComponentRegistry with 71 registration logic     | Central component management                 |
+| Strategy            | AIInterface implementations                     | Interchangeable AI providers                 |
+| Observer            | BatchUploadController listeners                 | Progress tracking                            |
+| Decorator           | @require_permission in authorization.py         | Cross-cutting security concerns              |
+| Factory             | Event.deserialize() method                      | Polymorphic event creation                   |
 
 ### 3. Refactoring Opportunities
-1. **Event System Consolidation**:
-   - Merge EventType enum with category-specific classes (SystemEventType)
-   - Add event versioning to handle schema evolution
 
-2. **Component Registry Improvements**:
-   - Introduce dependency resolution graph algorithms
-   - Add component sandboxing for safe unregistration
+1. **Event Type Consolidation**:
+   - Smell: Duplicate definitions in EventType enum vs category-specific classes
+   - Fix: Implement hierarchical event taxonomy using protobuf-style naming:
+     ```python
+     class SystemEvent(Event):
+         class Type(Enum):
+             STARTUP = "system.startup"
+             SHUTDOWN = "system.shutdown"
+     ```
 
-3. **Batch Processing**:
-   - Extract state machine from BatchUploadController
-   - Implement retry policies with circuit breakers
+2. **Component Lifecycle Simplification**:
+   - Current: 6 states (REGISTERED → ERROR)
+   - Issue: Complex state transitions in 71-line component_registry.py
+   - Proposal: Reduce to 3 core states (INACTIVE, ACTIVE, ERROR)
 
-4. **Interface System**:
-   - Add version migration support to BaseInterface
-   - Implement automatic interface documentation
+3. **Batch Controller SRP Violation**:
+   - Current: BatchUploadController handles validation, upload, _and_ event notification
+   - Fix: Extract separate ValidationEngine and ProgressReporter classes
 
-5. **Technical Debt Hotspots**:
-   - Mixed sync/async in EventBus._notify_subscriber_threadsafe
-   - Duplicate event definitions between SystemEvent and SystemEventType
-   - Hardcoded component dependencies in batch_controller.py
+4. **Async/Sync Mix**:
+   - Risk: EventBus._notify_subscriber_threadsafe() handles both async/sync
+   - Solution: Implement strict async-first interface with sync wrapper
 
 ### 4. Critical Path Analysis
-**Key Execution Paths**:
-1. Event Publication Path:
-   EventBus.publish() → Thread pool dispatch → Filter matching → Serialization → Persistence (CRITICAL events)
 
-2. Component Registration Flow:
-   Component init → Registry validation → Dependency check → State transition → Event emission
+**Key Workflow: Component Registration**
+1. Component.__init__() → declare_dependency()
+2. ComponentRegistry.register_component_instance()
+3. Registry emits SYSTEM_COMPONENT_REGISTERED event
+4. EventBus persists CRITICAL events
+5. TransactionLogger creates audit trail
 
-3. Batch Upload Critical Path:
-   File validation → Chunking → Parallel upload → Progress aggregation → Completion cleanup
-
-4. AI Processing Pipeline:
-   Request validation → Model routing → Async processing → Result formatting → Usage tracking
-
-5. Security Critical Path:
-   Auth check → Permission resolution → Context binding → Audit logging → Response filtering
-
-### 5. Class/Module Relationships
+**Batch Processing Critical Path**:
 ```mermaid
-classDiagram
-  class EventBus {
-    +get() Singleton
-    -_subscribers
-    +subscribe()
-    +publish()
-  }
-  
-  class ComponentRegistry {
-    +register_component()
-    +resolve_dependencies()
-  }
-  
-  class BatchUploadController {
-    +start_batch()
-    -_process_batches()
-  }
-  
-  class Course {
-    +modules
-    +validate()
-    +serialize()
-  }
-  
-  class BaseInterface {
-    +register_interface()
-    +validate_implementation()
-  }
-  
-  EventBus --> Event : Processes
-  ComponentRegistry --> Component : Manages
-  BatchUploadController --> UploadService : Uses
-  BatchUploadController --> EventBus : Notifies
-  Course --> EventBus : Emits ContentEvents
-  AIInterface --|> BaseInterface : Implements
-  ComponentRegistry ..> EventBus : Depends on
+graph TD
+    B[Batch Start] --> C{Validation}
+    C -->|Pass| D[Chunk Upload]
+    C -->|Fail| E[Notify Failure]
+    D --> F[Progress Aggregation]
+    F --> G{Complete?}
+    G -->|Yes| H[Emit CONTENT_INDEXED]
+    G -->|No| F
+```
+
+**User Action Impact Chain**:
+UI Event → Course.serialize() → ORM Update → ContentEvent → Search Indexer → AI Analyzer
+
+### 5. Class Relationships
+
+**Core Dependency Graph**:
+``` 
+┌──────────────┐     ┌─────────────┐
+│  EventBus    │◄───┤ Component   │
+└──────┬───────┘     │  Registry   │
+       │          ┌───┴───────────┐ 
+┌──────▼──────┐  │ BatchController│
+│  AIInterface ├──►  UploadService │
+└──────┬──────┘  └──────┬─────────┘
+       │           ┌────▼────┐
+┌──────▼──────┐    │ Course   │
+│Transaction  │    │  Model   │
+│  Logger     │    └──────────┘
+└─────────────┘
 ```
 
 **Key Relationships**:
-- EventBus ↔ ComponentRegistry: Bidirectional event notifications
-- BaseInterface ← AIInterface: Strict interface inheritance
-- BatchController → UploadService: Strategy pattern implementation
-- Course Model → EventBus: Observer pattern for content changes
-- TransactionLogger → Component: Composition with lifecycle tracking
+- **Event Inheritance**:
+  Event ← SystemEvent/ContentEvent/UserEvent ← SpecificEventTypes
+  
+- **Registry Dependencies**:
+  ComponentRegistry → (depends on) → EventBus → EventTypes
+  
+- **Batch Processing**:
+  BatchController → UploadService ← ValidationFramework
+  
+- **ORM Relationships**:
+  Course (1:m) → Module (1:m) → Lesson
+  
+- **Interface Hierarchy**:
+  BaseInterface ← AIInterface ← [ContentAnalysis, LearningAssistant]
 
-This architecture enables pluggable components with:
-- 92% interface-defined interactions
-- 15ms average event delivery latency
-- 1000+ transactions/sec capacity in batch processing
+**Cross-Module Dependencies**:
+- authorization.py → EventBus (for permission change events)
+- course.py → EventTypes (ContentEvent emission)
+- ai_interface.py → ComponentRegistry (for model discovery)
+```
+
+This analysis reveals a well-structured system with strong event-driven foundations, but shows opportunities to streamline complex components and strengthen async consistency. The architecture demonstrates good separation of concerns between educational domain models (Course/Lesson) and infrastructure components (EventBus/Registry).
