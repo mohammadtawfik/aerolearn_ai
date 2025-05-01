@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 251
+Total Python files: 261
 
 ## Table of Contents
 
@@ -54,7 +54,8 @@ Total Python files: 251
 │   │   │   ├── conversation.py
 │   │   │   ├── semantic_search.py
 │   │   │   ├── concept_extraction.py
-│   │   │   └── resource_discovery.py
+│   │   │   ├── resource_discovery.py
+│   │   │   └── prompt_engineering.py
 │   │   ├── api
 │   │   │   ├── api_client.py
 │   │   │   ├── deepseek_client.py
@@ -112,6 +113,11 @@ Total Python files: 251
 │   │   │   │   └── __init__.py
 │   │   │   ├── __init__.py
 │   │   │   └── handlers.py
+│   │   ├── prompts
+│   │   │   ├── template_engine.py
+│   │   │   ├── optimizers.py
+│   │   │   ├── parser.py
+│   │   │   └── __init__.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -290,7 +296,8 @@ Total Python files: 251
 │   │   │   ├── __init__.py
 │   │   │   ├── test_concept_extraction.py
 │   │   │   ├── test_resource_discovery.py
-│   │   │   └── test_conversation.py
+│   │   │   ├── test_conversation.py
+│   │   │   └── test_prompt_engineering.py
 │   │   ├── extraction
 │   │   │   ├── test_text_extractor.py
 │   │   │   ├── test_structured_data_extractor.py
@@ -310,6 +317,11 @@ Total Python files: 251
 │   │   ├── external_resources
 │   │   │   ├── test_providers.py
 │   │   │   └── test_scoring.py
+│   │   ├── prompts
+│   │   │   ├── test_template_engine.py
+│   │   │   ├── test_optimizers.py
+│   │   │   ├── test_parser.py
+│   │   │   └── __init__.py
 │   │   └── __init__.py
 │   ├── __init__.py
 │   ├── conftest.py
@@ -486,8 +498,8 @@ This upgrade completes Task 14.1 requirements:
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 
 
 ## Detailed Code Analysis
@@ -3570,6 +3582,29 @@ Location: /app/core/relationships/relationship_extractor.py
 
 
 
+### app\core\prompts\template_engine.py
+
+**Description:**
+
+Prompt Template Engine
+Location: /app/core/prompts/template_engine.py
+Handles template-based prompt generation with support for variables, context, and extensible registration.
+
+**Classes:**
+
+- `TemplateNotFoundError`
+ (inherits from: Exception)
+
+
+- `PromptTemplateEngine`
+
+
+  Handles registration and rendering of prompt templates, variable interpolation, and context merging.
+
+  Methods: `__init__()`, `register_template()`, `get_template()`, `render_template()`
+
+
+
 ### app\ui\common\test_component_architecture.py
 
 **Classes:**
@@ -4363,6 +4398,26 @@ This file should be saved as /app/core/search/semantic_backend.py according to t
 
 
 
+### app\core\prompts\optimizers.py
+
+**Description:**
+
+Prompt Optimizer Module
+Location: /app/core/prompts/optimizers.py
+
+Provides prompt optimization/filtering strategies for improving LLM results.
+
+**Classes:**
+
+- `PromptOptimizer`
+
+
+  Applies optimization heuristics to improve prompt efficacy.
+
+  Methods: `__init__()`, `optimize()`, `_shorten_prompt()`
+
+
+
 ### app\ui\common\content_preview.py
 
 **Description:**
@@ -4812,6 +4867,24 @@ Defines standard metadata fields, vector index configuration, and filter rules.
 
 
 
+### app\core\prompts\parser.py
+
+**Description:**
+
+Prompt Response Parser
+Location: /app/core/prompts/parser.py
+
+Responsible for extracting structured information from LLM responses.
+
+**Classes:**
+
+- `ResponseParser`
+
+
+  Methods: `parse()`
+
+
+
 ### app\ui\common\content_browser.py
 
 **Description:**
@@ -4980,6 +5053,28 @@ Provides a VectorIndex class that adapts the VectorIndexManager for easier use.
 - `query_similar_content(vector_index, query_vector, top_k, filter_metadata)`
 
   Find similar content using vector search, filter with metadata if needed.
+
+
+
+### app\core\ai\prompt_engineering.py
+
+**Description:**
+
+AeroLearn AI Prompt Engineering Orchestrator
+
+This module provides the main entry point for prompt generation, context-aware assembly,
+optimization, and response parsing within AeroLearn AI.
+
+Location: /app/core/ai/prompt_engineering.py
+
+**Classes:**
+
+- `PromptEngineering`
+
+
+  Main class handling prompt engineering workflow:
+
+  Methods: `__init__()`, `generate_prompt()`, `parse_response()`
 
 
 
@@ -5669,6 +5764,24 @@ Requires:
 
 
 
+### tests\core\ai\test_prompt_engineering.py
+
+**Functions:**
+
+- `prompt_engineering()`
+
+- `test_end_to_end_prompt_generation(prompt_engineering)`
+
+- `test_prompt_optimization_shortening(prompt_engineering)`
+
+- `test_parse_response_json(prompt_engineering)`
+
+- `test_parse_response_invalid_json(prompt_engineering)`
+
+- `test_missing_template_raises(prompt_engineering)`
+
+
+
 ### tests\core\relationships\test_relationship_finder.py
 
 **Description:**
@@ -6007,6 +6120,34 @@ for resource discovery integration testing.
 
 
 
+### tests\core\prompts\test_template_engine.py
+
+**Functions:**
+
+- `test_register_and_render_template()`
+
+- `test_render_with_context_merging()`
+
+- `test_missing_variable_raises()`
+
+- `test_template_not_found()`
+
+
+
+### tests\core\prompts\test_parser.py
+
+**Functions:**
+
+- `test_parse_valid_json()`
+
+- `test_parse_invalid_json()`
+
+- `test_parse_qa_pairs()`
+
+- `test_parse_raw_fallback()`
+
+
+
 ### app\core\db\__init__.py
 
 **Description:**
@@ -6116,6 +6257,18 @@ This file should be saved as /tests/core/search/test_semantic_backend.py accordi
 - `test_semantic_score_nonzero()`
 
 - `test_semantic_search_empty_context()`
+
+
+
+### tests\core\prompts\test_optimizers.py
+
+**Functions:**
+
+- `test_no_optimization_by_default()`
+
+- `test_shortening_applies_if_context_requests()`
+
+- `test_no_shortening_if_length_ok()`
 
 
 
@@ -6573,6 +6726,10 @@ Placeholder for modular conversation handler subclasses/components.
 
 
 
+### app\core\prompts\__init__.py
+
+
+
 ### app\ui\common\__init__.py
 
 **Description:**
@@ -6743,6 +6900,17 @@ to support pytest discovery and modular test extensions.
 
 
 
+### tests\core\prompts\__init__.py
+
+**Description:**
+
+File Location: /tests/core/prompts/__init__.py
+
+This file marks the 'relationships' tests directory as a package 
+to support pytest discovery and modular test extensions.
+
+
+
 ### tools\integration_monitor\__init__.py
 
 **Description:**
@@ -6779,160 +6947,136 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here's the architectural enhancement section to add:
+Here's the architectural enhancement to add to the summary:
 
 ```markdown
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows an event-driven microservices architecture with modular components. Key architectural characteristics:
-
-- **Core Pillars**:
-  - Event Bus (Pub/Sub System)
-  - Component Registry (Service Discovery)
-  - Interface Contracts (Abstract Base Classes)
+The system follows a layered event-driven architecture with modular components:
+- **Core System**: 
+  - Event Bus (Publisher-Subscriber pattern)
+  - Component Registry (Singleton service discovery)
   - Transaction Monitoring System
+- **Domain Layers**:
+  - Learning Content Management (Course/Module/Lesson hierarchy)
+  - AI Orchestration (Conversation/Model management)
+  - Batch Processing Engine
+- **Integration Layer**:
+  - Interface Contracts (BaseInterface implementations)
+  - Event Types Taxonomy
+  - Monitoring & Logging Infrastructure
+- **Data Layer**:
+  - SQLAlchemy ORM models
+  - Transactional state management
+  - Batch operation persistence
 
-- **Data Flow**:
-  ```mermaid
-  graph TD
-    A[User Actions] --> B[UI Components]
-    B --> C[Event Bus]
-    C --> D[Core Services]
-    D --> E[Persistence Layer]
-    E --> F[AI Processing]
-    F --> G[Monitoring System]
-    G --> C
-  ```
-
-- **Key Architectural Layers**:
-  1. **Integration Layer**: Event bus, component registry, and interface contracts
-  2. **Domain Layer**: Course models, AI operations, authorization rules
-  3. **Infrastructure Layer**: Batch processing, transaction logging, monitoring
-  4. **Interface Layer**: Base interfaces and AI service contracts
+Key architectural flows:
+1. Event-driven inter-service communication
+2. Component lifecycle management through registry
+3. Transactional operation tracking across boundaries
+4. Pluggable AI provider integration
 
 ### 2. Identified Design Patterns
+| Pattern                | Implementation Examples                              | Purpose                                      |
+|------------------------|-----------------------------------------------------|---------------------------------------------|
+| Singleton              | ComponentRegistry, EventBus                         | System-wide single instance management      |
+| Observer               | EventBus subscription model                         | Decoupled event notifications               |
+| Factory                | Component initialization via registry               | Dynamic component creation                  |
+| Strategy               | InMemoryConversationStore, ValidationFramework      | Pluggable algorithm implementation          |
+| Decorator              | @require_permission, @interface_method             | Behavior augmentation                       |
+| Registry               | ComponentRegistry                                   | Centralized service discovery               |
+| Command                | BatchController operations                          | Encapsulated request processing             |
+| Interface              | BaseInterface and AIInterface hierarchy             | Contract enforcement                        |
+| Composite              | Course-Module-Lesson structure                      | Tree structure representation               |
 
-| Pattern             | Implementation Examples                          | Purpose                                  |
-|---------------------|-------------------------------------------------|------------------------------------------|
-| Singleton           | ComponentRegistry, EventBus                     | Global access to core services           |
-| Observer            | EventBus subscribers                            | Loose coupling for event handling        |
-| Factory             | EventType hierarchy                             | Creation of domain-specific events       |
-| Decorator           | @interface_method in BaseInterface             | Method signature validation              |
-| Strategy            | ValidationFramework in BatchController         | Interchangeable validation logic         |
-| Registry            | ComponentRegistry                               | Central component management             |
-| Template Method     | BaseInterface.validate_implementation()         | Interface implementation enforcement     |
+### 3. Refactoring Opportunities
+1. **Event Class Hierarchy**:
+   - Current: Duplicated __init__ in SystemEvent/ContentEvent
+   - Proposed: Use kwargs in base Event class with type validation
 
-### 3. Potential Refactoring Opportunities
-
-1. **Event Type Consolidation**:
-   - Current: Duplicate event type definitions (EventType enum + *EventType classes)
-   - Proposed: Unified EventType hierarchy using metaclasses
-
-2. **Interface Versioning**:
-   - Current: Manual version checks in InterfaceVersion
-   - Proposed: Semantic version integration with decorators
+2. **Component Registration**:
+   ```python
+   # Current dual API
+   register_component(id, version)  # Test API
+   register_component_instance(component)  # Production API
+   
+   # Proposed unified interface
+   register(component: Union[Component, dict], is_test: bool=False)
+   ```
 
 3. **Dependency Management**:
-   - Current: Direct component registry access
-   - Proposed: Dependency injection framework integration
+   - Implement dependency injection for:
+     - EventBus in Course model
+     - ComponentRegistry in Interface implementations
+   - Reduce direct imports between integration modules
 
-4. **Batch Processing Improvements**:
-   - Add circuit breaker pattern for upload failures
-   - Implement chunked processing for large batches
-
-5. **Component Registry Enhancements**:
-   - Add lifecycle hooks for component states
-   - Implement dependency resolution using graph algorithms
+4. **Interface Contracts**:
+   - Add abstract base classes for: 
+     - EventHandler
+     - BatchProcessor
+     - AuthorizationProvider
+   - Strengthen InterfaceMethod signature validation
 
 ### 4. Critical Path Analysis
-
-1. **System Initialization**:
-   ```
-   ComponentRegistry → EventBus → TransactionLogger → AI Interfaces
-   ```
-
-2. **Course Creation Flow**:
-   ```
-   POST /courses → CourseModel → EventBus → ContentIndexer → DB Commit
-   ```
-
-3. **Batch Upload Process**:
-   ```
-   File Upload → ValidationFramework → UploadService → 
-   EventBus → TransactionLogger → Monitoring
-   ```
-
-4. **Authorization Check**:
-   ```
-   API Call → Permission Check → Role Hierarchy Resolution → 
-   Policy Decision Point → Audit Log
-   ```
-
-5. **AI Processing Pipeline**:
-   ```
-   User Query → ConversationManager → AIModelProvider → 
-   Response Generator → Event Logging
-   ```
-
-### 5. Class Relationships
-
 ```mermaid
-classDiagram
-    class Event {
-        +serialize()
-        +deserialize()
-    }
-    
-    class Component {
-        +declare_dependency()
-        +provide_interface()
-    }
-    
-    class EventBus {
-        -subscribers
-        +subscribe()
-        +publish()
-    }
-    
-    class ComponentRegistry {
-        -components
-        +register_component()
-        +resolve_dependencies()
-    }
-    
-    class BaseInterface {
-        +register_interface()
-        +validate_implementation()
-    }
-    
-    class Course {
-        +modules
-        +validate()
-        +archive()
-    }
-    
-    class BatchController {
-        +upload_batch()
-        +validate_files()
-    }
-    
-    Event <|-- SystemEvent
-    Event <|-- ContentEvent
-    Event <|-- AIEvent
-    
-    Component "1" *-- "many" BaseInterface
-    ComponentRegistry "1" o-- "many" Component
-    EventBus "1" --o "many" Event
-    BatchController "1" --> "1" ValidationFramework
-    Course "1" o-- "many" Module
-    Module "1" o-- "many" Lesson
+graph TD
+    A[User Action] --> B(EventBus)
+    B --> C{Event Type}
+    C -->|Content Update| D[Course Model]
+    C -->|AI Request| E[Conversation Manager]
+    D --> F[ComponentRegistry]
+    E --> F
+    F --> G{Check Dependencies}
+    G -->|Valid| H[Execute Transaction]
+    G -->|Invalid| I[Raise SystemEvent]
+    H --> J[TransactionLogger]
+    J --> K[Persist State]
 ```
 
-This architecture enables:
-- Horizontal scaling through component-based design
-- Real-time monitoring via transaction logging
-- AI service interoperability through interface contracts
-- Event-driven updates across distributed components
-- Policy-driven authorization throughout the system
+Key Execution Paths:
+1. **Content Modification Flow**:
+   UI Event → ContentEvent → EventBus → Course Model → DB Commit → ContentUpdatedEvent
+
+2. **Batch Processing Flow**:
+   Upload Start → Validate Dependencies → Init Transaction → Process Files → Update Registry → Commit Results
+
+3. **AI Conversation Flow**:
+   User Input → Route Handler → Context Update → Model Execution → Response Generation → History Persistence
+
+### 5. Class/Module Relationships
+```mermaid
+graph LR
+    EB[EventBus] -- Notifies --> CR[ComponentRegistry]
+    CR -- Manages --> COMP[Component]
+    COMP -- Implements --> INTERFACE[BaseInterface]
+    COURSE[Course] -- Generates --> CONTENT_EVENT[ContentEvent]
+    CONTENT_EVENT -- Published via --> EB
+    BATCH[BatchController] -- Uses --> VALIDATOR[ValidationFramework]
+    BATCH -- Emits --> BATCH_EVENT[BatchEvent]
+    AUTH[Authorization] -- Protects --> COURSE
+    TRANSACT[TransactionLogger] -- Tracks --> ALL[All Components]
+    AI_INT[AIInterface] -- Provides --> CONV[ConversationManager]
 ```
+
+Key Relationships:
+- **Event System**:
+  EventType ←inherits- SystemEventType/ContentEventType
+  EventBus ←depends- ComponentRegistry
+  All Components → EventBus (pub/sub)
+
+- **Data Model**:
+  Course 1→* Module 1→* Lesson
+  Course *→* Enrollment
+  UserPermissions *→ Role *→ Permission
+
+- **AI Subsystem**:
+  ConversationManager → ConversationState ←persists→ InMemoryStore
+  AIInterface ←implements- AIModelProvider ←adapts- (DeepSeek/OpenAI)
+  
+- **Security**:
+  AuthorizationManager ←aggregates→ Role/Permission
+  require_permission ←decorates- ProtectedMethods
+```
+
+This architectural enhancement focuses on the requested aspects while avoiding duplication with the existing file structure documentation. Would you like me to expand on any particular aspect?
