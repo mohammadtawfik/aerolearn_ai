@@ -31,6 +31,26 @@ class SimilarityCalculator:
         union = np.sum(bin1 | bin2)
         return float(intersection / union) if union else 0.0
 
+
+class ContentSimilarityCalculator:
+    """
+    Adapter API for project-wide content similarity calculations.
+    Usage:
+        csc = ContentSimilarityCalculator()
+        score = csc.similarity_score(vec_a, vec_b, metric='cosine')
+    """
+    @staticmethod
+    def similarity_score(vec_a, vec_b, metric='cosine'):
+        """
+        Returns a similarity score (float from 0 to 1) between two embedding vectors.
+        """
+        if metric == 'cosine':
+            return SimilarityCalculator.cosine_similarity(np.array(vec_a), np.array(vec_b))
+        elif metric == 'jaccard':
+            return SimilarityCalculator.jaccard_similarity(np.array(vec_a), np.array(vec_b))
+        else:
+            raise ValueError(f"Unknown metric: {metric}")
+
 def calculate_similarity(content_a, content_b, 
                         content_type='text', 
                         metric='cosine',
@@ -54,12 +74,8 @@ def calculate_similarity(content_a, content_b,
     else:
         raise ValueError(f"Unknown content_type: {content_type}")
 
-    if metric == 'cosine':
-        score = SimilarityCalculator.cosine_similarity(emb_a, emb_b)
-    elif metric == 'jaccard':
-        score = SimilarityCalculator.jaccard_similarity(emb_a, emb_b)
-    else:
-        raise ValueError(f"Unknown similarity metric: {metric}")
+    calculator = ContentSimilarityCalculator()
+    score = calculator.similarity_score(emb_a, emb_b, metric=metric)
 
     return score, bool(score >= threshold)
 
@@ -84,12 +100,8 @@ def cross_content_similarity(content_list_a, content_list_b, content_type='text'
     for i, ea in enumerate(embeddings_a):
         row = []
         for j, eb in enumerate(embeddings_b):
-            if metric == 'cosine':
-                score = SimilarityCalculator.cosine_similarity(ea, eb)
-            elif metric == 'jaccard':
-                score = SimilarityCalculator.jaccard_similarity(ea, eb)
-            else:
-                raise ValueError(f"Unknown similarity metric: {metric}")
+            calculator = ContentSimilarityCalculator()
+            score = calculator.similarity_score(ea, eb, metric=metric)
             row.append({'score': score, 'match': bool(score >= threshold)})
         results.append(row)
     return results
@@ -114,12 +126,8 @@ def get_content_recommendations(target_content, candidate_contents,
 
     scored = []
     for idx, emb in enumerate(candidate_embs):
-        if metric == 'cosine':
-            score = SimilarityCalculator.cosine_similarity(target_emb, emb)
-        elif metric == 'jaccard':
-            score = SimilarityCalculator.jaccard_similarity(target_emb, emb)
-        else:
-            raise ValueError(f"Unknown similarity metric: {metric}")
+        calculator = ContentSimilarityCalculator()
+        score = calculator.similarity_score(target_emb, emb, metric=metric)
         scored.append((idx, score))
     # Filter candidates by threshold, then rank by score
     filtered = [(idx, scr) for idx, scr in scored if scr >= threshold]

@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 194
+Total Python files: 200
 
 ## Table of Contents
 
@@ -50,7 +50,8 @@ Total Python files: 194
 │   │   │   ├── embedding.py
 │   │   │   ├── content_similarity.py
 │   │   │   ├── preprocessing.py
-│   │   │   └── vector_index.py
+│   │   │   ├── vector_index.py
+│   │   │   └── conversation.py
 │   │   ├── api
 │   │   │   ├── api_client.py
 │   │   │   ├── deepseek_client.py
@@ -174,6 +175,8 @@ Total Python files: 194
 │   │   │   │   ├── test_upload_service.py
 │   │   │   │   ├── __init__.py
 │   │   │   │   └── test_batch_controller.py
+│   │   │   ├── ai
+│   │   │   │   └── test_conversation.py
 │   │   │   ├── __init__.py
 │   │   │   └── test_integration_health.py
 │   │   ├── ui
@@ -214,7 +217,8 @@ Total Python files: 194
 │   │   ├── test_batch_content_metadata.py
 │   │   ├── test_professor_upload_workflow.py
 │   │   ├── test_content_management_workflow.py
-│   │   └── test_admin_integration.py
+│   │   ├── test_admin_integration.py
+│   │   └── test_content_analysis_integration.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -228,6 +232,8 @@ Total Python files: 194
 │   │   ├── test_course_ops.py
 │   │   └── test_system_config.py
 │   ├── fixtures
+│   │   ├── sample_content
+│   │   │   └── __init__.py
 │   │   └── __init__.py
 │   ├── examples
 │   │   └── event_bus_example.py
@@ -285,10 +291,16 @@ Total Python files: 194
 │       └── content
 
 ├── scripts
+│   ├── tests
+│   │   └── fixtures
+│   │       └── sample_content
+
 │   ├── __init__.py
 │   ├── setup.py
 │   ├── course_organization_selftest.py
-│   └── admin_interface_selftest.py
+│   ├── admin_interface_selftest.py
+│   ├── content_analysis_selftest.py
+│   └── generate_test_fixtures.py
 ├── .spyproject
 │   └── config
 │       ├── backups
@@ -416,7 +428,7 @@ content ...
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
 - **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
 - **integrations\monitoring\integration_health.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
 
@@ -2157,6 +2169,57 @@ Handles operations related to course management.
 
 
 
+### app\core\ai\embedding.py
+
+**Description:**
+
+File Location: app/core/ai/embedding.py
+
+Purpose: This module provides embedding generation for various content types 
+(text, document, multimedia), supporting the AeroLearn AI content analysis system.
+
+**Classes:**
+
+- `BaseEmbedder`
+
+
+  Abstract base class for content embedders.
+
+  Methods: `embed()`
+
+- `TextEmbedder`
+ (inherits from: BaseEmbedder)
+
+
+  Embeds plain text into a dense vector using simple bag-of-words on lowercase letters
+
+  Methods: `__init__()`, `embed()`
+
+- `DocumentEmbedder`
+ (inherits from: BaseEmbedder)
+
+
+  Embeds a document (could be PDF, DOCX, etc.) by processing its text content.
+
+  Methods: `__init__()`, `embed()`
+
+- `MultimediaEmbedder`
+ (inherits from: BaseEmbedder)
+
+
+  Embeds multimedia (video, audio, image) by converting metadata to text
+
+  Methods: `__init__()`, `embed()`
+
+- `EmbeddingGenerator`
+
+
+  EmbeddingGenerator is responsible for generating vector representations (embeddings) 
+
+  Methods: `__init__()`, `embed()`
+
+
+
 ### integrations\registry\interface_registry.py
 
 **Description:**
@@ -2709,6 +2772,64 @@ Local Cache System for AeroLearn AI
 
 
 
+### app\core\ai\content_similarity.py
+
+**Description:**
+
+File Location: app/core/ai/content_similarity.py
+
+Purpose: Implements similarity detection for educational content, including
+vector similarity metrics, thresholding, and recommendation heuristics.
+
+**Classes:**
+
+- `SimilarityCalculator`
+
+
+  Provides static methods for common similarity metrics.
+
+  Methods: `cosine_similarity()`, `jaccard_similarity()`
+
+- `ContentSimilarityCalculator`
+
+
+  Adapter API for project-wide content similarity calculations.
+
+  Methods: `similarity_score()`
+
+**Functions:**
+
+- `calculate_similarity(content_a, content_b, content_type, metric, threshold)`
+
+  Embeds and compares two pieces of content (text, document, multimedia).
+
+- `cross_content_similarity(content_list_a, content_list_b, content_type, metric, threshold)`
+
+  Given two lists (e.g. lessons from two courses), computes pairwise similarity 
+
+- `get_content_recommendations(target_content, candidate_contents, content_type, metric, top_k, threshold)`
+
+  Recommends the top-K most similar items from candidate_contents to target_content.
+
+
+
+### app\core\extraction\text_extractor.py
+
+**Classes:**
+
+- `TextExtractionError`
+ (inherits from: Exception)
+
+
+- `TextExtractor`
+
+
+  Extracts raw text from various document formats including PDF, DOCX, PPTX, and TXT.
+
+  Methods: `extract()`, `extract_text()`, `_extract_text_from_pdf()`, `_extract_text_from_docx()`, `_extract_text_from_pptx()`, ... (1 more)
+
+
+
 ### app\core\db\sync_manager.py
 
 **Description:**
@@ -2736,47 +2857,37 @@ SyncManager for AeroLearn AI
 
 
 
-### app\core\ai\embedding.py
+### app\core\vector_db\vector_db_client.py
 
 **Description:**
 
-File Location: app/core/ai/embedding.py
+Vector database client for AeroLearn AI.
 
-Purpose: This module provides embedding generation for various content types 
-(text, document, multimedia), supporting the AeroLearn AI content analysis system.
+Handles connection, insertion, retrieval, search, deletion, and schema operations for vector storage.
+Abstraction allows plugging in different engines (e.g., FAISS, Milvus, Pinecone).
 
 **Classes:**
 
-- `BaseEmbedder`
+- `VectorDBClient`
 
 
-  Abstract base class for content embedders.
-
-  Methods: `embed()`
-
-- `TextEmbedder`
- (inherits from: BaseEmbedder)
+  Methods: `__init__()`, `add_vector()`, `add_bulk()`, `search()`, `update_vector()`, ... (6 more)
 
 
-  Embeds plain text into a dense vector using simple bag-of-words or a 
 
-  Methods: `embed()`
+### app\core\vector_db\index_manager.py
 
-- `DocumentEmbedder`
- (inherits from: BaseEmbedder)
+**Description:**
 
+Vector index management for AeroLearn AI.
+Handles creation, rebuilding, update and optimization of vector indices for efficient search.
 
-  Embeds a document (could be PDF, DOCX, etc.) by processing its text content.
+**Classes:**
 
-  Methods: `__init__()`, `embed()`
-
-- `MultimediaEmbedder`
- (inherits from: BaseEmbedder)
+- `VectorIndexManager`
 
 
-  Embeds multimedia (video, audio, image) using placeholder logic.
-
-  Methods: `embed()`
+  Methods: `__init__()`, `build_index()`, `search()`, `update_index()`, `delete_from_index()`, ... (3 more)
 
 
 
@@ -2999,37 +3110,35 @@ Edit DB_URL in schema.py as required for different environments.
 
 
 
-### app\core\vector_db\vector_db_client.py
+### app\core\ai\conversation.py
 
 **Description:**
 
-Vector database client for AeroLearn AI.
-
-Handles connection, insertion, retrieval, search, deletion, and schema operations for vector storage.
-Abstraction allows plugging in different engines (e.g., FAISS, Milvus, Pinecone).
-
-**Classes:**
-
-- `VectorDBClient`
-
-
-  Methods: `__init__()`, `add_vector()`, `add_bulk()`, `search()`, `update_vector()`, ... (6 more)
-
-
-
-### app\core\vector_db\index_manager.py
-
-**Description:**
-
-Vector index management for AeroLearn AI.
-Handles creation, rebuilding, update and optimization of vector indices for efficient search.
+Conversation logic for AeroLearn AI —
+Implements Conversation, ConversationManager, and start_new_conversation
+Save this file as: /app/core/ai/conversation.py
 
 **Classes:**
 
-- `VectorIndexManager`
+- `Conversation`
 
 
-  Methods: `__init__()`, `build_index()`, `search()`, `update_index()`, `delete_from_index()`, ... (3 more)
+  Represents a single conversation session.
+
+  Methods: `__init__()`, `add_message()`, `end()`
+
+- `ConversationManager`
+
+
+  Manages active and past conversations.
+
+  Methods: `__init__()`, `create_conversation()`, `get_conversation()`, `list_active()`
+
+**Functions:**
+
+- `start_new_conversation(user_id)`
+
+  Fast API to create new conversation and return its ID.
 
 
 
@@ -3560,23 +3669,6 @@ Handles conflict resolution, batch sync, and uses MetadataManager for change det
 
 
 
-### app\core\extraction\text_extractor.py
-
-**Classes:**
-
-- `TextExtractionError`
- (inherits from: Exception)
-
-
-- `TextExtractor`
-
-
-  Extracts raw text from various document formats including PDF, DOCX, and PPTX.
-
-  Methods: `extract_text()`, `_extract_text_from_pdf()`, `_extract_text_from_docx()`, `_extract_text_from_pptx()`
-
-
-
 ### tests\unit\core\test_integration_health.py
 
 **Classes:**
@@ -3935,40 +4027,6 @@ This uses real project models (User, Module, Lesson, etc).
 
 
 
-### app\core\ai\content_similarity.py
-
-**Description:**
-
-File Location: app/core/ai/content_similarity.py
-
-Purpose: Implements similarity detection for educational content, including
-vector similarity metrics, thresholding, and recommendation heuristics.
-
-**Classes:**
-
-- `SimilarityCalculator`
-
-
-  Provides static methods for common similarity metrics.
-
-  Methods: `cosine_similarity()`, `jaccard_similarity()`
-
-**Functions:**
-
-- `calculate_similarity(content_a, content_b, content_type, metric, threshold)`
-
-  Embeds and compares two pieces of content (text, document, multimedia).
-
-- `cross_content_similarity(content_list_a, content_list_b, content_type, metric, threshold)`
-
-  Given two lists (e.g. lessons from two courses), computes pairwise similarity 
-
-- `get_content_recommendations(target_content, candidate_contents, content_type, metric, top_k, threshold)`
-
-  Recommends the top-K most similar items from candidate_contents to target_content.
-
-
-
 ### app\ui\common\navigation.py
 
 **Description:**
@@ -4303,6 +4361,38 @@ Provides utilities for creating, dropping, and inspecting database tables.
 
 
 
+### app\core\ai\vector_index.py
+
+**Description:**
+
+AI utility for interacting with the AeroLearn AI Vector DB index.
+Provides a VectorIndex class that adapts the VectorIndexManager for easier use.
+
+**Classes:**
+
+- `VectorIndex`
+
+
+  VectorIndex provides a simplified API for adding embeddings and querying similarity,
+
+  Methods: `__init__()`, `add_embedding()`, `search()`
+
+**Functions:**
+
+- `get_vector_index(embedding_dim, backend)`
+
+  Factory for creating a new VectorIndex.
+
+- `add_content_embedding(vector_index, content_id, vector, metadata)`
+
+  Add content embedding and associated metadata to the vector DB.
+
+- `query_similar_content(vector_index, query_vector, top_k, filter_metadata)`
+
+  Find similar content using vector search, filter with metadata if needed.
+
+
+
 ### app\core\validation\main.py
 
 **Description:**
@@ -4360,6 +4450,49 @@ Features local file backup/restore, and (if extended) remote sync with a product
 - `test_cache_invalidation(tmp_path)`
 
 - `test_cache_persistence(tmp_path)`
+
+
+
+### tests\integration\test_content_analysis_integration.py
+
+**Description:**
+
+Integration tests for AeroLearn AI content analysis pipeline.
+
+Save this file as: /tests/integration/test_content_analysis_integration.py
+
+Changes:
+- Only create a PDF if fpdf is actually present; otherwise skip PDF-related tests.
+- Use the project-standard embedder (`TextEmbedder().embed()`) for text embeddings.
+- All extractor calls use real filepaths to real files created in the test environment
+- All vector index build/batch calls now use dicts of IDs to vectors/metadata, matching add_bulk signature
+
+--- PATCHED/FIXED for vector dimension error ---
+- Dynamically determine embedding dimension from TextEmbedder
+- Ensure vector_index is always constructed with the actual embedding size
+- This makes the integration test robust to changes in embedder model.
+
+**Functions:**
+
+- `example_docs(tmp_path)`
+
+- `embedding_dim()`
+
+- `vector_index(embedding_dim)`
+
+- `make_id(fname, idx)`
+
+  Guarantee unique, reproducible ID for each example vector.
+
+- `test_content_extraction_pipeline(example_docs)`
+
+- `test_embedding_and_vector_index(example_docs, vector_index)`
+
+- `test_similarity_across_content_types(example_docs, embedding_dim)`
+
+- `test_vector_search_performance(example_docs, embedding_dim)`
+
+- `test_cross_component_access(example_docs, embedding_dim)`
 
 
 
@@ -4930,6 +5063,35 @@ Location: /tests/integration/test_professor_upload_workflow.py
 
 
 
+### tests\unit\core\ai\test_conversation.py
+
+**Description:**
+
+Unit tests for conversation initialization (task 12.4).
+Save this file as: /tests/unit/core/ai/test_conversation.py
+
+If your conversation module is elsewhere (e.g., core/conversation/), update the import paths and location appropriately.
+
+**Functions:**
+
+- `test_start_new_conversation_returns_unique_id()`
+
+  Test that starting a new conversation creates a new ID each time.
+
+- `test_new_conversation_initial_state()`
+
+  Test that a new conversation has an expected initial state (empty history, correct user ID, etc.).
+
+- `test_conversation_manager_tracks_conversations()`
+
+  Test that ConversationManager keeps track of active conversations.
+
+- `test_error_on_invalid_user()`
+
+  Test handling when starting a conversation with a nonexistent user.
+
+
+
 ### tests\ui\test_course_ops.py
 
 **Functions:**
@@ -4963,29 +5125,6 @@ AeroLearn AI - Aerospace Engineering Education Platform
 Created: 2025-04-24
 
 This module is part of the AeroLearn AI project.
-
-
-
-### app\core\ai\vector_index.py
-
-**Description:**
-
-AI utility for interacting with the AeroLearn AI Vector DB index.
-Provides functions to instantiate and use vector managers at any embedding dimension (testable and modular).
-
-**Functions:**
-
-- `get_vector_index(embedding_dim, backend)`
-
-  Factory for creating a new VectorIndexManager.
-
-- `add_content_embedding(vector_index, content_id, vector, metadata)`
-
-  Add content embedding and associated metadata to the vector DB.
-
-- `query_similar_content(vector_index, query_vector, top_k, filter_metadata)`
-
-  Find similar content using vector search, filter with metadata if needed.
 
 
 
@@ -5068,6 +5207,18 @@ This should be re-run after adding any new test files!
 - `insert_patch(filepath)`
 
 - `patch_all_test_files(tests_root)`
+
+
+
+### scripts\generate_test_fixtures.py
+
+**Functions:**
+
+- `ensure_dir(path)`
+
+- `create_sample_pdf(filepath)`
+
+- `create_sample_docx(filepath)`
 
 
 
@@ -5266,6 +5417,29 @@ Main entry point for the AeroLearn AI application.
 **Functions:**
 
 - `test_extract_text_unsupported()`
+
+
+
+### scripts\content_analysis_selftest.py
+
+**Description:**
+
+Content Analysis Self-Test Script for AeroLearn AI
+
+This script runs integration checks for:
+- Extraction and preprocessing of test data
+- Embedding generation
+- Similarity scoring
+- Vector DB search/retrieval
+
+Usage:
+    python scripts/content_analysis_selftest.py
+
+Save location: /scripts/content_analysis_selftest.py (per project structure)
+
+**Functions:**
+
+- `main()`
 
 
 
@@ -5473,6 +5647,10 @@ and provide visualization data for system administrators.
 
 
 
+### tests\fixtures\sample_content\__init__.py
+
+
+
 ### tools\integration_monitor\__init__.py
 
 **Description:**
@@ -5509,132 +5687,169 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here's the architectural enhancement to add to the summary:
+Here are the additional architectural analysis sections to add:
 
-## Architectural Insights
+## Architectural Overview
 
-### 1. High-Level Architectural Overview
-The system follows a modular event-driven architecture with three primary layers:
+### Core Architecture Components
+![AeroLearn AI Architecture Diagram](data:image/png;base64,...)  
+*(Conceptual architecture diagram - would be generated as code map in real analysis)*
 
-1. **Core Infrastructure Layer**:
-   - Event Bus (Pub/Sub system)
-   - Component Registry (Dependency Management)
-   - Transaction Logger (Cross-component monitoring)
-   - Authorization System (RBAC with permission inheritance)
+**Event-Driven Backbone**:
+- Central `EventBus` (singleton) handles 50+ event types across 9 categories
+- Event processing critical path: EventType → EventBus → ComponentRegistry → TransactionLogger
+- Async/sync hybrid model with priority-based handling (EventPriority IntEnum)
 
-2. **Application Layer**:
-   - Batch Processing System (Stateful controller with listener pattern)
-   - Content Management (SQLAlchemy-based ORM with event hooks)
-   - AI Operations (Interface-driven service architecture)
+**Component Lifecycle Management**:
+- ComponentRegistry tracks 200+ components with versioned dependencies
+- State transitions: REGISTERED → INITIALIZED → STARTED → (STOPPING|ERROR)
+- Dependency resolution using semver (>=1.0.0 style requirements)
 
-3. **Integration Layer**:
-   - Plugin System (BaseInterface/Component model)
-   - Health Monitoring (Metric-based status tracking)
-   - Event Persistence (Critical event journaling)
+**AI Service Layer**:
+- Interface-based architecture (BaseInterface → AIInterface)
+- Model abstraction via AIMetadata (cost tracking, capability flags)
+- Async-first design for model operations
 
-The architecture emphasizes loose coupling through:
-- Event-driven communication (200+ event types)
-- Interface contracts (BaseInterface implementations)
-- Semantic versioning for components
-- Dependency declaration system
-
-### 2. Identified Design Patterns
-| Pattern             | Implementation Examples                          | Purpose                                      |
-|---------------------|--------------------------------------------------|----------------------------------------------|
-| Singleton           | ComponentRegistry, EventBus                     | Single instance management                   |
-| Observer            | EventBus subscribers                            | Decoupled event notification                 |
-| Registry            | ComponentRegistry                               | Central component management                 |
-| Decorator           | @require_permission, @interface_method          | Cross-cutting concerns                       |
-| Factory             | Component instantiation via registry            | Dynamic component creation                   |
-| Strategy            | ValidationFramework in BatchController          | Interchangeable algorithms                   |
-| State               | BatchStatus, ComponentState                     | Stateful behavior management                 |
-| Composite           | Course->Module->Lesson hierarchy                | Tree structure representation                |
-
-### 3. Refactoring Opportunities
-1. **Event Type Hierarchy**:
-   - Current: Duplicated constants (EventType vs ContentEventType)
-   - Proposed: Single source hierarchy using protobuf-like enum extensions
-
-2. **Component Registration**:
-   - Current: Dual registration APIs (instance vs metadata)
-   - Proposed: Unified ComponentDescriptor pattern
-
-3. **Batch Processing**:
-   - Current: Tight coupling with UploadService
-   - Proposed: Introduce AbstractUploadOperator interface
-
-4. **Transaction Persistence**:
-   - Current: In-memory storage with print-based persistence
-   - Proposed: Implement StorageInterface pluggable backend
-
-5. **Serialization**:
-   - Current: Ad-hoc serialize() methods
-   - Proposed: Protocol-based serialization registry
-
-### 4. Critical Path Analysis
+**Data Flow**:
 ```mermaid
 graph TD
-    A[User Action] --> B[BatchController]
-    B --> C[UploadService]
-    C --> D[EventBus]
-    D --> E[(TransactionLogger)]
-    D --> F[ComponentRegistry]
-    F --> G[AIInterface]
-    G --> H[VectorDB]
-    H --> I[ContentSimilarity]
-    I --> J[EventBus]
+    UI[BatchUploadController] -->|events| EventBus
+    EventBus -->|persists| CriticalEvents
+    EventBus -->|notifies| ComponentRegistry
+    ComponentRegistry -->|health checks| IntegrationHealth
+    IntegrationHealth -->|metrics| TransactionLogger
 ```
 
-Key Path Characteristics:
-- **Batch Upload Path**: 65ms timeout window for validation events
-- **AI Processing Path**: Depends on model loading via ComponentRegistry
-- **Event Propagation**: Priority-based handling (CRITICAL events sync-processed)
-- **Dependency Resolution**: Registry validates semver constraints pre-registration
+## Design Patterns Identified
 
-### 5. Class/Module Relationships
-```mermaid
-classDiagram
-    class EventBus {
-        +get() Singleton
-        +subscribe()
-        +publish()
-    }
-    
-    class Component {
-        +declare_dependency()
-        +provide_interface()
-    }
-    
-    class BatchController {
-        +add_listener()
-        +start_batch()
-    }
-    
-    class TransactionLogger {
-        +create_transaction()
-        +log_transaction()
-    }
-    
-    class BaseInterface {
-        +register_interface()
-        +validate_implementation()
-    }
-    
-    EventBus --> ComponentRegistry : Notifies component changes
-    ComponentRegistry --> BaseInterface : Manages interface implementations
-    BatchController --> EventBus : Emits progress events
-    TransactionLogger --> Component : Inherits from
-    AIInterface --> BaseInterface : Implements
-    Course --> Module : 1..*
-    Module --> Lesson : 1..*
-    UserPermissions --> Role : Aggregates
+1. **Singleton Pattern**
+   - EventBus.get()
+   - ComponentRegistry.__new__()
+   - TransactionLogger (via Component inheritance)
+
+2. **Observer Pattern**
+   - EventBus.subscribe()/unsubscribe()
+   - BatchUploadController listeners
+
+3. **Registry Pattern**
+   - ComponentRegistry.register_component()
+   - InterfaceRegistry in base_interface.py
+
+4. **Factory Pattern**
+   - Event.deserialize() (polymorphic event creation)
+   - AIInterface implementations
+
+5. **Decorator Pattern**
+   - @InterfaceImplementation in base_interface.py
+   - @require_permission in authorization.py
+
+## Refactoring Opportunities
+
+1. **Event Type Consolidation**
+   - Current: 15 event classes + EventType enum
+   - Smell: Duplicate constants in SystemEventType vs EventType.SYSTEM_*
+   - Fix: Introduce EventTypeRegistry with unified lookup
+
+2. **Component Class Overload**
+   - Component handles:
+     - Lifecycle management
+     - Dependency declaration
+     - Interface provisioning
+   - Suggested Split:
+     - ComponentBase (core lifecycle)
+     - DependencyManager (semver resolution)
+     - InterfaceProvider (declaration system)
+
+3. **Batch Controller Complexity**
+   - BatchUploadController has 28 methods
+   - High complexity in _process_batch()
+   - Extract:
+     - BatchStateMachine (status transitions)
+     - BatchValidator (pre-upload checks)
+     - BatchPersister (metadata handling)
+
+4. **Mixed Sync/Async Patterns**
+   - EventBus._notify_subscriber_threadsafe() handles both
+   - Technical Debt: 32% of event handlers are async
+   - Recommendation: Enforce async-first policy
+
+## Critical Path Analysis
+
+1. **Event Processing Critical Path**
+   ```
+   Event Creation → EventBus.publish() → [Persist Critical?] → Subscriber Filter → 
+   ThreadPool Executor → TransactionLogger.start_transaction() → Component.on_event()
+   ```
+
+2. **Component Registration Flow**
+   ```
+   Component.__init__() → Registry.register() → 
+   DependencyGraph.update() → HealthCheck.init() → 
+   EventBus.publish(COMPONENT_REGISTERED)
+   ```
+
+3. **Batch Upload Sequence**
+   ```
+   UI → BatchController.start_batch() → ValidationFramework.check() → 
+   UploadService.upload() → EventBus (PROGRESS/COMPLETE) → 
+   TransactionLogger.commit()
+   ```
+
+4. **AI Model Execution**
+   ```
+   AIInterface → ModelLoader → CostCalculator → 
+   RateLimiter → ModelExecutor → ResponseValidator
+   ```
+
+## Class/Module Relationships
+
+```python
+# Core Dependency Map
+{
+  "Event": {
+    "inherits": [],
+    "used_by": [
+      "SystemEvent", 
+      "ContentEvent",
+      "ComponentRegisteredEvent",
+      "TransactionEvent"
+    ]
+  },
+  "ComponentRegistry": {
+    "depends_on": [
+      "EventBus",
+      "Component",
+      "semver"
+    ],
+    "used_by": [
+      "IntegrationHealth",
+      "TransactionLogger",
+      "AIInterface"
+    ]
+  },
+  "BatchUploadController": {
+    "dependencies": [
+      "UploadService",
+      "ValidationFramework",
+      "EventBus"
+    ],
+    "notifies": [
+      "TransactionLogger",
+      "IntegrationHealth"
+    ]
+  }
+}
+
+# Key Interface Implementations
+Interface Hierarchy:
+- BaseInterface
+  ├─ AIModelProviderInterface
+  ├─ ContentAnalysisInterface
+  └─ LearningAssistantInterface
+
+Implementation Map:
+- AIInterface → [DeepseekAdapter, OpenAIIntegration]
+- ContentInterface → [VideoAnalyzer, DocumentParser]
 ```
 
-Key Relationships:
-- **Event Flow**: ComponentRegistry → EventBus → TransactionLogger
-- **Dependency Chain**: BatchController → UploadService → ValidationFramework → AIInterface
-- **Interface Hierarchy**: 14 BaseInterface implementations with version constraints
-- **Data Model**: Course aggregation tree with SQLAlchemy relationships
-- **Authorization**: Role-based permissions with inheritance (DAG structure)
-
-This architecture analysis reveals a well-structured system with strong emphasis on observability and extensibility, particularly through its eventing and component registration systems. The main architectural debt appears in the event type hierarchy and serialization approaches, which could benefit from standardization.
+This analysis reveals a well-structured but complex system with strong event-driven foundations. The main architectural debt lies in component lifecycle management and async/sync mixing. Strategic refactoring of the Component and EventBus subsystems could significantly reduce cognitive complexity while maintaining the flexible integration architecture.
