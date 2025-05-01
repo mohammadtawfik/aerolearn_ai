@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 288
+Total Python files: 290
 
 ## Table of Contents
 
@@ -74,7 +74,8 @@ Total Python files: 288
 │   │   ├── monitoring
 │   │   │   ├── settings_manager.py
 │   │   │   ├── metrics.py
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   └── notification_center.py
 │   │   ├── config
 │   │   │   ├── api_secrets.py
 │   │   │   ├── api_secrets_example.py
@@ -237,6 +238,8 @@ Total Python files: 288
 │   │   │   │   └── test_batch_controller.py
 │   │   │   ├── ai
 │   │   │   │   └── test_conversation.py
+│   │   │   ├── monitoring
+│   │   │   │   └── test_notification_center.py
 │   │   │   ├── __init__.py
 │   │   │   └── test_integration_health.py
 │   │   ├── ui
@@ -1987,6 +1990,61 @@ Integration: Hooks into EventBus system for notification and validation events.
 **Functions:**
 
 - `_add_project_root_to_syspath()`
+
+
+
+### app\core\monitoring\notification_center.py
+
+**Description:**
+
+Notification Center for AeroLearn AI
+Location: app/core/monitoring/notification_center.py
+
+This file implements a centralized notification hub with support for:
+- Notification categories and priority levels
+- Subscriptions for components/users
+- Notification history management
+- Event-driven integration points
+
+NOTE: Integrations with events and UI to follow after core logic review.
+
+**Classes:**
+
+- `NotificationCategory`
+ (inherits from: Enum)
+
+
+- `NotificationPriority`
+ (inherits from: Enum)
+
+
+- `NotificationStatus`
+ (inherits from: Enum)
+
+
+- `Notification`
+
+
+  Methods: `__init__()`, `mark_read()`, `archive()`, `to_dict()`
+
+- `Subscription`
+
+
+  Methods: `__init__()`, `matches()`
+
+- `NotificationHistory`
+
+
+  Stores and manages notification history per recipient/component.
+
+  Methods: `__init__()`, `add()`, `get()`, `search()`
+
+- `NotificationCenter`
+
+
+  Central notification hub:
+
+  Methods: `__init__()`, `subscribe()`, `unsubscribe()`, `notify()`, `get_notifications()`, ... (3 more)
 
 
 
@@ -4965,6 +5023,41 @@ Requires PyQt6 (or compatible PySide6).
 
 
 
+### tests\unit\core\monitoring\test_notification_center.py
+
+**Description:**
+
+Unit tests for Notification Center
+
+Location: /tests/unit/core/monitoring/test_notification_center.py
+(Place this file in the tests/unit/core/monitoring/ directory as per project conventions)
+
+**Functions:**
+
+- `_make_simple_notification(title, message, category, priority, recipient_id, data, source)`
+
+- `setup_function()`
+
+- `test_basic_notification_delivery_and_history()`
+
+- `test_subscription_and_callback(monkeypatch)`
+
+- `test_priority_filtering()`
+
+- `test_category_filtering()`
+
+- `test_broadcast_notification_to_all()`
+
+- `test_mark_as_read_and_archive()`
+
+- `test_search_notifications()`
+
+- `test_unsubscribe()`
+
+- `test_thread_safety()`
+
+
+
 ### tests\integration\test_component_registry_async.py
 
 **Classes:**
@@ -7594,146 +7687,115 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here's the architectural enhancement to add to the summary:
+Here's the architectural enhancement to be added to the summary:
 
 ```markdown
-## Architectural Analysis
+## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows a modular event-driven architecture with three primary layers:
-
-1. **Core Application Layer** (app/):
-   - Domain models (Courses, Users, Enrollment)
-   - Business logic services (Authentication, Batch Processing)
-   - Data persistence (SQLAlchemy models)
-
-2. **Integration Layer** (integrations/):
-   - Event Bus (pub/sub system)
-   - Component Registry (service discovery)
-   - Monitoring & Transaction logging
-   - AI/ML interfaces
-
-3. **Interface Abstraction Layer**:
-   - BaseInterface for plugin architecture
-   - Specialized interfaces (AI, Content Analysis)
-   - Adapter pattern implementations
+The system follows a layered event-driven architecture with modular components:
+- **Core Layer**: Business logic (Courses, Auth, AI models)
+- **Integration Layer**: Event bus, component registry, interfaces
+- **Data Layer**: SQLAlchemy models with complex relationships
+- **Service Layer**: Batch processing, upload controllers
+- **Observability Layer**: Transaction logging, monitoring
 
 Key architectural characteristics:
-- Event-driven communication through centralized EventBus
-- Component lifecycle management via ComponentRegistry
-- Strict separation between domain models and system services
-- Horizontal scaling capability through stateless components
-- Plugin architecture for AI providers
+- Event-driven communication through EventBus (publish-subscribe)
+- Component-based architecture with registry pattern
+- Strict interface contracts for integrations
+- Horizontal layers with vertical slicing for domain capabilities
+- Hybrid synchronous/asynchronous processing
 
 ### 2. Identified Design Patterns
-
 | Pattern                | Implementation Examples                          | Purpose                                      |
-|------------------------|--------------------------------------------------|---------------------------------------------|
-| Singleton              | EventBus, ComponentRegistry                     | System-wide single instance management      |
-| Publisher-Subscriber   | EventBus with EventTypes                         | Loose coupling between components           |
-| Registry               | ComponentRegistry with dependency management     | Central service discovery                   |
-| Strategy               | AIInterface implementations                      | Interchangeable AI providers                |
-| Factory                | Event class hierarchy (SystemEvent, UserEvent)   | Type-safe event object creation             |
-| Decorator              | @interface_method in BaseInterface              | Method signature validation                 |
-| Observer               | BatchController listeners                        | Progress monitoring                         |
-| State                  | BatchStatus transitions                          | Upload lifecycle management                 |
+|------------------------|--------------------------------------------------|----------------------------------------------|
+| Singleton              | ComponentRegistry, EventBus                     | Single instance management                   |
+| Observer               | EventBus subscribers                            | Decoupled event handling                     |
+| Factory                | AIInterface implementations                     | Flexible AI provider integration             |
+| Decorator              | @interface_method in BaseInterface              | Interface validation                         |
+| Strategy               | AuthenticationProvider implementations          | Pluggable auth mechanisms                    |
+| Registry               | ComponentRegistry                               | Central component management                 |
+| Composite              | Event class hierarchy                           | Unified event handling                       |
+| Template Method        | BatchController processing workflow             | Consistent batch operations                  |
 
-### 3. Potential Refactoring Opportunities
+### 3. Refactoring Opportunities
+1. **Event System Consolidation**
+   - Current: Multiple event type classes (SystemEventType, ContentEventType)
+   - Improvement: Consolidate using EventType enum with category filtering
 
-1. **Event System Improvements**
-   - Introduce EventSchema validation layer
-   - Add dead-letter queue for failed event processing
-   - Implement event versioning for backward compatibility
+2. **Component Lifecycle Management**
+   - Current: Manual component registration in ComponentRegistry
+   - Improvement: Auto-discovery using entry points + dependency resolution
 
-2. **Component Registry Enhancements**
-   - Add dependency resolution algorithm
-   - Introduce health check monitoring
-   - Implement semantic version conflict detection
-
-3. **Model Relationships Optimization**
-   - Course->Module->Lesson hierarchy could benefit from Composite pattern
-   - Enrollment state management should use State pattern
-   - SQLAlchemy relationships need eager loading strategies
+3. **Model Duplication**
+   - Current: Course (ORM) vs CourseModel (domain model)
+   - Improvement: Introduce Data Mapper pattern for model separation
 
 4. **Batch Processing**
-   - Extract validation framework into separate service
-   - Implement retry queue pattern for failed uploads
-   - Add circuit breaker pattern for external service calls
+   - Current: Mixed sync/async in BatchController
+   - Improvement: Full async implementation with backpressure control
 
-5. **Common Anti-Patterns**
-   - God class tendencies in BatchUploadController
-   - Primitive obsession in event type strings
-   - Duplicated validation logic across models
+5. **Security Hardening**
+   - Current: Basic MFAProvider implementation
+   - Improvement: Replace with time-based OTP (RFC 6238) implementation
 
 ### 4. Critical Path Analysis
-
-**Key System Flows:**
-1. Course Enrollment Flow:
-   UserEvent → AuthService → Course.enroll() → EnrollmentEvent → EventBus
-
-2. Content Processing Pipeline:
-   BatchUpload → Validation → AI Analysis → Vector DB → Indexing
-
-3. AI Request Handling:
-   AIInterface → Model Provider → Usage Tracking → Response Transformation
-
-4. Component Initialization:
-   Registry Registration → Dependency Check → Interface Binding → Event Subscription
-
-**Performance-Sensitive Paths:**
-- EventBus message serialization/deserialization
-- BatchUploadController's thread synchronization
-- Course model relationships loading (N+1 query risk)
-- AIInterface response streaming
-
-### 5. Class/Module Relationships
-
 ```mermaid
 graph TD
-    subgraph Core Models
-        Course --> Module
-        Module --> Lesson
-        User --> Enrollment
-    end
-
-    subgraph Event System
-        EventBus -->|publishes| Event
-        Event --> SystemEvent
-        Event --> ContentEvent
-        EventType -->|categorizes| Event
-    end
-
-    subgraph Integration
-        ComponentRegistry -->|manages| Component
-        Component -->|implements| BaseInterface
-        AIInterface -->|extends| BaseInterface
-        TransactionLogger -->|logs| Component
-    end
-
-    subgraph Auth
-        AuthenticationService -->|uses| EventBus
-        AuthorizationManager -->|controls| Permission
-        UserModel -->|persists| User
-    end
-
-    BatchController -->|depends on| UploadService
-    BatchController -->|emits| BatchEvent
-    EventBus -->|notifies| BatchController
-
-    classDef model fill:#e6f3ff,stroke:#3399ff
-    classDef service fill:#ffe6cc,stroke:#ff9933
-    classDef integration fill:#e6ffe6,stroke:#33cc33
+    A[System Startup] --> B[ComponentRegistry Init]
+    B --> C[EventBus Initialization]
+    C --> D[Core Components Registration]
+    D --> E[Database Connection Pool Setup]
+    E --> F[Auth System Bootstrap]
+    F --> G[Batch Processor Initialization]
+    G --> H[AI Model Warmup]
+    H --> I[Ready for Requests]
     
-    class Course,Module,Lesson,User,Enrollment model
-    class EventBus,ComponentRegistry,TransactionLogger integration
-    class AuthenticationService,BatchController,UploadService service
+    J[Course Enrollment] --> K[EnrollmentEvent Creation]
+    K --> L[EventBus Publication]
+    L --> M[Authorization Check]
+    M --> N[Database Transaction]
+    N --> O[UserNotification Service]
+    O --> P[Analytics Processing]
 ```
 
-**Key Relationships:**
-- Course aggregates Modules which contain Lessons (composition)
-- Event hierarchy uses inheritance with polymorphic dispatch
-- ComponentRegistry acts as facade over component lifecycle
-- BatchController coordinates between UploadService and EventBus
-- AuthenticationService depends on EventBus for security events
-- AI interfaces follow bridge pattern between providers and consumers
+### 5. Class/Module Relationships
+```mermaid
+classDiagram
+    direction LR
+    
+    Event <|-- SystemEvent
+    Event <|-- ContentEvent
+    Event <|-- AIEvent
+    
+    Component "1" *-- "many" Interface
+    ComponentRegistry "1" o-- "many" Component
+    
+    Course "1" o-- "many" Module
+    Module "1" o-- "many" Lesson
+    Course "1" o-- "many" Enrollment
+    
+    BaseInterface <|-- AIInterface
+    BaseInterface <|-- ContentAnalysisInterface
+    
+    BatchController "1" --> "1" EventBus
+    BatchController "1" --> "1" ValidationFramework
+    
+    TransactionLogger "1" --> "1..*" Component
+    TransactionLogger "1" --> "1" EventBus
+    
+    AuthenticationService "1" --> "1..*" AuthenticationProvider
+    AuthenticationService "1" --> "1" AuthorizationManager
 ```
+
+Key Relationships:
+- **Event System**: Hierarchical event types with category-specific subclasses
+- **Component Registry**: Manages component dependencies and lifecycle states
+- **Course Hierarchy**: Composite structure with Course→Module→Lesson
+- **Interface System**: Strict contracts between integration components
+- **Batch Processing**: Coordinated workflow with event reporting
+- **Auth System**: Provider pattern with role-based authorization
+```
+
+This enhancement provides architectural context while maintaining focus on the codebase's structural patterns and improvement opportunities. Would you like me to elaborate on any particular aspect?
