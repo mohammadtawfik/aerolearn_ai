@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 272
+Total Python files: 281
 
 ## Table of Contents
 
@@ -144,7 +144,15 @@ Total Python files: 272
 │   │   │   ├── upload_service.py
 │   │   │   └── batch_upload_ui.py
 │   │   ├── student
-│   │   │   └── __init__.py
+│   │   │   ├── widgets
+│   │   │   │   ├── progress.py
+│   │   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   ├── dashboard.py
+│   │   │   ├── widget_registry.py
+│   │   │   ├── widget_base.py
+│   │   │   ├── dashboard_state.py
+│   │   │   └── register_widgets.py
 │   │   └── admin
 │   │       ├── templates
 
@@ -171,7 +179,8 @@ Total Python files: 272
 │   │   └── topic.py
 │   ├── utils
 │   │   ├── __init__.py
-│   │   └── crypto.py
+│   │   ├── crypto.py
+│   │   └── config_loader.py
 │   ├── config
 │   │   └── __init__.py
 │   ├── static
@@ -280,7 +289,8 @@ Total Python files: 272
 │   │   ├── test_admin_auth.py
 │   │   ├── test_user_management.py
 │   │   ├── test_course_ops.py
-│   │   └── test_system_config.py
+│   │   ├── test_system_config.py
+│   │   └── test_student_dashboard.py
 │   ├── fixtures
 │   │   ├── sample_content
 │   │   │   ├── __init__.py
@@ -349,7 +359,9 @@ Total Python files: 272
 
 │   ├── development
 
-│   └── ui
+│   ├── ui
+
+│   └── reports
 
 ├── tools
 │   ├── integration_monitor
@@ -392,6 +404,8 @@ Total Python files: 272
 │       └── defaults
 
 ├── .qodo
+
+├── demos
 
 ├── untitled3.py
 ├── code_summarizer.py
@@ -469,6 +483,12 @@ registra...
 - Functions: 1
 - Dependency Score: 63.00
 
+### app\core\auth\authentication.py
+
+- Classes: 8
+- Functions: 0
+- Dependency Score: 62.00
+
 ### app\core\auth\authorization.py
 
 - Classes: 5
@@ -497,24 +517,13 @@ making it easier t...
 - Functions: 0
 - Dependency Score: 59.00
 
-### app\models\content.py
-
-Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
-
-Location: app/models/content.py
-Depends on: app/models/topic.py, integrations/events/ev...
-
-- Classes: 8
-- Functions: 0
-- Dependency Score: 58.00
-
 ## Dependencies
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
-- **app\models\content.py** depends on: integrations\events\event_types.py, app\models\course.py, integrations\events\event_bus.py
+- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **app\core\auth\authentication.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 
 
 ## Detailed Code Analysis
@@ -893,6 +902,61 @@ interfaces in the system should inherit from the base classes defined here.
 - `register_all_interfaces()`
 
   Register all interfaces defined in the system.
+
+
+
+### app\core\auth\authentication.py
+
+**Classes:**
+
+- `AuthEvent`
+ (inherits from: Event)
+
+
+  Event representing authentication-related changes (login, logout, failure).
+
+  Methods: `__init__()`
+
+- `AuthenticationProvider`
+ (inherits from: ABC)
+
+
+  Interface for authentication providers.
+
+  Methods: `authenticate()`
+
+- `LocalAuthenticationProvider`
+ (inherits from: AuthenticationProvider)
+
+
+  Simple authentication provider with in-memory user verification and event emission.
+
+  Methods: `__init__()`, `authenticate()`, `logout()`
+
+- `MFAProvider`
+
+
+  Simple TOTP-like provider for MFA codes — 
+
+  Methods: `__init__()`, `generate_code()`, `verify_code()`
+
+- `AdminAuthService`
+
+
+  Methods: `__init__()`, `authenticate_admin()`, `log_activity()`, `enforce_permission()`, `get_activity_log()`
+
+- `AdminRoles`
+
+
+- `AdminPermissions`
+
+
+- `AuthenticationService`
+
+
+  Main service interface for authentication logic.
+
+  Methods: `__init__()`, `authenticate()`, `authenticate_admin()`, `logout()`, `enforce_permission()`, ... (2 more)
 
 
 
@@ -1386,54 +1450,6 @@ by orchestration and integration components.
 
 
 
-### app\core\auth\authentication.py
-
-**Classes:**
-
-- `AuthEvent`
- (inherits from: Event)
-
-
-  Event representing authentication-related changes (login, logout, failure).
-
-  Methods: `__init__()`
-
-- `AuthenticationProvider`
- (inherits from: ABC)
-
-
-  Interface for authentication providers.
-
-  Methods: `authenticate()`
-
-- `LocalAuthenticationProvider`
- (inherits from: AuthenticationProvider)
-
-
-  Simple authentication provider with in-memory user verification and event emission.
-
-  Methods: `__init__()`, `authenticate()`, `logout()`
-
-- `MFAProvider`
-
-
-  Simple TOTP-like provider for MFA codes — placeholder, extend for hardware, SMS/email.
-
-  Methods: `__init__()`, `generate_code()`, `verify_code()`
-
-- `AdminAuthService`
-
-
-  Methods: `__init__()`, `authenticate_admin()`, `log_activity()`, `enforce_permission()`, `get_activity_log()`
-
-- `AdminRoles`
-
-
-- `AdminPermissions`
-
-
-
-
 ### app\models\metadata_manager.py
 
 **Classes:**
@@ -1599,26 +1615,6 @@ and operational capability.
 
 
 
-### app\core\auth\user_profile.py
-
-**Classes:**
-
-- `UserProfile`
-
-
-  Represents the user's profile and identity attributes.
-
-  Methods: `__init__()`, `role()`, `to_dict()`, `from_dict()`
-
-- `UserProfileManager`
-
-
-  Core logic for user profile management (CRUD, validation, bulk ops).
-
-  Methods: `__init__()`, `_validate_user_data()`, `create_user()`, `get_user()`, `update_user()`, ... (5 more)
-
-
-
 ### integrations\events\event_subscribers.py
 
 **Description:**
@@ -1675,6 +1671,26 @@ and handle events from the event bus. It also defines the EventFilter interface 
   Event subscriber that uses a provided callback function for event processing.
 
   Methods: `__init__()`, `on_event()`
+
+
+
+### app\core\auth\user_profile.py
+
+**Classes:**
+
+- `UserProfile`
+
+
+  Represents the user's profile and identity attributes.
+
+  Methods: `__init__()`, `role()`, `to_dict()`, `from_dict()`
+
+- `UserProfileManager`
+
+
+  Core logic for user profile management (CRUD, validation, bulk ops).
+
+  Methods: `__init__()`, `_validate_user_data()`, `create_user()`, `get_user()`, `update_user()`, ... (5 more)
 
 
 
@@ -4518,6 +4534,24 @@ Features:
 
 
 
+### app\ui\student\widget_base.py
+
+**Description:**
+
+Widget base class for all student dashboard widgets.
+Save at: /app/ui/student/widget_base.py
+
+Defines standard API for rendering, configuration and settings.
+
+**Classes:**
+
+- `StudentDashboardWidget`
+
+
+  Methods: `__init__()`, `render()`, `get_config_schema()`
+
+
+
 ### tests\integration\test_component_registry.py
 
 **Classes:**
@@ -4599,6 +4633,51 @@ Features:
 - `test_theme_toggle(qt_app)`
 
 - `test_window_state_persistence(qt_app)`
+
+
+
+### tests\ui\test_student_dashboard.py
+
+**Description:**
+
+Tests for Student Dashboard Framework
+
+Save this file as /tests/ui/test_student_dashboard.py
+
+Covers:
+- StudentDashboard: basic rendering, layout, customization
+- StudentWidgetRegistry: widget registration/listing
+- DashboardState: persistence of per-student widget layouts
+- Widget base: interface contract
+- Registration and use of sample ProgressWidget
+
+Uses pytest style, consistent with other UI component tests.
+
+**Classes:**
+
+- `DummyWidget`
+ (inherits from: StudentDashboardWidget)
+
+
+  Methods: `render()`
+
+**Functions:**
+
+- `test_widget_registry_register_and_get()`
+
+- `test_dashboardstate_set_and_get_layout()`
+
+- `test_student_dashboard_renders_registered_widgets()`
+
+- `test_dashboard_handles_missing_widget_gracefully()`
+
+- `test_studentdashboard_customize_layout()`
+
+- `test_widget_config_schema()`
+
+- `test_register_widgets_function_registers_progress_widget()`
+
+- `test_progress_widget_renders_basic_html()`
 
 
 
@@ -5004,6 +5083,24 @@ Extensible to work with actual content models/data sources.
 
 
 
+### app\ui\student\widget_registry.py
+
+**Description:**
+
+Student Widget Registry for Dashboard
+Save at: /app/ui/student/widget_registry.py
+
+Handles registration of widgets so that dashboard containers are composable and extensible.
+
+**Classes:**
+
+- `StudentWidgetRegistry`
+
+
+  Methods: `__init__()`, `register()`, `get_widget()`, `list_widgets()`
+
+
+
 ### tests\integration\test_semantic_search_integration.py
 
 **Description:**
@@ -5189,6 +5286,47 @@ Features local file backup/restore, and (if extended) remote sync with a product
 
 
   Methods: `__init__()`, `query_all_providers()`, `attach_resources_to_course()`
+
+
+
+### app\ui\student\dashboard.py
+
+**Description:**
+
+Student Dashboard: Main entrypoint for the student dashboard UI.
+
+This file should be saved as /app/ui/student/dashboard.py based on current project structure.
+
+The dashboard provides:
+- Responsive grid layout for widgets
+- State management and persistence
+- Widget registration/integration
+- Customization hooks (stubbed)
+
+**Classes:**
+
+- `StudentDashboard`
+
+
+  Methods: `__init__()`, `render()`, `customize()`
+
+
+
+### app\ui\student\dashboard_state.py
+
+**Description:**
+
+DashboardState for layout and widget tracking per student.
+Save at: /app/ui/student/dashboard_state.py
+
+Stub persistence with in-memory dict; extendible for DB/Redis.
+
+**Classes:**
+
+- `DashboardState`
+
+
+  Methods: `__init__()`, `get_layout()`, `set_layout()`
 
 
 
@@ -5505,6 +5643,25 @@ Per project structure (see code_summary.md), all test content/data factories go 
 
 
   Methods: `__init__()`, `set_field()`, `get_metadata()`, `interactive_edit()`
+
+
+
+### app\ui\student\widgets\progress.py
+
+**Description:**
+
+Sample progress widget for dashboard.
+Save as /app/ui/student/widgets/progress.py
+
+Shows standard widget pattern for extension.
+
+**Classes:**
+
+- `ProgressWidget`
+ (inherits from: StudentDashboardWidget)
+
+
+  Methods: `render()`
 
 
 
@@ -6186,6 +6343,44 @@ This file should be saved as /app/core/search/permissions.py according to the pr
 
 
 
+### app\ui\student\register_widgets.py
+
+**Description:**
+
+Registers built-in student dashboard widgets.
+Save as /app/ui/student/register_widgets.py
+
+**Functions:**
+
+- `register_student_widgets(registry)`
+
+
+
+### app\utils\config_loader.py
+
+**Description:**
+
+config_loader.py
+
+Location: /app/utils/config_loader.py
+
+This utility is introduced because main.py imports load_config from this path.
+It belongs here based on AeroLearn AI's project structure (see code_summary.md).
+Extend as needed to support additional config formats.
+
+Functions:
+    - load_config(config_path=None): Loads config from JSON or Python files.
+
+Author: (auto-generated by AeroLearn AI assistant)
+
+**Functions:**
+
+- `load_config(config_path)`
+
+  Loads application configuration from the specified file, or from a default config file.
+
+
+
 ### tests\unit\core\ai\test_conversation.py
 
 **Description:**
@@ -6502,6 +6697,29 @@ This should be re-run after adding any new test files!
 
 
 
+### app\main.py
+
+**Description:**
+
+Main entry point for the AeroLearn AI application.
+
+Location: /app/main.py
+- Hardened for production demo: adds robust error handling, startup info, and user-friendly feedback
+- Handles configuration errors gracefully with fallbacks and clear user messaging
+- Provides detailed console output for troubleshooting during demos
+
+**Functions:**
+
+- `show_critical_error(title, message)`
+
+  Show a modal error dialog (PyQt-safe). Useful for demo mode.
+
+- `main()`
+
+  Initialize and run the AeroLearn AI application, with demo-friendly error handling and output.
+
+
+
 ### app\core\db\db_events.py
 
 **Description:**
@@ -6654,20 +6872,6 @@ Intended for dry-run, manual, or CI use for Task 11.5 verification.
 - `print_result(title, passed)`
 
 - `run_admin_selftest()`
-
-
-
-### app\main.py
-
-**Description:**
-
-Main entry point for the AeroLearn AI application.
-
-**Functions:**
-
-- `main()`
-
-  Initialize and run the AeroLearn AI application.
 
 
 
@@ -6993,6 +7197,10 @@ This module is part of the AeroLearn AI project.
 
 
 
+### app\ui\student\widgets\__init__.py
+
+
+
 ### app\ui\admin\__init__.py
 
 **Description:**
@@ -7198,130 +7406,135 @@ Here's the architectural enhancement to add to the summary:
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows a layered event-driven architecture with modular components:
+The system follows a modular event-driven architecture with three main layers:
 
-```
-┌───────────────────────┐
-│       App Layer       │
-│  (Domain Models/UI)   │  ← Course/Content Models, Authorization
-└───────────┬───────────┘
-            │
-┌───────────▼───────────┐
-│ Integration Layer     │  ← Event Bus, Component Registry
-│  (Cross-Cutting)      │  ← Interfaces, Monitoring
-└───────────┬───────────┘
-            │
-┌───────────▼───────────┐
-│ Core Services Layer   │  ← Batch Processing, AI Services
-│ (Infrastructure)      │  ← Persistence, Transaction Management
-└───────────────────────┘
-```
+1. **Core Application Layer**:
+   - Domain models (Course, Module, Lesson)
+   - Business logic services (Authentication, BatchController)
+   - Data persistence (SQLAlchemy models)
 
-Key Architectural Characteristics:
-- Event-driven communication via central EventBus (publish-subscribe)
-- Component-based architecture with registry pattern (ComponentRegistry)
-- Plugin architecture through Interface implementations
-- Horizontal layers with vertical integration domains (AI, Storage, Auth)
-- Asynchronous batch processing with progress tracking
-- Type-safe event system with hierarchical categories
+2. **Integration Layer**:
+   - Event Bus (pub/sub system)
+   - Component Registry (service discovery)
+   - Interface System (contract-first implementations)
+   - Monitoring (TransactionLogger)
+
+3. **AI/ML Layer**:
+   - Model providers (via AIInterface)
+   - Content analysis pipelines
+   - Recommendation systems
+
+Key architectural characteristics:
+- Event-driven communication between components
+- Strong component isolation via interface contracts
+- Semantic versioning for component dependencies
+- Hybrid sync/async operation support
+- Transactional integrity through cross-component logging
 
 ### 2. Identified Design Patterns
 
-| Pattern             | Implementation Examples                          | Purpose                                      |
-|---------------------|--------------------------------------------------|----------------------------------------------|
-| Singleton           | EventBus, ComponentRegistry                     | System-wide single instance management       |
-| Observer            | EventBus subscribers                            | Loose coupling for event notifications       |
-| Registry            | ComponentRegistry                               | Central component management                 |
-| Strategy            | AIInterface implementations                     | Interchangeable AI algorithms                |
-| Decorator           | @require_permission in authorization            | Dynamic authorization checks                 |
-| Factory             | Component creation via registry                 | Standardized component instantiation         |
-| Template Method     | BatchController processing steps                | Reusable batch operation workflow            |
-| Composite           | Course->Module->Lesson hierarchy                | Tree structure for educational content       |
-| Memento             | TransactionLogger snapshots                     | Transaction state preservation               |
+| Pattern            | Implementation Examples                          | Purpose                                      |
+|--------------------|--------------------------------------------------|---------------------------------------------|
+| Singleton          | ComponentRegistry, EventBus                     | System-wide service access                  |
+| Observer           | EventBus subscribers                            | Decoupled event notification                |
+| Factory            | Event type hierarchy                            | Polymorphic event creation                  |
+| Strategy           | AIInterface implementations                     | Interchangeable AI providers                |
+| Decorator          | @require_permission, InterfaceImplementation    | Dynamic behavior extension                  |
+| Command            | BatchController operations                      | Encapsulate upload requests                 |
+| Registry           | ComponentRegistry                               | Central component management                |
+| Template Method     | BaseInterface.validate_implementation           | Enforcement of interface contracts          |
 
-### 3. Refactoring & Improvement Opportunities
+### 3. Refactoring Opportunities
 
-1. **Event System Consolidation**
-- Problem: Duplication between EventType enum and category-specific classes
-- Solution: Convert to hierarchical enum structure with auto-registration
+1. **Event System Improvements**:
+   - Consolidate EventType enum and category-specific classes
+   - Add event versioning for schema evolution
+   - Implement dead-letter queue for failed event processing
 
-2. **Component Lifecycle Management**
-- Problem: Mixed test/production APIs in ComponentRegistry
-- Solution: Introduce ComponentFactory with strict interface
+2. **Component Registry Enhancements**:
+   - Split test-friendly APIs from production code
+   - Add dependency resolution engine
+   - Implement component health monitoring
 
-3. **Batch Processing Optimization**
-- Problem: Mixed sync/async in BatchController
-- Solution: Implement pure async pipeline with backpressure control
+3. **Interface System**:
+   - Separate interface registration from validation
+   - Add interface compatibility checks
+   - Implement automatic interface discovery
 
-4. **Model Serialization**
-- Problem: Inconsistent serialize() methods across models
-- Solution: Introduce unified SerializationStrategy interface
+4. **Batch Processing**:
+   - Decouple validation from upload logic
+   - Add retry policies with exponential backoff
+   - Implement chunked processing for large batches
 
-5. **Event Type Safety**
-- Problem: String-based event type references
-- Solution: Generate protocol buffers/pydantic models from EventType
-
-6. **Dependency Management**
-- Problem: Direct EventBus references in models
-- Solution: Introduce dependency injection container
+5. **Authentication Flow**:
+   - Add protocol for OAuth/OIDC integration
+   - Implement credential rotation system
+   - Add session encryption support
 
 ### 4. Critical Path Analysis
 
-**Core System Initialization:**
+**Key System Flows**:
+
+1. Event Processing Critical Path:
 ```
-ComponentRegistry → EventBus → Auth System → AI Interfaces → Batch Controllers
+Event Producer → EventBus → Priority Queue → Subscriber Matching 
+→ Async/Sync Handler → TransactionLogger → (Optional) Persistence
 ```
 
-**Content Modification Flow:**
+2. Component Registration Flow:
 ```
-Course.update() → ContentEvent → EventBus → [Indexer, Analytics, Notifications]
-```
-
-**Batch Upload Process:**
-```
-BatchController → ValidationFramework → UploadService → EventBus → TransactionLogger
+Component Init → Registry Registration → Dependency Validation 
+→ Interface Binding → SystemEvent Emission → Availability Notification
 ```
 
-**AI Request Handling:**
+3. Batch Upload Critical Path:
 ```
-AIInterface → ModelProvider → UsageTracker → ResponseFormatter → EventBus
+File Add → Validation Framework → Metadata Extraction → 
+Chunking → Parallel Upload → Progress Aggregation → 
+Cleanup → Completion Event
 ```
 
-Key Performance Constraints:
+**Performance Sensitive Areas**:
 - EventBus thread contention during peak loads
-- Component dependency resolution during registration
-- Batch validation I/O bottlenecks
-- AI model cold-start latency
+- Component dependency resolution complexity (O(n²) potential)
+- BatchController's synchronous validation step
+- TransactionLogger's in-memory storage scaling
 
 ### 5. Class/Module Relationships
 
 ```mermaid
 graph TD
-    EB[EventBus] -->|notifies| CR[ComponentRegistry]
-    CR -->|manages| COMP[Component]
-    COMP -->|implements| INTERFACE[BaseInterface]
-    INTERFACE -->|inherits| AI_INT[AIInterface]
+    %% Core Relationships
+    EventBus -->|notifies| ComponentRegistry
+    ComponentRegistry -->|manages| Component
+    Component -->|implements| BaseInterface
+    BaseInterface -->|versioned by| InterfaceVersion
     
-    COURSE[Course] -->|contains| MODULE[Module]
-    MODULE -->|contains| LESSON[Lesson]
+    %% Domain Model Connections
+    Course -->|emits| ContentEvent
+    ContentEvent -->|published via| EventBus
+    Authentication -->|emits| AuthEvent
+    AuthEvent -->|handled by| Authorization
     
-    AUTH[Authorization] -->|uses| PERM[Permission]
-    AUTH -->|manages| ROLE[Role]
+    %% AI Subsystem
+    AIInterface -->|implemented by| AIModelProvider
+    AIModelProvider -->|uses| TransactionLogger
+    BatchController -->|depends on| AIInterface
     
-    BATCH[BatchController] -->|raises| BATCH_EV[BatchEvent]
-    BATCH_EV -->|inherits| EVENT[Event]
+    %% Infrastructure
+    TransactionLogger -->|logs to| ComponentRegistry
+    EventBus -->|persists via| TransactionLogger
     
-    TRANS_LOG[TransactionLogger] -->|records| TRANS[Transaction]
-    TRANS -->|triggers| TRANS_EV[TransactionEvent]
-    
-    INTERFACE -->|versioned by| IV[InterfaceVersion]
-    COMP -->|depends on| IV
+    %% Cross-Cutting
+    ComponentRegistry -->|depends on| EventTypes
+    EventBus -->|uses| EventTypes
+    BaseInterface -->|validated by| ComponentRegistry
 ```
 
-Key Relationships:
-- Event hierarchy: Event ← SystemEvent/ContentEvent/AIEvent
-- Component dependencies: Registry → Component → Interfaces
-- Authorization chain: User → Role → Permission
-- Content aggregation: Course → Module → Lesson → Quiz
-- AI workflow: Request → Model → Response → Tracking
+**Key Relationships**:
+- EventBus acts as central nervous system connecting all components
+- ComponentRegistry serves as the system's service discovery hub
+- TransactionLogger provides cross-cutting observability
+- BaseInterface implementations form contract boundaries
+- Course model acts as core domain entity with event emission
 ```

@@ -294,7 +294,7 @@ class AuthenticationService:
         # Admin authentication service for admin workflows (with MFA)
         self.admin_auth_service = AdminAuthService()
         # Track current user role and profile
-        self._current_role = "admin"  # Default role
+        self._current_role = "student"  # Default role
         self._current_user_profile = None  # Track current user
 
     def authenticate(self, username: str, password: str):
