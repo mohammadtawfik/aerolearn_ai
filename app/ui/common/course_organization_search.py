@@ -1,7 +1,7 @@
 # /app/ui/common/course_organization_search.py
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QListWidget, QListWidgetItem
-from PyQt5.QtCore import Qt
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout, QListWidget, QListWidgetItem
+from PyQt6.QtCore import Qt
 
 class CourseOrganizationSearch(QWidget):
     """
@@ -27,7 +27,6 @@ class CourseOrganizationSearch(QWidget):
         self.search_btn.clicked.connect(self._search)
 
     def _search(self):
-        # Placeholder: In production, call a backend service or filter data.
         c = self.category_input.text().strip()
         t = self.tag_input.text().strip()
         results = []

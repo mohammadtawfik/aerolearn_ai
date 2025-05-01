@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 284
+Total Python files: 288
 
 ## Table of Contents
 
@@ -149,7 +149,8 @@ Total Python files: 284
 │   │   ├── student
 │   │   │   ├── widgets
 │   │   │   │   ├── progress.py
-│   │   │   │   └── __init__.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── progress_visualization.py
 │   │   │   ├── __init__.py
 │   │   │   ├── dashboard.py
 │   │   │   ├── widget_registry.py
@@ -179,7 +180,8 @@ Total Python files: 284
 │   │   ├── tag_suggestion.py
 │   │   ├── tag_search.py
 │   │   ├── base.py
-│   │   └── topic.py
+│   │   ├── topic.py
+│   │   └── progress.py
 │   ├── utils
 │   │   ├── __init__.py
 │   │   ├── crypto.py
@@ -238,7 +240,8 @@ Total Python files: 284
 │   │   │   ├── __init__.py
 │   │   │   └── test_integration_health.py
 │   │   ├── ui
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   └── test_progress_visualization.py
 │   │   ├── models
 │   │   │   ├── __init__.py
 │   │   │   ├── test_metadata_manager.py
@@ -246,7 +249,8 @@ Total Python files: 284
 │   │   ├── test_crypto.py
 │   │   ├── test_credential_manager.py
 │   │   ├── test_local_cache_and_sync.py
-│   │   └── __init__.py
+│   │   ├── __init__.py
+│   │   └── test_pyqt6_charts.py
 │   ├── integration
 │   │   ├── interfaces
 │   │   │   ├── test_base_interface.py
@@ -1873,9 +1877,10 @@ Author: AeroLearn AI Team
 **Description:**
 
 AeroLearn AI — Standardized UI Form Controls module
+(Migrated to PyQt6)
 
 This module provides reusable, themed UI form controls for the desktop UI. 
-Designed to be used with a UI toolkit such as PyQt5/PySide2 (Qt), though logic is separated
+Designed to be used with a UI toolkit such as PyQt6 (Qt), though logic is separated
 for backend/UI framework independence and testability.
 
 Includes:
@@ -2678,6 +2683,46 @@ Provides:
 
 
   Methods: `__new__()`, `__init__()`, `_validate()`, `_load()`, `save()`, ... (5 more)
+
+
+
+### app\models\progress.py
+
+**Description:**
+
+app/models/progress.py
+======================
+
+Data models for student progress tracking across modules, lessons, quizzes, with standardized metrics.
+
+Location: app/models/progress.py
+
+**Classes:**
+
+- `ProgressMetricType`
+ (inherits from: Enum)
+
+
+- `ProgressEntry`
+
+
+  Represents progress data for a specific metric and time-point.
+
+  Methods: `__init__()`, `serialize()`
+
+- `ProgressTimeline`
+
+
+  Time-series progress for a specific user/content.
+
+  Methods: `__init__()`, `add_entry()`, `get_metric_over_time()`, `serialize()`
+
+- `ComparativeProgress`
+
+
+  Supports comparison of progress metrics between users or groups.
+
+  Methods: `__init__()`, `set_value()`, `serialize()`
 
 
 
@@ -4346,9 +4391,9 @@ Handles conflict resolution, batch sync, and uses MetadataManager for change det
 
 - `main()`
 
-- `test_pyqt5_installed()`
+- `test_pyqt6_installed()`
 
-  Minimal test to show that the UI test suite is present and PyQt5 is importable.
+  Minimal test to show that the UI test suite is present and PyQt6 is importable.
 
 
 
@@ -4545,7 +4590,7 @@ Provides prompt optimization/filtering strategies for improving LLM results.
 
 **Description:**
 
-AeroLearn AI — Content Preview Component
+AeroLearn AI — Content Preview Component (PyQt6)
 
 This module provides the ContentPreview UI widget for displaying quick previews of content
 selected in the browser. Handles text, images, PDF, video, and provides graceful fallback.
@@ -4566,11 +4611,7 @@ Features:
 
   ContentPreview widget for dynamically showing the preview of content item/file.
 
-  Methods: `__init__()`, `_setup_ui()`, `preview_content()`, `_show_text_preview()`, `_show_image_preview()`, ... (3 more)
-
-**Functions:**
-
-- `create_test_content_preview()`
+  Methods: `__init__()`, `_setup_ui()`, `preview_content()`, `_show_text_preview()`, `_try_read()`, ... (4 more)
 
 
 
@@ -5076,6 +5117,7 @@ Responsible for extracting structured information from LLM responses.
 **Description:**
 
 AeroLearn AI - Content Browser Component
+(Migrated to PyQt6)
 
 This module provides the ContentBrowser UI widget for displaying lists and trees of
 content items (documents, lessons, media, etc.), supporting filtering, search, selection,
@@ -5614,6 +5656,31 @@ How to extend:
 
 
   Methods: `__init__()`, `on_batch_event()`
+
+
+
+### app\ui\student\widgets\progress_visualization.py
+
+**Description:**
+
+app/ui/student/widgets/progress_visualization.py
+===============================================
+
+Widget for visualizing student progress:
+- Progress bars for module/lesson
+- Line/bar charts for time-series and comparisons
+
+Location: app/ui/student/widgets/progress_visualization.py
+
+**Classes:**
+
+- `ProgressVisualizationWidget`
+ (inherits from: QWidget)
+
+
+  Visualization widget for student progress, supporting multiple metrics.
+
+  Methods: `__init__()`, `init_ui()`
 
 
 
@@ -6885,6 +6952,16 @@ Requires: event bus to be started (`await EventBus().start()`).
 
 
 
+### tests\unit\ui\test_progress_visualization.py
+
+**Functions:**
+
+- `qt_app()`
+
+- `test_widget_creates_with_sample_data(qt_app)`
+
+
+
 ### tests\integration\test_upload_flow.py
 
 **Functions:**
@@ -7048,6 +7125,14 @@ Stub for basic knowledge graph visualization data output.
 **Functions:**
 
 - `_add_project_root_to_syspath()`
+
+
+
+### tests\unit\test_pyqt6_charts.py
+
+**Functions:**
+
+- `test_pyqt6_charts_import()`
 
 
 
@@ -7509,124 +7594,146 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here's the architectural enhancement to be added to the summary:
+Here's the architectural enhancement to add to the summary:
 
----
-
-## Architectural Insights
+```markdown
+## Architectural Analysis
 
 ### 1. High-Level Architectural Overview
-The system follows a layered event-driven architecture with modular components:
+The system follows a modular event-driven architecture with three primary layers:
 
-```
-[Presentation Layer] 
-    └─ UI Components → 
-        [Application Layer] 
-            ├─ Course Management 
-            ├─ Auth Services 
-            ├─ Batch Processing 
-            └─ AI Integration →
-                [Domain Layer] 
-                    ├─ Event Bus (Pub/Sub)
-                    ├─ Component Registry 
-                    ├─ Transaction Monitor 
-                    └─ Core Models →
-                        [Infrastructure Layer] 
-                            ├─ Database Abstraction 
-                            ├─ File Storage 
-                            └─ External Service Integration
-```
+1. **Core Application Layer** (app/):
+   - Domain models (Courses, Users, Enrollment)
+   - Business logic services (Authentication, Batch Processing)
+   - Data persistence (SQLAlchemy models)
+
+2. **Integration Layer** (integrations/):
+   - Event Bus (pub/sub system)
+   - Component Registry (service discovery)
+   - Monitoring & Transaction logging
+   - AI/ML interfaces
+
+3. **Interface Abstraction Layer**:
+   - BaseInterface for plugin architecture
+   - Specialized interfaces (AI, Content Analysis)
+   - Adapter pattern implementations
 
 Key architectural characteristics:
-- **Event-Carried State Transfer** through EventBus (integrations/events)
-- **Component Discovery Pattern** via ComponentRegistry (integrations/registry)
-- **Hexagonal Architecture** for AI integrations (interfaces/base_interface)
-- **CQRS Pattern** in batch processing (core/upload/batch_controller)
+- Event-driven communication through centralized EventBus
+- Component lifecycle management via ComponentRegistry
+- Strict separation between domain models and system services
+- Horizontal scaling capability through stateless components
+- Plugin architecture for AI providers
 
 ### 2. Identified Design Patterns
 
-| Pattern              | Implementation Example                          | Purpose                                                                 |
-|----------------------|-------------------------------------------------|-------------------------------------------------------------------------|
-| Singleton            | ComponentRegistry, EventBus                    | System-wide single instance management                                  |
-| Observer             | EventBus subscribers                           | Decoupled event notification system                                    |
-| Strategy             | AIInterface implementations                    | Interchangeable AI model providers                                      |
-| Factory              | Event class hierarchy                          | Polymorphic event creation based on category                           |
-| Decorator            | @interface_method in base_interface            | Method signature validation for interface implementations              |
-| Registry             | ComponentRegistry                              | Central component lifecycle management                                 |
-| Template Method      | BatchController processing pipeline            | Standardized batch validation/upload workflow                          |
+| Pattern                | Implementation Examples                          | Purpose                                      |
+|------------------------|--------------------------------------------------|---------------------------------------------|
+| Singleton              | EventBus, ComponentRegistry                     | System-wide single instance management      |
+| Publisher-Subscriber   | EventBus with EventTypes                         | Loose coupling between components           |
+| Registry               | ComponentRegistry with dependency management     | Central service discovery                   |
+| Strategy               | AIInterface implementations                      | Interchangeable AI providers                |
+| Factory                | Event class hierarchy (SystemEvent, UserEvent)   | Type-safe event object creation             |
+| Decorator              | @interface_method in BaseInterface              | Method signature validation                 |
+| Observer               | BatchController listeners                        | Progress monitoring                         |
+| State                  | BatchStatus transitions                          | Upload lifecycle management                 |
 
-### 3. Refactoring Opportunities
+### 3. Potential Refactoring Opportunities
 
-**Structural Improvements:**
-1. Event Inheritance Hierarchy
-   - Current: Duplicated constructor signatures in SystemEvent/ContentEvent
-   - Proposed: Abstract Base Event class with common fields + mixins
+1. **Event System Improvements**
+   - Introduce EventSchema validation layer
+   - Add dead-letter queue for failed event processing
+   - Implement event versioning for backward compatibility
 
-2. Component Registry Dependencies
-   - Issue: Tight coupling with EventBus for state notifications
-   - Solution: Introduce RegistryObserver interface
+2. **Component Registry Enhancements**
+   - Add dependency resolution algorithm
+   - Introduce health check monitoring
+   - Implement semantic version conflict detection
 
-3. Batch Processing Validation
-   - Current: ValidationFramework direct dependency in BatchController
-   - Better: Validation Strategy pattern with pluggable validators
+3. **Model Relationships Optimization**
+   - Course->Module->Lesson hierarchy could benefit from Composite pattern
+   - Enrollment state management should use State pattern
+   - SQLAlchemy relationships need eager loading strategies
 
-**Code Quality Improvements:**
-- Introduce EventSchema class (similar to CourseModel) for serialization validation
-- Replace multiple `select()` imports in course.py with consolidated SQLAlchemy import
-- Implement Circuit Breaker pattern in AIInterface for model availability
+4. **Batch Processing**
+   - Extract validation framework into separate service
+   - Implement retry queue pattern for failed uploads
+   - Add circuit breaker pattern for external service calls
+
+5. **Common Anti-Patterns**
+   - God class tendencies in BatchUploadController
+   - Primitive obsession in event type strings
+   - Duplicated validation logic across models
 
 ### 4. Critical Path Analysis
 
-**Core Flow: Content Modification**
-```mermaid
-graph TD
-    A[Course Modification] --> B[SQLAlchemy ORM]
-    B --> C[Emit ContentEvent]
-    C --> D[EventBus Distribution]
-    D --> E[Indexing Service]
-    D --> F[Notification Service]
-    D --> G[Audit Logger]
-    E --> H[VectorDB Update]
-    F --> I[User Notifications]
-```
+**Key System Flows:**
+1. Course Enrollment Flow:
+   UserEvent → AuthService → Course.enroll() → EnrollmentEvent → EventBus
 
-**Key Integration Points:**
-1. EventBus throughput (67 handlers in event_bus.py)
-2. ComponentRegistry dependency resolution (71 component tracking)
-3. BatchController's thread safety in upload processing (65 concurrent operations)
-4. Authentication/AuthZ chain (62 auth handlers + 61 permission checks)
+2. Content Processing Pipeline:
+   BatchUpload → Validation → AI Analysis → Vector DB → Indexing
+
+3. AI Request Handling:
+   AIInterface → Model Provider → Usage Tracking → Response Transformation
+
+4. Component Initialization:
+   Registry Registration → Dependency Check → Interface Binding → Event Subscription
+
+**Performance-Sensitive Paths:**
+- EventBus message serialization/deserialization
+- BatchUploadController's thread synchronization
+- Course model relationships loading (N+1 query risk)
+- AIInterface response streaming
 
 ### 5. Class/Module Relationships
 
 ```mermaid
-graph LR
-    EventBus --> ComponentRegistry
-    ComponentRegistry --> AIInterface
-    ComponentRegistry --> BaseInterface
-    Course --> EventBus
-    Course --> Enrollment
-    BatchController --> UploadService
-    BatchController --> ValidationFramework
-    Authentication --> Authorization
-    Authentication --> EventBus
-    TransactionLogger --> ComponentRegistry
-    TransactionLogger --> EventBus
+graph TD
+    subgraph Core Models
+        Course --> Module
+        Module --> Lesson
+        User --> Enrollment
+    end
+
+    subgraph Event System
+        EventBus -->|publishes| Event
+        Event --> SystemEvent
+        Event --> ContentEvent
+        EventType -->|categorizes| Event
+    end
+
+    subgraph Integration
+        ComponentRegistry -->|manages| Component
+        Component -->|implements| BaseInterface
+        AIInterface -->|extends| BaseInterface
+        TransactionLogger -->|logs| Component
+    end
+
+    subgraph Auth
+        AuthenticationService -->|uses| EventBus
+        AuthorizationManager -->|controls| Permission
+        UserModel -->|persists| User
+    end
+
+    BatchController -->|depends on| UploadService
+    BatchController -->|emits| BatchEvent
+    EventBus -->|notifies| BatchController
+
+    classDef model fill:#e6f3ff,stroke:#3399ff
+    classDef service fill:#ffe6cc,stroke:#ff9933
+    classDef integration fill:#e6ffe6,stroke:#33cc33
     
-    classDef core fill:#e6f3ff,stroke:#333;
-    classDef integration fill:#ffe6e6,stroke:#333;
-    classDef data fill:#e6ffe6,stroke:#333;
-    
-    class EventBus,ComponentRegistry,BaseInterface integration
-    class Course,Enrollment,Authentication core
-    class BatchController,UploadService,ValidationFramework data
+    class Course,Module,Lesson,User,Enrollment model
+    class EventBus,ComponentRegistry,TransactionLogger integration
+    class AuthenticationService,BatchController,UploadService service
 ```
 
-**Key Dependencies:**
-- `EventBus` is the central nervous system (67 subscribers, 105 event types)
-- `ComponentRegistry` manages 71+ component relationships
-- `Course` model has 9 SQLAlchemy relationships and 14 management methods
-- `AIInterface` hierarchy supports 7 model types and 11 capabilities
-
----
-
-This enhancement focuses on architectural patterns and system dynamics while avoiding duplication of the existing file structure documentation. Would you like me to expand on any particular aspect?
+**Key Relationships:**
+- Course aggregates Modules which contain Lessons (composition)
+- Event hierarchy uses inheritance with polymorphic dispatch
+- ComponentRegistry acts as facade over component lifecycle
+- BatchController coordinates between UploadService and EventBus
+- AuthenticationService depends on EventBus for security events
+- AI interfaces follow bridge pattern between providers and consumers
+```

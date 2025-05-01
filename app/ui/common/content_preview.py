@@ -1,5 +1,5 @@
 """
-AeroLearn AI — Content Preview Component
+AeroLearn AI — Content Preview Component (PyQt6)
 
 This module provides the ContentPreview UI widget for displaying quick previews of content
 selected in the browser. Handles text, images, PDF, video, and provides graceful fallback.
@@ -18,11 +18,11 @@ from typing import Optional, Dict, Any, Callable
 import os
 
 try:
-    from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QTextEdit, QPushButton, QFileDialog, QMessageBox
-    from PyQt5.QtGui import QPixmap
-    from PyQt5.QtCore import Qt, pyqtSignal
+    from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTextEdit, QPushButton, QFileDialog, QMessageBox
+    from PyQt6.QtGui import QPixmap
+    from PyQt6.QtCore import Qt, pyqtSignal
 except ImportError:
-    QWidget, QVBoxLayout, QLabel, QTextEdit, QPushButton, QFileDialog, QMessageBox, QPixmap, Qt, pyqtSignal = (object,) * 9
+    QWidget = QVBoxLayout = QLabel = QTextEdit = QPushButton = QFileDialog = QMessageBox = QPixmap = Qt = pyqtSignal = object
 
 class ContentPreview(QWidget):
     """
@@ -39,7 +39,7 @@ class ContentPreview(QWidget):
         self.layout = QVBoxLayout()
         self.title = QLabel("Content Preview")
         self.content_area = QLabel("[No content loaded]")
-        self.content_area.setAlignment(Qt.AlignCenter)
+        self.content_area.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.title)
         self.layout.addWidget(self.content_area)
         self.setLayout(self.layout)
@@ -53,7 +53,7 @@ class ContentPreview(QWidget):
         self.content_area.setPixmap(QPixmap())
         try:
             content_type = content.get("type", "Unknown")
-            # Assume content dict has 'path' for file-based, or 'body' for inline text
+            # Display by type
             if content_type in {"Text", "Notes", "Markdown", "Document"}:
                 self._show_text_preview(content.get("body") or self._try_read(content.get("path")))
             elif content_type in {"Image", "Photo"}:
@@ -80,6 +80,15 @@ class ContentPreview(QWidget):
         self.content_area.hide()
         text_widget.show()
 
+    def _try_read(self, path: Optional[str]) -> Optional[str]:
+        if not path or not os.path.exists(path):
+            return None
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return f.read(4096)
+        except Exception:
+            return None
+
     def _show_image_preview(self, path: Optional[str]):
         if not path or not os.path.exists(path):
             self.handle_error(f"Image not found: {path}")
@@ -88,7 +97,7 @@ class ContentPreview(QWidget):
         if pix.isNull():
             self.handle_error(f"Could not load image: {path}")
             return
-        self.content_area.setPixmap(pix.scaled(400, 300, Qt.KeepAspectRatio))
+        self.content_area.setPixmap(pix.scaled(400, 300, Qt.AspectRatioMode.KeepAspectRatio))
         self.content_area.show()
 
     def _show_pdf_preview(self, path: Optional[str]):
@@ -97,7 +106,7 @@ class ContentPreview(QWidget):
             self.handle_error(f"PDF not found: {path}")
             return
         self.notification.emit("PDF preview requires plugin. Opening externally.")
-        os.system(f"open \"{path}\"") # Portable in real app
+        os.system(f"start \"\" \"{path}\"" if os.name == "nt" else f"open \"{path}\"")
 
     def _show_video_preview(self, path: Optional[str]):
         # Minimal stub: delegate to OS
@@ -105,7 +114,7 @@ class ContentPreview(QWidget):
             self.handle_error(f"Video not found: {path}")
             return
         self.notification.emit("Video preview requires external viewer. Opening externally.")
-        os.system(f"open \"{path}\"")
+        os.system(f"start \"\" \"{path}\"" if os.name == "nt" else f"open \"{path}\"")
 
     def handle_error(self, message: str):
         self.error_occurred.emit(message)
@@ -114,21 +123,19 @@ class ContentPreview(QWidget):
         else:
             print("Preview Error:", message)
 
-# Example/minimal usage for manual test
-def create_test_content_preview():
-    import sys
-    from PyQt5.QtWidgets import QApplication, QPushButton
-
-    app = QApplication(sys.argv)
-    window = ContentPreview()
-    btn = QPushButton("Preview Example Text")
-    def show_preview():
-        window.preview_content({'type': 'Text', 'body': 'Sample textbook content.\nFormulas:\nE=mc^2'})
-    btn.clicked.connect(show_preview)
-    window.layout.addWidget(btn)
-    window.resize(500, 300)
-    window.show()
-    app.exec_()
-
 if __name__ == '__main__':
+    def create_test_content_preview():
+        import sys
+        from PyQt6.QtWidgets import QApplication, QPushButton
+
+        app = QApplication(sys.argv)
+        window = ContentPreview()
+        btn = QPushButton("Preview Example Text")
+        def show_preview():
+            window.preview_content({'type': 'Text', 'body': 'Sample textbook content.\nFormulas:\nE=mc^2'})
+        btn.clicked.connect(show_preview)
+        window.layout.addWidget(btn)
+        window.resize(500, 300)
+        window.show()
+        app.exec()
     create_test_content_preview()

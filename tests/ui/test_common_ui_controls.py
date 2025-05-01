@@ -15,7 +15,7 @@ _add_project_root_to_syspath()
 # --- END PATCH ---
 
 """
-Test Suite for AeroLearn Common UI Controls (Task 4.3)
+Test Suite for AeroLearn Common UI Controls (Task 4.3, PyQt6 version)
 
 Covers:
 - Form controls: validation, value change, error display
@@ -25,7 +25,7 @@ Covers:
 - Simulated drag-and-drop (programmatic, for basic verification)
 - Hooks for manual interaction
 
-Requirements: PyQt5 or PySide2, minimal test assets (text/image files for preview step)
+Requirements: PyQt6, minimal test assets (text/image files for preview step)
 
 To run:
 $ python tests/ui/test_common_ui_controls.py
@@ -38,14 +38,14 @@ import sys
 import os
 
 try:
-    from PyQt5.QtWidgets import (
+    from PyQt6.QtWidgets import (
         QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QFileDialog, QMessageBox
     )
-    from PyQt5.QtCore import Qt
+    from PyQt6.QtCore import Qt
 except ImportError:
     print(
-        "ERROR: PyQt5 is not installed in the current environment. "
-        "Install it with `pip install PyQt5` and re-run the test."
+        "ERROR: PyQt6 is not installed in the current environment. "
+        "Install it with `pip install PyQt6 PyQt6-Charts` and re-run the test."
     )
     sys.exit(1)
 
@@ -147,15 +147,15 @@ def main():
     app = QApplication(sys.argv)
     window = TestMainWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
-def test_pyqt5_installed():
-    """Minimal test to show that the UI test suite is present and PyQt5 is importable."""
+def test_pyqt6_installed():
+    """Minimal test to show that the UI test suite is present and PyQt6 is importable."""
     try:
-        from PyQt5.QtWidgets import QApplication
+        from PyQt6.QtWidgets import QApplication
         assert True
     except ImportError:
-        assert False, "PyQt5 not installed"
+        assert False, "PyQt6 not installed"
 
 if __name__ == "__main__":
     # For manual testing with UI interaction:

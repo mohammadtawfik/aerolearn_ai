@@ -1,8 +1,9 @@
 """
 AeroLearn AI — Standardized UI Form Controls module
+(Migrated to PyQt6)
 
 This module provides reusable, themed UI form controls for the desktop UI. 
-Designed to be used with a UI toolkit such as PyQt5/PySide2 (Qt), though logic is separated
+Designed to be used with a UI toolkit such as PyQt6 (Qt), though logic is separated
 for backend/UI framework independence and testability.
 
 Includes:
@@ -26,8 +27,8 @@ Integration: Hooks into EventBus system for notification and validation events.
 from typing import Any, Callable, List, Optional, Dict, Union
 
 try:
-    from PyQt5.QtWidgets import (QWidget, QLineEdit, QVBoxLayout, QLabel, QCheckBox, QComboBox, QTextEdit)
-    from PyQt5.QtCore import pyqtSignal, Qt
+    from PyQt6.QtWidgets import QWidget, QLineEdit, QVBoxLayout, QLabel, QCheckBox, QComboBox, QTextEdit
+    from PyQt6.QtCore import pyqtSignal, Qt
 except ImportError:
     # For non-UI headless or testing environments
     QWidget, QLineEdit, QVBoxLayout, QLabel, QCheckBox, QComboBox, QTextEdit, pyqtSignal, Qt = (object,) * 8
@@ -103,7 +104,7 @@ class TextInputControl(BaseFormControl):
 class PasswordInputControl(TextInputControl):
     def _setup_ui(self):
         super()._setup_ui()
-        self.input.setEchoMode(QLineEdit.Password)
+        self.input.setEchoMode(QLineEdit.EchoMode.Password)
 
 class MultiLineTextControl(BaseFormControl):
     def _setup_ui(self):
@@ -113,7 +114,13 @@ class MultiLineTextControl(BaseFormControl):
 
     def _connect_events(self):
         self.input.textChanged.connect(lambda: self.value_changed.emit(self.get_value()))
-        self.input.focusOutEvent = lambda e: (self.validate(), QTextEdit.focusOutEvent(self.input, e))
+        # Focus events updated for PyQt6
+        orig_focus_out = self.input.focusOutEvent
+
+        def focus_out(event):
+            self.validate()
+            orig_focus_out(event)
+        self.input.focusOutEvent = focus_out
 
     def get_value(self):
         return self.input.toPlainText()
@@ -163,7 +170,7 @@ class CheckboxControl(BaseFormControl):
 # Example minimal form usage - for testability
 def create_test_form():
     import sys
-    from PyQt5.QtWidgets import QApplication, QFormLayout, QPushButton, QDialog
+    from PyQt6.QtWidgets import QApplication, QFormLayout, QPushButton, QDialog
 
     app = QApplication(sys.argv)
     dialog = QDialog()
@@ -179,7 +186,7 @@ def create_test_form():
         form.addRow(ctrl.label, ctrl)
 
     dialog.setLayout(form)
-    dialog.exec_()
+    dialog.exec()
 
 if __name__ == '__main__':
     # For direct test run

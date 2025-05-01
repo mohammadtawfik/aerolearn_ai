@@ -1,5 +1,6 @@
 """
 AeroLearn AI - Content Browser Component
+(Migrated to PyQt6)
 
 This module provides the ContentBrowser UI widget for displaying lists and trees of
 content items (documents, lessons, media, etc.), supporting filtering, search, selection,
@@ -22,9 +23,9 @@ Extensible to work with actual content models/data sources.
 from typing import List, Callable, Optional, Any, Dict
 
 try:
-    from PyQt5.QtWidgets import (
+    from PyQt6.QtWidgets import (
         QWidget, QVBoxLayout, QListWidget, QListWidgetItem, QLineEdit, QLabel, QAbstractItemView, QTreeWidget, QTreeWidgetItem)
-    from PyQt5.QtCore import Qt, pyqtSignal
+    from PyQt6.QtCore import Qt, pyqtSignal
 except ImportError:
     QWidget, QVBoxLayout, QListWidget, QListWidgetItem, QLineEdit, QLabel, QAbstractItemView, QTreeWidget, QTreeWidgetItem, Qt, pyqtSignal = (object,) * 10
 
@@ -57,7 +58,7 @@ class ContentBrowser(QWidget):
             self.list_widget.setHeaderLabels(['Title', 'Type'])
         else:
             self.list_widget = QListWidget()
-            self.list_widget.setSelectionMode(QAbstractItemView.SingleSelection)
+            self.list_widget.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.layout.addWidget(self.list_widget)
         self.setLayout(self.layout)
         self.search_box.textChanged.connect(self._filter_content)
@@ -67,7 +68,8 @@ class ContentBrowser(QWidget):
             self.list_widget.setDragEnabled(True)
         if hasattr(self.list_widget, 'setAcceptDrops'):
             self.list_widget.setAcceptDrops(True)
-        self.list_widget.itemDoubleClicked.connect(self._item_selected)
+        if hasattr(self.list_widget, "itemDoubleClicked"):
+            self.list_widget.itemDoubleClicked.connect(self._item_selected)
         # For tree, would need separate signal with currentItemChanged
 
     def _populate(self):
@@ -127,7 +129,7 @@ class ContentBrowser(QWidget):
 # Example: Minimal test widget
 def create_test_content_browser():
     import sys
-    from PyQt5.QtWidgets import QApplication
+    from PyQt6.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
     window = ContentBrowser(content_items=[
@@ -137,7 +139,7 @@ def create_test_content_browser():
     ])
     window.resize(400, 300)
     window.show()
-    app.exec_()
+    app.exec()
 
 if __name__ == '__main__':
     create_test_content_browser()

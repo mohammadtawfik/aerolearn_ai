@@ -1,6 +1,7 @@
 # Core Dependencies
-PyQt6
-PyQt6-WebEngine
+PyQt6>=6.4,<7.0
+PyQt6-Charts>=6.4,<7.0
+PyQt6-WebEngine>=6.4,<7.0
 requests
 python-dotenv
 pycryptodome
@@ -25,3 +26,4 @@ python-docx
 python-dotenv>=0.20.0
 openai  # For OpenAI API integration
 networkx>=3.0  # Required for dependency analysis
+pytest
