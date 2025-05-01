@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 249
+Total Python files: 251
 
 ## Table of Contents
 
@@ -110,7 +110,8 @@ Total Python files: 249
 │   │   ├── conversation
 │   │   │   ├── handlers
 │   │   │   │   └── __init__.py
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   └── handlers.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -288,7 +289,8 @@ Total Python files: 249
 │   │   │   ├── test_semantic_search.py
 │   │   │   ├── __init__.py
 │   │   │   ├── test_concept_extraction.py
-│   │   │   └── test_resource_discovery.py
+│   │   │   ├── test_resource_discovery.py
+│   │   │   └── test_conversation.py
 │   │   ├── extraction
 │   │   │   ├── test_text_extractor.py
 │   │   │   ├── test_structured_data_extractor.py
@@ -469,24 +471,23 @@ content ...
 - Functions: 1
 - Dependency Score: 56.00
 
-### app\models\content.py
+### app\core\ai\conversation.py
 
-Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
+Conversational AI entry point and session manager — AeroLearn AI.
 
-Location: app/models/content.py
-Depends on: app/models/topic.py, integrations/events/ev...
+This upgrade completes Task 14.1 requirements:
+- Conversation flow management with ...
 
-- Classes: 8
-- Functions: 0
+- Classes: 5
+- Functions: 2
 - Dependency Score: 55.00
 
 ## Dependencies
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
-- **app\models\content.py** depends on: app\models\course.py, integrations\events\event_bus.py, integrations\events\event_types.py
+- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
 
 
 ## Detailed Code Analysis
@@ -1084,6 +1085,65 @@ content analysis, question answering, and recommendation systems.
 - `register_ai_interfaces()`
 
   Register all AI interfaces.
+
+
+
+### app\core\ai\conversation.py
+
+**Description:**
+
+Conversational AI entry point and session manager — AeroLearn AI.
+
+This upgrade completes Task 14.1 requirements:
+- Conversation flow management with state persistence
+- Context tracking and memory
+- Session & conversation history with privacy controls
+- Pluggable, handler-based flow routing for component-specific logic
+
+Supersedes previous basic Conversation/ConversationManager implementation.
+
+**Classes:**
+
+- `InMemoryConversationStore`
+
+
+  Pluggable (currently in-memory) session persistence.
+
+  Methods: `__init__()`, `get()`, `set()`, `delete()`, `all_sessions()`
+
+- `ConversationContext`
+
+
+  Tracks per-session dynamic memory/state.
+
+  Methods: `__init__()`, `set()`, `get()`, `clear()`
+
+- `ConversationHistory`
+
+
+  Tracks user-bot conversation with privacy settings.
+
+  Methods: `__init__()`, `add_turn()`, `get_history()`, `clear()`
+
+- `ConversationState`
+
+
+  Full persistent snapshot for user session.
+
+  Methods: `__init__()`, `as_dict()`, `clear_privacy_sensitive()`
+
+- `ConversationManager`
+
+
+  Main orchestrator for conversational AI sessions.
+
+  Methods: `__init__()`, `register_handler()`, `set_default_handler()`, `start_session()`, `end_session()`, ... (5 more)
+
+**Functions:**
+
+- `default_user_validator(user_id)`
+
+- `default_handler(user_input, user_id, state, extra)`
 
 
 
@@ -3058,38 +3118,6 @@ SyncManager for AeroLearn AI
 
 
 
-### app\core\ai\conversation.py
-
-**Description:**
-
-Conversation logic for AeroLearn AI —
-Implements Conversation, ConversationManager, and start_new_conversation
-Save this file as: /app/core/ai/conversation.py
-
-**Classes:**
-
-- `Conversation`
-
-
-  Represents a single conversation session.
-
-  Methods: `__init__()`, `add_message()`, `end()`
-
-- `ConversationManager`
-
-
-  Manages active and past conversations.
-
-  Methods: `__init__()`, `create_conversation()`, `get_conversation()`, `list_active()`
-
-**Functions:**
-
-- `start_new_conversation(user_id)`
-
-  Fast API to create new conversation and return its ID.
-
-
-
 ### app\core\vector_db\vector_db_client.py
 
 **Description:**
@@ -3658,6 +3686,44 @@ Intended for PyQt5/PySide2, but UI toolkit can be swapped.
 - `test_scenario_builder_runall()`
 
   Test: TestScenarioBuilder properly runs a sample scenario.
+
+
+
+### tests\core\ai\test_conversation.py
+
+**Functions:**
+
+- `always_true_validator(user_id)`
+
+- `always_false_validator(user_id)`
+
+- `echo_handler(user_input, user_id, state, extra)`
+
+- `make_manager(store, validator)`
+
+- `test_session_creation_and_retrieval()`
+
+- `test_session_denies_invalid_user()`
+
+- `test_session_persistence_and_history()`
+
+- `test_switch_handler()`
+
+- `test_end_session_wipes_and_removes()`
+
+- `test_privacy_controls_clear_context_and_history()`
+
+- `test_set_and_update_privacy_level()`
+
+- `test_handle_input_invalid_session_fails()`
+
+- `test_handler_registration_errors()`
+
+- `test_conversation_context()`
+
+- `test_conversation_history()`
+
+- `test_in_memory_conversation_store()`
 
 
 
@@ -5967,6 +6033,25 @@ This module is part of the AeroLearn AI project.
 
 
 
+### app\core\conversation\handlers.py
+
+**Description:**
+
+Example conversation handlers for component-specific tasks in AeroLearn AI.
+
+Handlers implement (user_input, user_id, ConversationState, extra) -> str (bot-response).
+Register with ConversationManager from /app/core/ai/conversation.py
+
+**Functions:**
+
+- `professor_content_handler(user_input, user_id, state, extra)`
+
+- `admin_handler(user_input, user_id, state, extra)`
+
+- `student_query_handler(user_input, user_id, state, extra)`
+
+
+
 ### tests\core\ai\test_vector_index.py
 
 **Description:**
@@ -6694,120 +6779,160 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here's the architectural enhancement to be added to the summary:
+Here's the architectural enhancement section to add:
 
 ```markdown
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows a modular event-driven architecture with three main layers:
+The system follows an event-driven microservices architecture with modular components. Key architectural characteristics:
 
-1. **Core System**:
-   - Event Bus (Pub/Sub pattern)
-   - Component Registry (Singleton)
-   - Interface Contracts
-   - Transaction Monitoring
+- **Core Pillars**:
+  - Event Bus (Pub/Sub System)
+  - Component Registry (Service Discovery)
+  - Interface Contracts (Abstract Base Classes)
+  - Transaction Monitoring System
 
-2. **Application Layer**:
-   - Course/Content Management (ORM Models)
-   - Batch Processing
-   - Authorization System
-   - AI Integration
+- **Data Flow**:
+  ```mermaid
+  graph TD
+    A[User Actions] --> B[UI Components]
+    B --> C[Event Bus]
+    C --> D[Core Services]
+    D --> E[Persistence Layer]
+    E --> F[AI Processing]
+    F --> G[Monitoring System]
+    G --> C
+  ```
 
-3. **Integration Layer**:
-   - Event Type Definitions
-   - Monitoring & Logging
-   - Interface Implementations
-   - Registry Services
-
-Key architectural flows:
-- Event-driven communication between decoupled components
-- Strong type safety through enumerated event types
-- Versioned component registration/dependency management
-- Transactional awareness across operations
+- **Key Architectural Layers**:
+  1. **Integration Layer**: Event bus, component registry, and interface contracts
+  2. **Domain Layer**: Course models, AI operations, authorization rules
+  3. **Infrastructure Layer**: Batch processing, transaction logging, monitoring
+  4. **Interface Layer**: Base interfaces and AI service contracts
 
 ### 2. Identified Design Patterns
 
-| Pattern              | Implementation Examples                          | Purpose                                      |
-|----------------------|--------------------------------------------------|---------------------------------------------|
-| Observer             | EventBus ↔ ComponentRegistry                    | Decoupled event notifications               |
-| Singleton            | ComponentRegistry, EventBus                     | System-wide single instance management      |
-| Abstract Factory     | BaseInterface → AIInterface implementations     | Interface contract enforcement              |
-| Decorator            | @require_permission, @interface_method         | Cross-cutting concerns                      |
-| Command              | BatchController operations                      | Encapsulate upload requests as objects      |
-| Facade               | TransactionLogger                               | Simplified transaction monitoring interface |
+| Pattern             | Implementation Examples                          | Purpose                                  |
+|---------------------|-------------------------------------------------|------------------------------------------|
+| Singleton           | ComponentRegistry, EventBus                     | Global access to core services           |
+| Observer            | EventBus subscribers                            | Loose coupling for event handling        |
+| Factory             | EventType hierarchy                             | Creation of domain-specific events       |
+| Decorator           | @interface_method in BaseInterface             | Method signature validation              |
+| Strategy            | ValidationFramework in BatchController         | Interchangeable validation logic         |
+| Registry            | ComponentRegistry                               | Central component management             |
+| Template Method     | BaseInterface.validate_implementation()         | Interface implementation enforcement     |
 
-### 3. Refactoring Opportunities
+### 3. Potential Refactoring Opportunities
 
-1. **Event System**:
-   - Consolidate duplicate event type definitions between EventType enum and category-specific classes
-   - Implement event schema versioning for backward compatibility
+1. **Event Type Consolidation**:
+   - Current: Duplicate event type definitions (EventType enum + *EventType classes)
+   - Proposed: Unified EventType hierarchy using metaclasses
 
-2. **Component Registry**:
-   - Add dependency injection support
-   - Replace Singleton pattern with dependency management
+2. **Interface Versioning**:
+   - Current: Manual version checks in InterfaceVersion
+   - Proposed: Semantic version integration with decorators
 
-3. **Batch Processing**:
-   - Separate validation framework from upload controller
-   - Implement async/await pattern consistently
+3. **Dependency Management**:
+   - Current: Direct component registry access
+   - Proposed: Dependency injection framework integration
 
-4. **ORM Models**:
-   - Extract repository pattern from direct SQLAlchemy usage
-   - Add unit-of-work pattern for complex operations
+4. **Batch Processing Improvements**:
+   - Add circuit breaker pattern for upload failures
+   - Implement chunked processing for large batches
 
-5. **Interface System**:
-   - Implement automatic interface discovery
-   - Add version compatibility checking
+5. **Component Registry Enhancements**:
+   - Add lifecycle hooks for component states
+   - Implement dependency resolution using graph algorithms
 
 ### 4. Critical Path Analysis
 
-1. **Event Processing Path**:
-   Event Creation → EventBus → Subscriber Notification → Transaction Logger → Component Registry Update
+1. **System Initialization**:
+   ```
+   ComponentRegistry → EventBus → TransactionLogger → AI Interfaces
+   ```
 
-2. **Batch Upload Critical Path**:
-   File Validation → Metadata Extraction → Async Upload → Progress Tracking → Event Emission
+2. **Course Creation Flow**:
+   ```
+   POST /courses → CourseModel → EventBus → ContentIndexer → DB Commit
+   ```
 
-3. **Component Lifecycle**:
-   Registration → Dependency Resolution → Interface Binding → Event Subscription → Operation Execution
+3. **Batch Upload Process**:
+   ```
+   File Upload → ValidationFramework → UploadService → 
+   EventBus → TransactionLogger → Monitoring
+   ```
 
-4. **Authorization Flow**:
-   Permission Check → Role Hierarchy Evaluation → Event Logging → Transaction Verification
+4. **Authorization Check**:
+   ```
+   API Call → Permission Check → Role Hierarchy Resolution → 
+   Policy Decision Point → Audit Log
+   ```
 
-5. **AI Processing**:
-   Content Ingest → Embedding Generation → Vector Indexing → Similarity Analysis → Recommendation Emission
+5. **AI Processing Pipeline**:
+   ```
+   User Query → ConversationManager → AIModelProvider → 
+   Response Generator → Event Logging
+   ```
 
-### 5. Class/Module Relationships
+### 5. Class Relationships
 
 ```mermaid
-graph TD
-    A[Event] --> B[SystemEvent]
-    A --> C[ContentEvent]
-    A --> D[AIEvent]
-    E[ComponentRegistry] --> F[EventBus]
-    G[Course] --> H[Module]
-    H --> I[Lesson]
-    J[BatchController] --> K[UploadService]
-    J --> L[ValidationFramework]
-    M[BaseInterface] --> N[AIModelProviderInterface]
-    M --> O[ContentAnalysisInterface]
-    P[AuthorizationManager] --> Q[Permission]
-    P --> R[Role]
+classDiagram
+    class Event {
+        +serialize()
+        +deserialize()
+    }
     
-    classDef event fill:#f9f,stroke:#333;
-    classDef component fill:#bbf,stroke:#333;
-    classDef model fill:#bfb,stroke:#333;
-    classDef interface fill:#fbb,stroke:#333;
+    class Component {
+        +declare_dependency()
+        +provide_interface()
+    }
     
-    class A,B,C,D event;
-    class E,F component;
-    class G,H,I model;
-    class M,N,O interface;
+    class EventBus {
+        -subscribers
+        +subscribe()
+        +publish()
+    }
+    
+    class ComponentRegistry {
+        -components
+        +register_component()
+        +resolve_dependencies()
+    }
+    
+    class BaseInterface {
+        +register_interface()
+        +validate_implementation()
+    }
+    
+    class Course {
+        +modules
+        +validate()
+        +archive()
+    }
+    
+    class BatchController {
+        +upload_batch()
+        +validate_files()
+    }
+    
+    Event <|-- SystemEvent
+    Event <|-- ContentEvent
+    Event <|-- AIEvent
+    
+    Component "1" *-- "many" BaseInterface
+    ComponentRegistry "1" o-- "many" Component
+    EventBus "1" --o "many" Event
+    BatchController "1" --> "1" ValidationFramework
+    Course "1" o-- "many" Module
+    Module "1" o-- "many" Lesson
 ```
 
-Key Relationships:
-- Event subtypes inherit from base Event class
-- ComponentRegistry coordinates with EventBus for lifecycle events
-- ORM models emit ContentEvent changes to EventBus
-- Interfaces depend on ComponentRegistry for implementation discovery
-- Authorization system integrates with EventBus for permission changes
+This architecture enables:
+- Horizontal scaling through component-based design
+- Real-time monitoring via transaction logging
+- AI service interoperability through interface contracts
+- Event-driven updates across distributed components
+- Policy-driven authorization throughout the system
 ```
