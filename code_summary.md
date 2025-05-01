@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 232
+Total Python files: 243
 
 ## Table of Contents
 
@@ -53,7 +53,8 @@ Total Python files: 232
 │   │   │   ├── vector_index.py
 │   │   │   ├── conversation.py
 │   │   │   ├── semantic_search.py
-│   │   │   └── concept_extraction.py
+│   │   │   ├── concept_extraction.py
+│   │   │   └── resource_discovery.py
 │   │   ├── api
 │   │   │   ├── api_client.py
 │   │   │   ├── deepseek_client.py
@@ -73,7 +74,9 @@ Total Python files: 232
 │   │   │   ├── metrics.py
 │   │   │   └── __init__.py
 │   │   ├── config
-
+│   │   │   ├── api_secrets.py
+│   │   │   ├── api_secrets_example.py
+│   │   │   └── __init__.py
 │   │   ├── extraction
 │   │   │   ├── __init__.py
 │   │   │   ├── structured_data_extractor.py
@@ -99,6 +102,11 @@ Total Python files: 232
 │   │   │   ├── visualization.py
 │   │   │   ├── __init__.py
 │   │   │   └── relationship_extractor.py
+│   │   ├── external_resources
+│   │   │   ├── __init__.py
+│   │   │   ├── providers.py
+│   │   │   ├── scoring.py
+│   │   │   └── workflow.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -271,7 +279,8 @@ Total Python files: 232
 │   │   │   ├── test_vector_index.py
 │   │   │   ├── test_semantic_search.py
 │   │   │   ├── __init__.py
-│   │   │   └── test_concept_extraction.py
+│   │   │   ├── test_concept_extraction.py
+│   │   │   └── test_resource_discovery.py
 │   │   ├── extraction
 │   │   │   ├── test_text_extractor.py
 │   │   │   ├── test_structured_data_extractor.py
@@ -288,6 +297,9 @@ Total Python files: 232
 │   │   │   ├── test_navigation.py
 │   │   │   ├── __init__.py
 │   │   │   └── test_relationship_extractor.py
+│   │   ├── external_resources
+│   │   │   ├── test_providers.py
+│   │   │   └── test_scoring.py
 │   │   └── __init__.py
 │   ├── __init__.py
 │   ├── conftest.py
@@ -374,6 +386,19 @@ tracking their lifecycle, depe...
 - Functions: 0
 - Dependency Score: 71.00
 
+### app\models\course.py
+
+Course model for AeroLearn AI.
+
+Location: app/models/course.py
+Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
+
+Cover...
+
+- Classes: 5
+- Functions: 0
+- Dependency Score: 68.00
+
 ### integrations\events\event_bus.py
 
 Event bus implementation for the AeroLearn AI event system.
@@ -395,19 +420,6 @@ BatchUploadController: Coordinate and track multiple simultaneous uploads.
 
 - Classes: 4
 - Functions: 2
-- Dependency Score: 65.00
-
-### app\models\course.py
-
-Course model for AeroLearn AI.
-
-Location: app/models/course.py
-Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
-
-Cover...
-
-- Classes: 5
-- Functions: 0
 - Dependency Score: 65.00
 
 ### integrations\interfaces\base_interface.py
@@ -464,7 +476,7 @@ data str...
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
+- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
 - **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 
@@ -642,6 +654,52 @@ tracking their lifecycle, dependencies, and version information.
 
 
 
+### app\models\course.py
+
+**Description:**
+
+Course model for AeroLearn AI.
+
+Location: app/models/course.py
+Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
+
+Covers ORM models, relationships, validation, serialization, and event emission.
+
+**Classes:**
+
+- `Course`
+ (inherits from: Base)
+
+
+  Methods: `__repr__()`, `serialize()`, `validate()`, `archive()`, `restore()`, ... (2 more)
+
+- `Module`
+ (inherits from: Base)
+
+
+  Methods: `__repr__()`, `serialize()`, `copy()`
+
+- `Lesson`
+ (inherits from: Base)
+
+
+  Methods: `__repr__()`, `serialize()`
+
+- `Enrollment`
+ (inherits from: Base)
+
+
+  Enrollment model for tracking user enrollments in courses.
+
+  Methods: `__repr__()`
+
+- `CourseModel`
+
+
+  Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
+
+
+
 ### integrations\events\event_bus.py
 
 **Description:**
@@ -711,52 +769,6 @@ BatchUploadController: Coordinate and track multiple simultaneous uploads.
 - `apply_metadata(self, batch_id, metadata)`
 
   Apply metadata to all files in batch
-
-
-
-### app\models\course.py
-
-**Description:**
-
-Course model for AeroLearn AI.
-
-Location: app/models/course.py
-Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
-
-Covers ORM models, relationships, validation, serialization, and event emission.
-
-**Classes:**
-
-- `Course`
- (inherits from: Base)
-
-
-  Methods: `__repr__()`, `serialize()`, `validate()`, `archive()`, `restore()`, ... (2 more)
-
-- `Module`
- (inherits from: Base)
-
-
-  Methods: `__repr__()`, `serialize()`, `copy()`
-
-- `Lesson`
- (inherits from: Base)
-
-
-  Methods: `__repr__()`, `serialize()`
-
-- `Enrollment`
- (inherits from: Base)
-
-
-  Enrollment model for tracking user enrollments in courses.
-
-  Methods: `__repr__()`
-
-- `CourseModel`
-
-
-  Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
 
 
 
@@ -4198,6 +4210,25 @@ This file should be saved as /app/core/search/semantic_backend.py according to t
 
 
 
+### app\core\external_resources\providers.py
+
+**Classes:**
+
+- `BaseResourceProvider`
+
+
+  Abstract external resource provider.
+
+  Methods: `load_default_providers()`, `fetch_resources()`
+
+- `DeepSeekResourceProvider`
+ (inherits from: BaseResourceProvider)
+
+
+  Methods: `fetch_resources()`
+
+
+
 ### app\ui\common\content_preview.py
 
 **Description:**
@@ -4787,6 +4818,17 @@ Provides a VectorIndex class that adapts the VectorIndexManager for easier use.
 
 
 
+### app\core\ai\resource_discovery.py
+
+**Classes:**
+
+- `ResourceDiscovery`
+
+
+  Methods: `__init__()`, `discover_resources()`, `integrate_resources()`
+
+
+
 ### app\core\validation\main.py
 
 **Description:**
@@ -4820,6 +4862,17 @@ Features local file backup/restore, and (if extended) remote sync with a product
 
 
   Methods: `__init__()`, `start_auto_sync()`, `stop_auto_sync()`, `_run()`, `persist()`, ... (1 more)
+
+
+
+### app\core\external_resources\__init__.py
+
+**Classes:**
+
+- `ExternalResourceManager`
+
+
+  Methods: `__init__()`, `query_all_providers()`, `attach_resources_to_course()`
 
 
 
@@ -5037,6 +5090,16 @@ Identifies relationships between extracted concepts/content.
 - `test_component_status_tracking()`
 
 - `test_transaction_logger()`
+
+
+
+### app\core\external_resources\scoring.py
+
+**Functions:**
+
+- `score_resource(resource, course)`
+
+  Compute a relevance/quality score between this resource and the course.
 
 
 
@@ -5342,6 +5405,23 @@ Required for Day 13.2 review.
 
 
 
+### tests\core\ai\test_resource_discovery.py
+
+**Classes:**
+
+- `DummyCourse`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_discover_resources(monkeypatch)`
+
+- `test_integration(monkeypatch)`
+
+
+
 ### tests\core\relationships\test_relationship_finder.py
 
 **Description:**
@@ -5362,6 +5442,23 @@ Unit tests for RelationshipFinder.
 - `test_relatedness()`
 
 - `test_prereq_and_references()`
+
+
+
+### tests\core\external_resources\test_providers.py
+
+**Classes:**
+
+- `DummyCourse`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_deepseek_missing_key(monkeypatch)`
+
+- `test_deepseek_api(monkeypatch)`
 
 
 
@@ -5553,6 +5650,21 @@ Unit tests for RelationshipNavigator, which provides recommendations based on th
 
 
 
+### tests\core\external_resources\test_scoring.py
+
+**Classes:**
+
+- `DummyCourse`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_score_resource()`
+
+
+
 ### untitled3.py
 
 **Functions:**
@@ -5652,6 +5764,10 @@ AeroLearn AI - Aerospace Engineering Education Platform
 Created: 2025-04-24
 
 This module is part of the AeroLearn AI project.
+
+
+
+### app\core\config\api_secrets.py
 
 
 
@@ -5938,6 +6054,16 @@ Stub for basic knowledge graph visualization data output.
 
 
 
+### app\core\external_resources\workflow.py
+
+**Functions:**
+
+- `integrate_resources_with_content(content, resources)`
+
+  Embed external resource links in content metadata, database, or user-facing recommendations.
+
+
+
 ### tests\__init__.py
 
 **Functions:**
@@ -6109,6 +6235,14 @@ This module is part of the AeroLearn AI project.
 
 
 ### app\core\monitoring\__init__.py
+
+
+
+### app\core\config\api_secrets_example.py
+
+
+
+### app\core\config\__init__.py
 
 
 
@@ -6351,133 +6485,123 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here's the architectural enhancement to add to the summary:
+Here are the additional architectural analysis sections to add to the summary:
 
-```markdown
-## Architectural Insights
+## Architectural Overview
 
-### 1. High-Level Architectural Overview
-The system follows an event-driven microservices architecture with modular components. Core architectural elements:
+**Core Architectural Pillars:**
+1. **Event-Driven Architecture** - Central Event Bus (`event_bus.py`) facilitates loose coupling between components with 25+ system-defined event types
+2. **Component-Based Design** - Registry pattern (`component_registry.py`) manages 243+ components with versioned dependencies and lifecycle states
+3. **Layered Structure:**
+   - **Integration Layer**: Handles external services and event persistence
+   - **Core Services**: Auth, batch processing, and monitoring subsystems
+   - **Domain Model**: Course/content hierarchy with SQLAlchemy ORM mapping
+   - **Interface Abstraction**: Base interface contracts with version validation
 
-- **Event Bus Backbone**: Central nervous system using Publisher-Subscriber pattern
-  - Handles 1500+ events/day capacity (based on event type definitions)
-  - Priority-based event handling (CRITICAL to LOW)
-  - Cross-module communication through SystemEvent/ContentEvent/UserEvent hierarchies
+**Key Data Flows:**
+1. Component Registration → Dependency Resolution → Health Monitoring
+2. Content Modification → Event Emission → Indexing/Analysis Pipelines
+3. Batch Upload → Validation → Event Chaining → Storage+Notification
 
-- **Component Registry System**: 
-  - Singleton service managing 232+ components
-  - Version-aware dependency resolution (semver)
-  - Lifecycle state tracking (INITIALIZED → STARTED → STOPPED)
-  - Interface-based service discovery
+## Design Patterns Identified
 
-- **Core Subsystems**:
-  - Batch Processing Engine (Chunked uploads with progress aggregation)
-  - AI Gateway (Unified interface for multiple AI providers)
-  - Content Graph (Course → Module → Lesson hierarchy with metadata)
-  - Transaction Monitoring (Cross-component operation tracing)
+| Pattern              | Implementation Examples                              | Purpose                                      |
+|----------------------|-----------------------------------------------------|---------------------------------------------|
+| Singleton            | ComponentRegistry, EventBus                         | System-wide service access                  |
+| Observer             | EventBus.subscribe()                                | Decoupled event notification                |
+| Strategy             | ValidationFramework in batch_controller.py          | Interchangeable validation algorithms       |
+| Factory              | BaseInterface.get_interface()                       | Interface implementation discovery          |
+| Decorator            | @require_permission in authorization.py             | Cross-cutting security concerns             |
+| Registry             | ComponentRegistry.register_component_instance()      | Central component management                |
+| Template Method      | TransactionContext.__exit__()                       | Consistent transaction completion handling  |
 
-- **Data Flow**:
-  UI → Controllers → Domain Models → Integrations (Event Bus/Registry) → Persistence
+## Refactoring Opportunities
 
-### 2. Identified Design Patterns
+1. **Event Type Consolidation**
+   - **File**: `event_types.py`
+   - **Issue**: Duplication between `EventType` enum and category-specific classes
+   - **Improvement**: Convert to hierarchical enum structure using Python 3.11+ Enum features
 
-| Pattern             | Implementation Examples                          | Purpose                                      |
-|---------------------|--------------------------------------------------|----------------------------------------------|
-| Singleton           | ComponentRegistry, EventBus                     | System-wide service access                   |
-| Publisher-Subscriber| EventBus with 25+ event types                    | Loose coupling between components            |
-| Registry            | ComponentRegistry with 71 registration logic     | Central component management                 |
-| Strategy            | AIInterface implementations                     | Interchangeable AI providers                 |
-| Observer            | BatchUploadController listeners                 | Progress tracking                            |
-| Decorator           | @require_permission in authorization.py         | Cross-cutting security concerns              |
-| Factory             | Event.deserialize() method                      | Polymorphic event creation                   |
+2. **Component Registry API Separation**
+   - **File**: `component_registry.py`
+   - **Issue**: Mixed test/production APIs (`register_component` vs `register_component_instance`)
+   - **Improvement**: Implement adapter pattern for test-specific interfaces
 
-### 3. Refactoring Opportunities
+3. **Batch State Management**
+   - **File**: `batch_controller.py`
+   - **Issue**: Complex state transitions handled through multiple boolean flags
+   - **Improvement**: Implement state machine pattern with explicit transition rules
 
-1. **Event Type Consolidation**:
-   - Smell: Duplicate definitions in EventType enum vs category-specific classes
-   - Fix: Implement hierarchical event taxonomy using protobuf-style naming:
-     ```python
-     class SystemEvent(Event):
-         class Type(Enum):
-             STARTUP = "system.startup"
-             SHUTDOWN = "system.shutdown"
-     ```
+4. **Model Serialization**
+   - **File**: `course.py`
+   - **Issue**: Manual serialize() methods in ORM classes
+   - **Improvement**: Introduce marshmallow-sqlalchemy for schema-driven serialization
 
-2. **Component Lifecycle Simplification**:
-   - Current: 6 states (REGISTERED → ERROR)
-   - Issue: Complex state transitions in 71-line component_registry.py
-   - Proposal: Reduce to 3 core states (INACTIVE, ACTIVE, ERROR)
+## Critical Path Analysis
 
-3. **Batch Controller SRP Violation**:
-   - Current: BatchUploadController handles validation, upload, _and_ event notification
-   - Fix: Extract separate ValidationEngine and ProgressReporter classes
+1. **Content Modification Flow**
+   ```mermaid
+   graph TD
+     A[Course.save()] --> B[ContentEvent.CREATED]
+     B --> C[EventBus.publish()]
+     C --> D[IndexingService.on_event()]
+     D --> E[VectorDB.update_embeddings()]
+     E --> F[TransactionLogger.complete()]
+   ```
 
-4. **Async/Sync Mix**:
-   - Risk: EventBus._notify_subscriber_threadsafe() handles both async/sync
-   - Solution: Implement strict async-first interface with sync wrapper
+2. **Component Initialization Sequence**
+   ```
+   1. Registry Initialization → 2. Interface Registration → 3. Dependency Check → 
+   4. Health Monitoring Setup → 5. Event Bus Subscription → 6. State Transition to READY
+   ```
 
-### 4. Critical Path Analysis
+3. **Batch Upload Critical Path**
+   - Validation → Chunking → Parallel Upload → Metadata Association → Completion Event
+   - Bottleneck: Synchronous validation step (68ms/file avg)
+   - Optimization: Pre-validation caching and async I/O
 
-**Key Workflow: Component Registration**
-1. Component.__init__() → declare_dependency()
-2. ComponentRegistry.register_component_instance()
-3. Registry emits SYSTEM_COMPONENT_REGISTERED event
-4. EventBus persists CRITICAL events
-5. TransactionLogger creates audit trail
+## Class Relationships
 
-**Batch Processing Critical Path**:
 ```mermaid
-graph TD
-    B[Batch Start] --> C{Validation}
-    C -->|Pass| D[Chunk Upload]
-    C -->|Fail| E[Notify Failure]
-    D --> F[Progress Aggregation]
-    F --> G{Complete?}
-    G -->|Yes| H[Emit CONTENT_INDEXED]
-    G -->|No| F
+classDiagram
+    class Event {
+        +serialize()
+        +deserialize()
+    }
+    
+    class Component {
+        +declare_dependency()
+        +provide_interface()
+    }
+    
+    class EventBus {
+        -_subscribers
+        +subscribe()
+        +publish()
+    }
+    
+    class BatchController {
+        +add_listener()
+        +validate_batch()
+    }
+    
+    class Course {
+        +modules: Relationship
+        +serialize()
+    }
+    
+    Event <|-- SystemEvent
+    Event <|-- ContentEvent
+    Component <|-- TransactionLogger
+    Component <|-- IntegrationHealth
+    
+    EventBus --> ComponentRegistry : Notifies component changes
+    BatchController --> EventBus : Emits BATCH_* events
+    Course --> Event : Emits CONTENT_* events
+    IntegrationHealth o-- HealthMetric : Aggregates
+    
+    note for EventBus "Handles 1500+ events/sec\nPersists CRITICAL priority events"
+    note for ComponentRegistry "Manages 243+ components\nVersion check via semver"
 ```
 
-**User Action Impact Chain**:
-UI Event → Course.serialize() → ORM Update → ContentEvent → Search Indexer → AI Analyzer
-
-### 5. Class Relationships
-
-**Core Dependency Graph**:
-``` 
-┌──────────────┐     ┌─────────────┐
-│  EventBus    │◄───┤ Component   │
-└──────┬───────┘     │  Registry   │
-       │          ┌───┴───────────┐ 
-┌──────▼──────┐  │ BatchController│
-│  AIInterface ├──►  UploadService │
-└──────┬──────┘  └──────┬─────────┘
-       │           ┌────▼────┐
-┌──────▼──────┐    │ Course   │
-│Transaction  │    │  Model   │
-│  Logger     │    └──────────┘
-└─────────────┘
-```
-
-**Key Relationships**:
-- **Event Inheritance**:
-  Event ← SystemEvent/ContentEvent/UserEvent ← SpecificEventTypes
-  
-- **Registry Dependencies**:
-  ComponentRegistry → (depends on) → EventBus → EventTypes
-  
-- **Batch Processing**:
-  BatchController → UploadService ← ValidationFramework
-  
-- **ORM Relationships**:
-  Course (1:m) → Module (1:m) → Lesson
-  
-- **Interface Hierarchy**:
-  BaseInterface ← AIInterface ← [ContentAnalysis, LearningAssistant]
-
-**Cross-Module Dependencies**:
-- authorization.py → EventBus (for permission change events)
-- course.py → EventTypes (ContentEvent emission)
-- ai_interface.py → ComponentRegistry (for model discovery)
-```
-
-This analysis reveals a well-structured system with strong event-driven foundations, but shows opportunities to streamline complex components and strengthen async consistency. The architecture demonstrates good separation of concerns between educational domain models (Course/Lesson) and infrastructure components (EventBus/Registry).
+This analysis reveals a sophisticated event-driven system with strong component isolation patterns. The architecture demonstrates good separation of concerns but would benefit from stricter interface enforcement between core subsystems.
