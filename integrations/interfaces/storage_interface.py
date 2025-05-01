@@ -3,9 +3,13 @@ Storage interface contracts for the AeroLearn AI system.
 
 This module defines the interfaces for storage systems, including local and cloud
 storage providers, synchronization mechanisms, and file operations.
+
+It also provides a simple StorageInterface abstract base class that can be used
+by orchestration and integration components.
 """
 import abc
 import os
+from abc import ABC, abstractmethod
 from enum import Enum
 from datetime import datetime
 from typing import Dict, List, Optional, Set, Any, Union, BinaryIO, Tuple, AsyncIterator
@@ -666,5 +670,79 @@ class FileStreamingInterface(BaseInterface):
             
         Returns:
             Tuple of (content_bytes, metadata)
+        """
+        pass
+
+
+class StorageInterface(ABC):
+    """
+    Abstract interface for storage service integration.
+    All storage connectors should implement this interface.
+    
+    This simplified interface is used by orchestration and integration components
+    that need basic storage operations without the full complexity of the
+    specialized storage interfaces above.
+    """
+
+    @abstractmethod
+    def exists(self, storage_ref) -> bool:
+        """
+        Check if content exists in storage by ref/key.
+        
+        Args:
+            storage_ref: Reference or key to the storage item
+            
+        Returns:
+            True if the item exists, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def upload(self, storage_ref, data) -> None:
+        """
+        Upload data to storage by ref/key.
+        
+        Args:
+            storage_ref: Reference or key where the data should be stored
+            data: The data to upload
+        """
+        pass
+    
+    @abstractmethod
+    def download(self, storage_ref):
+        """
+        Download data from storage by ref/key.
+        
+        Args:
+            storage_ref: Reference or key to the storage item
+            
+        Returns:
+            The downloaded data
+        """
+        pass
+    
+    @abstractmethod
+    def delete(self, storage_ref) -> bool:
+        """
+        Delete data from storage by ref/key.
+        
+        Args:
+            storage_ref: Reference or key to the storage item to delete
+            
+        Returns:
+            True if deleted successfully, False otherwise
+        """
+        pass
+    
+    @abstractmethod
+    def list(self, prefix=None) -> List[str]:
+        """
+        List storage items, optionally filtered by prefix.
+        
+        Args:
+            prefix: Optional prefix to filter items
+            
+        Returns:
+            List of storage references matching the prefix
         """
         pass

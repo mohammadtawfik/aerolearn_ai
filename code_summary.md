@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 261
+Total Python files: 266
 
 ## Table of Contents
 
@@ -118,6 +118,9 @@ Total Python files: 261
 │   │   │   ├── optimizers.py
 │   │   │   ├── parser.py
 │   │   │   └── __init__.py
+│   │   ├── integration
+│   │   │   ├── integration_coordinator.py
+│   │   │   └── __init__.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -202,6 +205,9 @@ Total Python files: 261
 │   │   ├── integration_health.py
 │   │   ├── component_status.py
 │   │   └── transaction_logger.py
+│   ├── week2
+│   │   ├── orchestrator.py
+│   │   └── __init__.py
 │   └── __init__.py
 ├── tests
 │   ├── unit
@@ -261,7 +267,8 @@ Total Python files: 261
 │   │   ├── test_content_analysis_integration.py
 │   │   ├── test_relationship_mapping_integration.py
 │   │   ├── test_semantic_search_integration.py
-│   │   └── test_resource_discovery_integration.py
+│   │   ├── test_resource_discovery_integration.py
+│   │   └── test_week2_integration.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -461,6 +468,17 @@ registra...
 - Functions: 1
 - Dependency Score: 61.00
 
+### integrations\interfaces\ai_interface.py
+
+AI interface contracts for the AeroLearn AI system.
+
+This module defines the interfaces for AI-powered components, including language models,
+content ...
+
+- Classes: 15
+- Functions: 1
+- Dependency Score: 59.00
+
 ### integrations\monitoring\transaction_logger.py
 
 Transaction logging for the AeroLearn AI system.
@@ -472,27 +490,16 @@ making it easier t...
 - Functions: 0
 - Dependency Score: 59.00
 
-### integrations\interfaces\ai_interface.py
+### app\models\content.py
 
-AI interface contracts for the AeroLearn AI system.
+Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
 
-This module defines the interfaces for AI-powered components, including language models,
-content ...
+Location: app/models/content.py
+Depends on: app/models/topic.py, integrations/events/ev...
 
-- Classes: 15
-- Functions: 1
-- Dependency Score: 56.00
-
-### app\core\ai\conversation.py
-
-Conversational AI entry point and session manager — AeroLearn AI.
-
-This upgrade completes Task 14.1 requirements:
-- Conversation flow management with ...
-
-- Classes: 5
-- Functions: 2
-- Dependency Score: 55.00
+- Classes: 8
+- Functions: 0
+- Dependency Score: 58.00
 
 ## Dependencies
 
@@ -500,6 +507,7 @@ Key file relationships (files with most dependencies):
 
 - **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
 - **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **app\models\content.py** depends on: integrations\events\event_bus.py, app\models\course.py, integrations\events\event_types.py
 
 
 ## Detailed Code Analysis
@@ -925,61 +933,6 @@ interfaces in the system should inherit from the base classes defined here.
 
 
 
-### integrations\monitoring\transaction_logger.py
-
-**Description:**
-
-Transaction logging for the AeroLearn AI system.
-
-This module provides tools for tracking and logging cross-component transactions,
-making it easier to trace operations as they flow through different parts of the system.
-
-**Classes:**
-
-- `TransactionStage`
- (inherits from: Enum)
-
-
-  Stages of a transaction lifecycle.
-
-- `TransactionEvent`
- (inherits from: Event)
-
-
-  Event fired when a transaction changes stage.
-
-  Methods: `__init__()`, `to_dict()`
-
-- `TransactionError`
- (inherits from: Exception)
-
-
-  Exception raised for errors in transaction processing.
-
-- `Transaction`
-
-
-  Represents a cross-component transaction.
-
-  Methods: `__init__()`, `start()`, `process()`, `complete()`, `fail()`, ... (6 more)
-
-- `TransactionContext`
-
-
-  Context manager for transaction handling.
-
-  Methods: `__init__()`, `__enter__()`, `__exit__()`
-
-- `TransactionLogger`
- (inherits from: Component)
-
-
-  System for logging and tracking cross-component transactions.
-
-  Methods: `__init__()`, `create_transaction()`, `update_transaction()`, `get_transaction()`, `get_transactions_by_parent()`, ... (14 more)
-
-
-
 ### integrations\interfaces\ai_interface.py
 
 **Description:**
@@ -1100,62 +1053,58 @@ content analysis, question answering, and recommendation systems.
 
 
 
-### app\core\ai\conversation.py
+### integrations\monitoring\transaction_logger.py
 
 **Description:**
 
-Conversational AI entry point and session manager — AeroLearn AI.
+Transaction logging for the AeroLearn AI system.
 
-This upgrade completes Task 14.1 requirements:
-- Conversation flow management with state persistence
-- Context tracking and memory
-- Session & conversation history with privacy controls
-- Pluggable, handler-based flow routing for component-specific logic
-
-Supersedes previous basic Conversation/ConversationManager implementation.
+This module provides tools for tracking and logging cross-component transactions,
+making it easier to trace operations as they flow through different parts of the system.
 
 **Classes:**
 
-- `InMemoryConversationStore`
+- `TransactionStage`
+ (inherits from: Enum)
 
 
-  Pluggable (currently in-memory) session persistence.
+  Stages of a transaction lifecycle.
 
-  Methods: `__init__()`, `get()`, `set()`, `delete()`, `all_sessions()`
-
-- `ConversationContext`
-
-
-  Tracks per-session dynamic memory/state.
-
-  Methods: `__init__()`, `set()`, `get()`, `clear()`
-
-- `ConversationHistory`
+- `TransactionEvent`
+ (inherits from: Event)
 
 
-  Tracks user-bot conversation with privacy settings.
+  Event fired when a transaction changes stage.
 
-  Methods: `__init__()`, `add_turn()`, `get_history()`, `clear()`
+  Methods: `__init__()`, `to_dict()`
 
-- `ConversationState`
-
-
-  Full persistent snapshot for user session.
-
-  Methods: `__init__()`, `as_dict()`, `clear_privacy_sensitive()`
-
-- `ConversationManager`
+- `TransactionError`
+ (inherits from: Exception)
 
 
-  Main orchestrator for conversational AI sessions.
+  Exception raised for errors in transaction processing.
 
-  Methods: `__init__()`, `register_handler()`, `set_default_handler()`, `start_session()`, `end_session()`, ... (5 more)
+- `Transaction`
 
-**Functions:**
 
-- `default_user_validator(user_id)`
+  Represents a cross-component transaction.
 
-- `default_handler(user_input, user_id, state, extra)`
+  Methods: `__init__()`, `start()`, `process()`, `complete()`, `fail()`, ... (6 more)
+
+- `TransactionContext`
+
+
+  Context manager for transaction handling.
+
+  Methods: `__init__()`, `__enter__()`, `__exit__()`
+
+- `TransactionLogger`
+ (inherits from: Component)
+
+
+  System for logging and tracking cross-component transactions.
+
+  Methods: `__init__()`, `create_transaction()`, `update_transaction()`, `get_transaction()`, `get_transactions_by_parent()`, ... (14 more)
 
 
 
@@ -1275,6 +1224,158 @@ data structures for monitoring the health of system integrations.
   Central system for tracking integration health across components.
 
   Methods: `__init__()`, `register_health_provider()`, `unregister_health_provider()`, `collect_metrics()`, `_update_metrics()`, ... (10 more)
+
+
+
+### app\core\ai\conversation.py
+
+**Description:**
+
+Conversational AI entry point and session manager — AeroLearn AI.
+
+This upgrade completes Task 14.1 requirements:
+- Conversation flow management with state persistence
+- Context tracking and memory
+- Session & conversation history with privacy controls
+- Pluggable, handler-based flow routing for component-specific logic
+
+Supersedes previous basic Conversation/ConversationManager implementation.
+
+**Classes:**
+
+- `InMemoryConversationStore`
+
+
+  Pluggable (currently in-memory) session persistence.
+
+  Methods: `__init__()`, `get()`, `set()`, `delete()`, `all_sessions()`
+
+- `ConversationContext`
+
+
+  Tracks per-session dynamic memory/state.
+
+  Methods: `__init__()`, `set()`, `get()`, `clear()`
+
+- `ConversationHistory`
+
+
+  Tracks user-bot conversation with privacy settings.
+
+  Methods: `__init__()`, `add_turn()`, `get_history()`, `clear()`
+
+- `ConversationState`
+
+
+  Full persistent snapshot for user session.
+
+  Methods: `__init__()`, `as_dict()`, `clear_privacy_sensitive()`
+
+- `ConversationManager`
+
+
+  Main orchestrator for conversational AI sessions.
+
+  Methods: `__init__()`, `register_handler()`, `set_default_handler()`, `start_session()`, `end_session()`, ... (5 more)
+
+**Functions:**
+
+- `default_user_validator(user_id)`
+
+- `default_handler(user_input, user_id, state, extra)`
+
+
+
+### integrations\interfaces\storage_interface.py
+
+**Description:**
+
+Storage interface contracts for the AeroLearn AI system.
+
+This module defines the interfaces for storage systems, including local and cloud
+storage providers, synchronization mechanisms, and file operations.
+
+It also provides a simple StorageInterface abstract base class that can be used
+by orchestration and integration components.
+
+**Classes:**
+
+- `StorageScope`
+ (inherits from: Enum)
+
+
+  Defines the scope/visibility of stored data.
+
+- `StoragePermission`
+ (inherits from: Enum)
+
+
+  Permission levels for stored items.
+
+- `SyncStatus`
+ (inherits from: Enum)
+
+
+  Synchronization status for stored items.
+
+- `StorageItem`
+
+
+  Represents a storage item (file or folder) with metadata.
+
+  Methods: `__init__()`, `to_dict()`, `from_dict()`
+
+- `SyncConflict`
+
+
+  Represents a synchronization conflict between local and remote versions.
+
+  Methods: `__init__()`
+
+- `SyncProgress`
+
+
+  Represents the progress of a synchronization operation.
+
+  Methods: `__init__()`, `completion_percentage()`
+
+- `StorageProviderInterface`
+ (inherits from: BaseInterface)
+
+
+  Interface for components that provide storage capabilities.
+
+- `SynchronizationInterface`
+ (inherits from: BaseInterface)
+
+
+  Interface for components that synchronize content between storage providers.
+
+- `StorageQuotaInterface`
+ (inherits from: BaseInterface)
+
+
+  Interface for components that manage storage quotas.
+
+- `StoragePermissionInterface`
+ (inherits from: BaseInterface)
+
+
+  Interface for components that manage storage permissions.
+
+- `FileStreamingInterface`
+ (inherits from: BaseInterface)
+
+
+  Interface for components that provide file streaming capabilities.
+
+- `StorageInterface`
+ (inherits from: ABC)
+
+
+  Abstract interface for storage service integration.
+
+  Methods: `exists()`, `upload()`, `download()`, `delete()`, `list()`
 
 
 
@@ -1799,88 +1900,6 @@ Integration: Hooks into EventBus system for notification and validation events.
 **Functions:**
 
 - `_add_project_root_to_syspath()`
-
-
-
-### integrations\interfaces\storage_interface.py
-
-**Description:**
-
-Storage interface contracts for the AeroLearn AI system.
-
-This module defines the interfaces for storage systems, including local and cloud
-storage providers, synchronization mechanisms, and file operations.
-
-**Classes:**
-
-- `StorageScope`
- (inherits from: Enum)
-
-
-  Defines the scope/visibility of stored data.
-
-- `StoragePermission`
- (inherits from: Enum)
-
-
-  Permission levels for stored items.
-
-- `SyncStatus`
- (inherits from: Enum)
-
-
-  Synchronization status for stored items.
-
-- `StorageItem`
-
-
-  Represents a storage item (file or folder) with metadata.
-
-  Methods: `__init__()`, `to_dict()`, `from_dict()`
-
-- `SyncConflict`
-
-
-  Represents a synchronization conflict between local and remote versions.
-
-  Methods: `__init__()`
-
-- `SyncProgress`
-
-
-  Represents the progress of a synchronization operation.
-
-  Methods: `__init__()`, `completion_percentage()`
-
-- `StorageProviderInterface`
- (inherits from: BaseInterface)
-
-
-  Interface for components that provide storage capabilities.
-
-- `SynchronizationInterface`
- (inherits from: BaseInterface)
-
-
-  Interface for components that synchronize content between storage providers.
-
-- `StorageQuotaInterface`
- (inherits from: BaseInterface)
-
-
-  Interface for components that manage storage quotas.
-
-- `StoragePermissionInterface`
- (inherits from: BaseInterface)
-
-
-  Interface for components that manage storage permissions.
-
-- `FileStreamingInterface`
- (inherits from: BaseInterface)
-
-
-  Interface for components that provide file streaming capabilities.
 
 
 
@@ -2483,6 +2502,56 @@ Content Type Registry
 
 
 
+### app\core\ai\content_similarity.py
+
+**Description:**
+
+File Location: app/core/ai/content_similarity.py
+
+Purpose: Implements similarity detection for educational content, including
+vector similarity metrics, thresholding, and recommendation heuristics.
+Provides ContentSimilarityEngine as a unified interface for computing similarities
+across content items.
+
+**Classes:**
+
+- `SimilarityCalculator`
+
+
+  Provides static methods for common similarity metrics.
+
+  Methods: `cosine_similarity()`, `jaccard_similarity()`
+
+- `ContentSimilarityCalculator`
+
+
+  Adapter API for project-wide content similarity calculations.
+
+  Methods: `similarity_score()`
+
+- `ContentSimilarityEngine`
+
+
+  Unifies content similarity routines for the AeroLearn AI system.
+
+  Methods: `__init__()`, `compute_similarities()`, `find_similar_content()`
+
+**Functions:**
+
+- `calculate_similarity(content_a, content_b, content_type, metric, threshold)`
+
+  Embeds and compares two pieces of content (text, document, multimedia).
+
+- `cross_content_similarity(content_list_a, content_list_b, content_type, metric, threshold)`
+
+  Given two lists (e.g. lessons from two courses), computes pairwise similarity 
+
+- `get_content_recommendations(target_content, candidate_contents, content_type, metric, top_k, threshold)`
+
+  Recommends the top-K most similar items from candidate_contents to target_content.
+
+
+
 ### app\core\ai\concept_extraction.py
 
 **Description:**
@@ -2892,6 +2961,39 @@ component dependencies and ensuring proper component initialization order.
 
 
 
+### app\ui\admin\system_config.py
+
+**Description:**
+
+Admin System Config & Monitoring UI — AeroLearn AI
+Save at: /app/ui/admin/system_config.py
+
+Connects:
+- SystemSettingsManager (from core.monitoring)
+- SystemMetricsManager (from core.monitoring)
+Provides:
+- UI for viewing/editing validated system settings
+- Interactive component dependency visualization (stub for integration)
+- Health metrics/alerts dashboard
+
+**Classes:**
+
+- `AdminSystemConfigController`
+
+
+  Controller for system settings/config and system monitoring dashboard.
+
+  Methods: `get_all_settings()`, `update_setting()`, `get_all_metrics()`, `get_alerts()`, `get_component_dependency_graph()`, ... (3 more)
+
+- `SystemMonitorUI`
+
+
+  Stub for System Monitoring UI exposed to admin users.
+
+  Methods: `update_health_status()`, `display_content_similarities()`
+
+
+
 ### app\models\tag.py
 
 **Classes:**
@@ -3042,47 +3144,6 @@ Local Cache System for AeroLearn AI
   Local cache storage supporting offline operation and prioritization.
 
   Methods: `__new__()`, `__init__()`, `set()`, `get()`, `delete()`, ... (5 more)
-
-
-
-### app\core\ai\content_similarity.py
-
-**Description:**
-
-File Location: app/core/ai/content_similarity.py
-
-Purpose: Implements similarity detection for educational content, including
-vector similarity metrics, thresholding, and recommendation heuristics.
-
-**Classes:**
-
-- `SimilarityCalculator`
-
-
-  Provides static methods for common similarity metrics.
-
-  Methods: `cosine_similarity()`, `jaccard_similarity()`
-
-- `ContentSimilarityCalculator`
-
-
-  Adapter API for project-wide content similarity calculations.
-
-  Methods: `similarity_score()`
-
-**Functions:**
-
-- `calculate_similarity(content_a, content_b, content_type, metric, threshold)`
-
-  Embeds and compares two pieces of content (text, document, multimedia).
-
-- `cross_content_similarity(content_list_a, content_list_b, content_type, metric, threshold)`
-
-  Given two lists (e.g. lessons from two courses), computes pairwise similarity 
-
-- `get_content_recommendations(target_content, candidate_contents, content_type, metric, top_k, threshold)`
-
-  Recommends the top-K most similar items from candidate_contents to target_content.
 
 
 
@@ -3328,6 +3389,25 @@ This file should be saved as /tests/core/ai/test_semantic_search.py according to
 - `test_score_aggregation(simple_context)`
 
 - `test_empty_results(simple_context)`
+
+
+
+### app\core\db\content_db.py
+
+**Description:**
+
+ContentDB stub for integration testing.
+
+Provides minimal is_uploaded logic for test_professor_upload_workflow.
+
+Location: /app/core/db/content_db.py
+
+**Classes:**
+
+- `ContentDB`
+
+
+  Methods: `__init__()`, `mark_uploaded()`, `is_uploaded()`
 
 
 
@@ -3762,25 +3842,6 @@ Intended for PyQt5/PySide2, but UI toolkit can be swapped.
 
 
 
-### app\core\db\content_db.py
-
-**Description:**
-
-ContentDB stub for integration testing.
-
-Provides minimal is_uploaded logic for test_professor_upload_workflow.
-
-Location: /app/core/db/content_db.py
-
-**Classes:**
-
-- `ContentDB`
-
-
-  Methods: `__init__()`, `mark_uploaded()`, `is_uploaded()`
-
-
-
 ### app\core\ai\semantic_search.py
 
 **Description:**
@@ -3838,6 +3899,31 @@ Typical usage:
 
 
 ### app\models\base.py
+
+
+
+### integrations\week2\orchestrator.py
+
+**Description:**
+
+SAVE THIS FILE AT: /integrations/week2/orchestrator.py
+
+Purpose:
+- Orchestrates week 2 system integrations between content management, storage, indexing/AI, admin and monitoring.
+- Imports and utilizes interfaces from content, storage, AI analysis, admin, and monitoring.
+- This is the primary integration automation entry point for Week 2 deliverables.
+
+How to extend: 
+- Add specific handler implementations as subsystems become concrete.
+
+**Classes:**
+
+- `Week2Orchestrator`
+
+
+  Main orchestrator for Week 2 integration efforts.
+
+  Methods: `__init__()`, `sync_content_with_storage()`, `index_content_with_ai()`, `link_admin_to_monitoring()`, `connect_similarity_to_admin()`, ... (1 more)
 
 
 
@@ -4036,32 +4122,6 @@ service.uploadCompleted.connect(...)
 
 
   Methods: `__init__()`, `upload_files()`, `_enqueue_upload()`, `_start_uploads()`, `_upload_file_with_retry()`, ... (3 more)
-
-
-
-### app\ui\admin\system_config.py
-
-**Description:**
-
-Admin System Config & Monitoring UI — AeroLearn AI
-Save at: /app/ui/admin/system_config.py
-
-Connects:
-- SystemSettingsManager (from core.monitoring)
-- SystemMetricsManager (from core.monitoring)
-Provides:
-- UI for viewing/editing validated system settings
-- Interactive component dependency visualization (stub for integration)
-- Health metrics/alerts dashboard
-
-**Classes:**
-
-- `AdminSystemConfigController`
-
-
-  Controller for system settings/config and system monitoring dashboard.
-
-  Methods: `get_all_settings()`, `update_setting()`, `get_all_metrics()`, `get_alerts()`, `get_component_dependency_graph()`, ... (3 more)
 
 
 
@@ -5308,6 +5368,30 @@ Identifies relationships between extracted concepts/content.
 
 
 
+### app\core\integration\integration_coordinator.py
+
+**Description:**
+
+SAVE THIS FILE AT: /app/core/integration/integration_coordinator.py
+
+Purpose:
+- Core extension point for all major cross-component integrations.
+- Allows app-layer to invoke week2 orchestrator cleanly and provides hooks for future integrations.
+
+How to extend:
+- Register additional orchestration routines as new integrations are added.
+
+**Classes:**
+
+- `IntegrationCoordinator`
+
+
+  High-level integration controller; expose unified API for app core.
+
+  Methods: `__init__()`, `perform_week2_integrations()`
+
+
+
 ### app\ui\professor\batch_upload_ui.py
 
 **Classes:**
@@ -5339,6 +5423,39 @@ Identifies relationships between extracted concepts/content.
 - `test_component_status_tracking()`
 
 - `test_transaction_logger()`
+
+
+
+### tests\integration\test_week2_integration.py
+
+**Description:**
+
+SAVE THIS FILE AT: /tests/integration/test_week2_integration.py
+
+Purpose:
+- Integration-level tests for week 2 orchestrator and core integration controller.
+- Confirms connections among all target subsystems.
+
+How to use:
+- Populate with real/fake/mock subsystems as those become test-ready.
+
+**Functions:**
+
+- `fake_content_db()`
+
+- `fake_storage()`
+
+- `fake_ai_analysis()`
+
+- `fake_similarity()`
+
+- `fake_admin_monitor_ui()`
+
+- `fake_integration_health()`
+
+- `orchestrator(fake_content_db, fake_storage, fake_ai_analysis, fake_similarity, fake_admin_monitor_ui, fake_integration_health)`
+
+- `test_week2_full_integration(monkeypatch, orchestrator)`
 
 
 
@@ -6730,6 +6847,20 @@ Placeholder for modular conversation handler subclasses/components.
 
 
 
+### app\core\integration\__init__.py
+
+**Description:**
+
+SAVE THIS FILE AT: /app/core/integration/__init__.py
+
+Purpose:
+- Makes /app/core/integration/ a Python package so you can import integration logic elsewhere.
+- Clean, project-consistent initialization file.
+
+Extend as needed for submodule registrations or integration-wide constants in the future.
+
+
+
 ### app\ui\common\__init__.py
 
 **Description:**
@@ -6861,6 +6992,17 @@ This module is part of the AeroLearn AI project.
 
 
 
+### integrations\week2\__init__.py
+
+**Description:**
+
+SAVE THIS FILE AT: /integrations/week2/__init__.py
+
+Purpose:
+- Marks /integrations/week2/ as a Python package for orchestrator imports, discovery, and testing.
+
+
+
 ### tests\unit\core\upload\__init__.py
 
 
@@ -6953,130 +7095,140 @@ Here's the architectural enhancement to add to the summary:
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows a layered event-driven architecture with modular components:
-- **Core System**: 
-  - Event Bus (Publisher-Subscriber pattern)
-  - Component Registry (Singleton service discovery)
-  - Transaction Monitoring System
-- **Domain Layers**:
-  - Learning Content Management (Course/Module/Lesson hierarchy)
-  - AI Orchestration (Conversation/Model management)
-  - Batch Processing Engine
-- **Integration Layer**:
-  - Interface Contracts (BaseInterface implementations)
-  - Event Types Taxonomy
-  - Monitoring & Logging Infrastructure
-- **Data Layer**:
-  - SQLAlchemy ORM models
-  - Transactional state management
-  - Batch operation persistence
+The system follows an event-driven microservices architecture with modular components. Key architectural characteristics:
 
-Key architectural flows:
-1. Event-driven inter-service communication
-2. Component lifecycle management through registry
-3. Transactional operation tracking across boundaries
-4. Pluggable AI provider integration
+- **Core Pillars**:
+  - Event Bus (Pub/Sub) - Central nervous system using EventBus singleton
+  - Component Registry - Global service directory via ComponentRegistry
+  - Modular Interfaces - Pluggable components using BaseInterface hierarchy
+  - Batch Processing - Asynchronous pipeline architecture in BatchController
+
+- **Data Flow**:
+  1. UI/External Triggers → Event Bus → Component Registry → AI Services
+  2. Batch Operations → Transaction Logger → Event Bus → Monitoring
+
+- **Critical Subsystems**:
+  - Event System (35+ event types across 9 categories)
+  - Component Lifecycle Management
+  - Educational Content Graph (Course→Module→Lesson→Quiz)
+  - AI Service Orchestration
+  - Distributed Transaction Tracking
+
+- **Cross-Cutting Concerns**:
+  - Transaction Logger (ACID-compliant operation tracking)
+  - Semantic Versioning (ComponentRegistry + InterfaceVersion)
+  - Hierarchical Authorization (RBAC with inheritance)
 
 ### 2. Identified Design Patterns
-| Pattern                | Implementation Examples                              | Purpose                                      |
-|------------------------|-----------------------------------------------------|---------------------------------------------|
-| Singleton              | ComponentRegistry, EventBus                         | System-wide single instance management      |
-| Observer               | EventBus subscription model                         | Decoupled event notifications               |
-| Factory                | Component initialization via registry               | Dynamic component creation                  |
-| Strategy               | InMemoryConversationStore, ValidationFramework      | Pluggable algorithm implementation          |
-| Decorator              | @require_permission, @interface_method             | Behavior augmentation                       |
-| Registry               | ComponentRegistry                                   | Centralized service discovery               |
-| Command                | BatchController operations                          | Encapsulated request processing             |
-| Interface              | BaseInterface and AIInterface hierarchy             | Contract enforcement                        |
-| Composite              | Course-Module-Lesson structure                      | Tree structure representation               |
+| Pattern                | Implementation Examples                          | Purpose                                      |
+|------------------------|-------------------------------------------------|----------------------------------------------|
+| Singleton              | EventBus, ComponentRegistry                    | System-wide single instance management       |
+| Publisher-Subscriber   | EventBus with 35+ event types                   | Decoupled component communication           |
+| Registry               | ComponentRegistry with 71 registration logic    | Central service discovery                   |
+| Abstract Factory       | BaseInterface → AIInterface implementations     | Cross-provider AI service abstraction        |
+| Strategy               | ValidationFramework in BatchController         | Interchangeable validation algorithms       |
+| Decorator              | @require_permission in authorization.py         | Dynamic permission checks                   |
+| Observer               | BatchUploadListener ←→ BatchController         | Progress monitoring                         |
+| State                  | ComponentState (6 lifecycle states)            | Component lifecycle management              |
+| Composite              | Course→Module→Lesson hierarchy                 | Educational content representation          |
 
 ### 3. Refactoring Opportunities
-1. **Event Class Hierarchy**:
-   - Current: Duplicated __init__ in SystemEvent/ContentEvent
-   - Proposed: Use kwargs in base Event class with type validation
+1. **Event System Consolidation**:
+   - Merge EventType enum (98 LOC) with category-specific classes
+   - Create EventTypeBuilder for dynamic event registration
+   - Add event schema versioning to Event base class
 
-2. **Component Registration**:
-   ```python
-   # Current dual API
-   register_component(id, version)  # Test API
-   register_component_instance(component)  # Production API
-   
-   # Proposed unified interface
-   register(component: Union[Component, dict], is_test: bool=False)
-   ```
+2. **Component Registry Improvements**:
+   - Unify register_component/register_component_instance methods
+   - Add dependency resolution graph visualization
+   - Implement component sandboxing for safe unregistering
 
-3. **Dependency Management**:
-   - Implement dependency injection for:
-     - EventBus in Course model
-     - ComponentRegistry in Interface implementations
-   - Reduce direct imports between integration modules
+3. **Model Layer Optimization**:
+   - Combine Course ↔ CourseModel duplicate representations
+   - Add ContentVersioning mixin for audit trails
+   - Implement SQLAlchemy event hooks for auto-indexing
 
-4. **Interface Contracts**:
-   - Add abstract base classes for: 
-     - EventHandler
-     - BatchProcessor
-     - AuthorizationProvider
-   - Strengthen InterfaceMethod signature validation
+4. **Batch Processing**:
+   - Extract validation framework dependency
+   - Add circuit breaker pattern for upload failures
+   - Implement chunked upload strategy for large files
+
+5. **Interface System**:
+   - Add interface compatibility matrix
+   - Implement automatic version negotiation
+   - Add interface health monitoring
 
 ### 4. Critical Path Analysis
+**Key Execution Paths**:
+1. Content Creation Flow:
+   UI → Course.create_from_template() → EventBus (CONTENT_CREATED) → 
+   AIInterface.content_analyzed() → VectorIndex.update()
+
+2. Batch Upload Critical Path:
+   BatchController.start_batch() → ValidationFramework.validate() → 
+   UploadService.upload() → TransactionLogger.persist_transaction()
+
+3. Component Initialization:
+   Component.__init__() → ComponentRegistry.register_component() → 
+   DependencyResolver.check_compatibility() → InterfaceBinding
+
+4. AI Request Flow:
+   AIInterface → ModelProvider → CostCalculator → 
+   UsageTracker → ResponseFormatter
+
+**Bottleneck Analysis**:
+- EventBus._notify_subscriber_threadsafe() shows mixed sync/async patterns
+- ComponentRegistry.check_component_compatibility() O(n²) complexity
+- Course.serialize() recursive model serialization
+- BatchController._process_batch() I/O-bound without parallelism
+
+### 5. Class Relationships
+
 ```mermaid
 graph TD
-    A[User Action] --> B(EventBus)
-    B --> C{Event Type}
-    C -->|Content Update| D[Course Model]
-    C -->|AI Request| E[Conversation Manager]
-    D --> F[ComponentRegistry]
-    E --> F
-    F --> G{Check Dependencies}
-    G -->|Valid| H[Execute Transaction]
-    G -->|Invalid| I[Raise SystemEvent]
-    H --> J[TransactionLogger]
-    J --> K[Persist State]
+    %% Event System
+    Event --> SystemEvent
+    Event --> ContentEvent
+    Event --> AIEvent
+    EventBus -.-> ComponentRegistry
+    EventType -->|Used by| Event
+    
+    %% Core Components
+    ComponentRegistry --> Component
+    Component -->|Depends on| BaseInterface
+    BaseInterface -->|Implemented by| AIInterface
+    
+    %% Educational Model
+    Course --> Module
+    Module --> Lesson
+    Lesson --> Content
+    Content -->|Generates| ContentEvent
+    
+    %% Batch Processing
+    BatchController --> UploadService
+    BatchController --> ValidationFramework
+    BatchController -->|Notifies| BatchUploadListener
+    
+    %% Authorization
+    AuthorizationManager --> Role
+    Role --> Permission
+    UserPermissions -->|Contains| Role
+    
+    %% Monitoring
+    TransactionLogger --> Transaction
+    Transaction -->|Generates| TransactionEvent
+    
+    %% AI System
+    AIInterface --> AIModelMetadata
+    AIInterface --> AIRequest
+    AIRequest -->|Processed by| AIModelProvider
 ```
 
-Key Execution Paths:
-1. **Content Modification Flow**:
-   UI Event → ContentEvent → EventBus → Course Model → DB Commit → ContentUpdatedEvent
-
-2. **Batch Processing Flow**:
-   Upload Start → Validate Dependencies → Init Transaction → Process Files → Update Registry → Commit Results
-
-3. **AI Conversation Flow**:
-   User Input → Route Handler → Context Update → Model Execution → Response Generation → History Persistence
-
-### 5. Class/Module Relationships
-```mermaid
-graph LR
-    EB[EventBus] -- Notifies --> CR[ComponentRegistry]
-    CR -- Manages --> COMP[Component]
-    COMP -- Implements --> INTERFACE[BaseInterface]
-    COURSE[Course] -- Generates --> CONTENT_EVENT[ContentEvent]
-    CONTENT_EVENT -- Published via --> EB
-    BATCH[BatchController] -- Uses --> VALIDATOR[ValidationFramework]
-    BATCH -- Emits --> BATCH_EVENT[BatchEvent]
-    AUTH[Authorization] -- Protects --> COURSE
-    TRANSACT[TransactionLogger] -- Tracks --> ALL[All Components]
-    AI_INT[AIInterface] -- Provides --> CONV[ConversationManager]
+**Key Relationships**:
+- **Event System**: 15 event types inherit from base Event class
+- **Component Registry**: Manages 1:many relationships between Components
+- **Model Layer**: Course aggregates 3 levels of content (Module→Lesson→Content)
+- **Batch Processing**: Controller coordinates between 4 services
+- **AI System**: Interface hierarchy supports 5+ AI provider types
+- **Authorization**: Role-based permissions with inheritance
 ```
-
-Key Relationships:
-- **Event System**:
-  EventType ←inherits- SystemEventType/ContentEventType
-  EventBus ←depends- ComponentRegistry
-  All Components → EventBus (pub/sub)
-
-- **Data Model**:
-  Course 1→* Module 1→* Lesson
-  Course *→* Enrollment
-  UserPermissions *→ Role *→ Permission
-
-- **AI Subsystem**:
-  ConversationManager → ConversationState ←persists→ InMemoryStore
-  AIInterface ←implements- AIModelProvider ←adapts- (DeepSeek/OpenAI)
-  
-- **Security**:
-  AuthorizationManager ←aggregates→ Role/Permission
-  require_permission ←decorates- ProtectedMethods
-```
-
-This architectural enhancement focuses on the requested aspects while avoiding duplication with the existing file structure documentation. Would you like me to expand on any particular aspect?

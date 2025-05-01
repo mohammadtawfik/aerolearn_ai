@@ -111,6 +111,45 @@ class AdminSystemConfigController:
 # Singleton for external (test/UI) use
 system_config_controller = AdminSystemConfigController()
 
+
+class SystemMonitorUI:
+    """
+    Stub for System Monitoring UI exposed to admin users.
+    Enables orchestrator integration and system health display.
+    """
+
+    def update_health_status(self, status):
+        """
+        Update health/monitoring display.
+        Args:
+            status: Arbitrary status object from integration health.
+        """
+        # In production implementation, this would update UI elements
+        # For now, we can use the system_metrics manager
+        if isinstance(status, dict):
+            for metric_name, value in status.items():
+                system_metrics.report_metric(
+                    metric_name, 
+                    MetricType.HEALTH, 
+                    value
+                )
+
+    def display_content_similarities(self, similarities):
+        """
+        Display or log content similarity data.
+        Args:
+            similarities: List/dict of similarity analytics from orchestrator.
+        """
+        # Future implementation would visualize this data in the admin UI
+        # For now, just log it to the metrics system
+        if similarities:
+            system_metrics.report_metric(
+                "content_similarity", 
+                MetricType.CUSTOM, 
+                len(similarities)
+            )
+
+
 # Example usage (would be button handlers or API endpoints in real UI):
 if __name__ == "__main__":
     # Demo: Print all settings and metrics
@@ -118,3 +157,8 @@ if __name__ == "__main__":
     print("Current Metrics:", system_config_controller.get_all_metrics())
     # Test dependency graph data
     print("Dependency Graph:", system_config_controller.get_component_dependency_graph())
+    
+    # Test SystemMonitorUI
+    monitor = SystemMonitorUI()
+    monitor.update_health_status({"api_health": 100, "db_health": 95})
+    monitor.display_content_similarities([0.8, 0.9, 0.7])

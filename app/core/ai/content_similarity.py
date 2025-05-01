@@ -3,9 +3,12 @@ File Location: app/core/ai/content_similarity.py
 
 Purpose: Implements similarity detection for educational content, including
 vector similarity metrics, thresholding, and recommendation heuristics.
+Provides ContentSimilarityEngine as a unified interface for computing similarities
+across content items.
 """
 
 import numpy as np
+from typing import List, Any, Dict
 from .embedding import TextEmbedder, DocumentEmbedder, MultimediaEmbedder
 
 # Configurable similarity threshold (can be overridden via constructor or config)
@@ -135,3 +138,120 @@ def get_content_recommendations(target_content, candidate_contents,
     top = filtered[:top_k]
     # Return recommended items (indices and scores)
     return [{'index': idx, 'score': scr, 'content': candidate_contents[idx]} for idx, scr in top]
+
+
+class ContentSimilarityEngine:
+    """
+    Unifies content similarity routines for the AeroLearn AI system.
+    Provides a high-level interface for computing similarities between content items.
+    
+    Usage: 
+        engine = ContentSimilarityEngine()
+        similarities = engine.compute_similarities(content_list)
+    """
+
+    def __init__(self, content_type='text', metric='cosine', threshold=DEFAULT_SIMILARITY_THRESHOLD):
+        """
+        Initialize the ContentSimilarityEngine with configurable parameters.
+        
+        Args:
+            content_type: Type of content ('text', 'document', 'multimedia')
+            metric: Similarity metric to use ('cosine', 'jaccard')
+            threshold: Minimum similarity threshold to consider content as similar
+        """
+        self.content_type = content_type
+        self.metric = metric
+        self.threshold = threshold
+        self.embedder_map = {
+            'text': TextEmbedder,
+            'document': DocumentEmbedder,
+            'multimedia': MultimediaEmbedder
+        }
+        
+        if self.content_type not in self.embedder_map:
+            raise ValueError(f"Unknown content_type: {self.content_type}")
+        
+        self.embedder = self.embedder_map[self.content_type]()
+        self.calculator = ContentSimilarityCalculator()
+
+    def compute_similarities(self, contents: List[Any]) -> List[Dict]:
+        """
+        Compute and aggregate similarities between provided content items.
+
+        Args:
+            contents: List of content objects with at minimum .id and content attributes.
+        Returns:
+            List of dictionaries with similarity information:
+            [{"content_id_1": id1, "content_id_2": id2, "similarity": float, "is_match": bool}]
+        """
+        # Extract content and IDs, handling different object structures
+        processed_contents = []
+        for i, content in enumerate(contents):
+            content_id = getattr(content, "id", i)
+            content_text = None
+            
+            # Try to extract content based on common attribute names
+            for attr in ["text", "content", "body", "data"]:
+                if hasattr(content, attr):
+                    content_text = getattr(content, attr)
+                    break
+            
+            # If content is a dict, try to get content from it
+            if content_text is None and isinstance(content, dict):
+                for key in ["text", "content", "body", "data"]:
+                    if key in content:
+                        content_text = content[key]
+                        break
+                if "id" in content and content_id == i:
+                    content_id = content["id"]
+            
+            # If content is a string, use it directly
+            if content_text is None and isinstance(content, str):
+                content_text = content
+            
+            if content_text is not None:
+                processed_contents.append((content_id, content_text))
+        
+        # Compute embeddings for all content
+        embeddings = [self.embedder.embed(text) for _, text in processed_contents]
+        
+        # Compute pairwise similarities
+        similarities = []
+        for i in range(len(processed_contents)):
+            for j in range(i+1, len(processed_contents)):
+                content_id_1, _ = processed_contents[i]
+                content_id_2, _ = processed_contents[j]
+                
+                score = self.calculator.similarity_score(
+                    embeddings[i], embeddings[j], metric=self.metric
+                )
+                
+                similarities.append({
+                    "content_id_1": content_id_1,
+                    "content_id_2": content_id_2,
+                    "similarity": score,
+                    "is_match": bool(score >= self.threshold)
+                })
+        
+        return similarities
+
+    def find_similar_content(self, target_content, candidate_contents, top_k=3):
+        """
+        Find the most similar content items to a target content.
+        
+        Args:
+            target_content: The content to compare against
+            candidate_contents: List of content items to compare with
+            top_k: Number of top similar items to return
+            
+        Returns:
+            List of dictionaries with similarity information for the top matches
+        """
+        return get_content_recommendations(
+            target_content, 
+            candidate_contents,
+            content_type=self.content_type,
+            metric=self.metric,
+            top_k=top_k,
+            threshold=self.threshold
+        )
