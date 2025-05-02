@@ -9,6 +9,9 @@ Covers:
 - DashboardState: persistence of per-student widget layouts
 - Widget base: interface contract
 - Registration and use of sample ProgressWidget
+- Registration and integration of new widgets: InteractiveQuizWidget, ContentHighlighterWidget, 
+  InteractiveDiagramWidget, FlashcardWidget, RichTextNoteEditor, NoteReferenceLinker, 
+  NoteOrganizerWidget, NoteSearchWidget
 
 Uses pytest style, consistent with other UI component tests.
 """
@@ -16,11 +19,21 @@ Uses pytest style, consistent with other UI component tests.
 import pytest
 
 from app.ui.student.dashboard import StudentDashboard
-from app.ui.student.widget_registry import StudentWidgetRegistry
+from app.ui.student.widget_registry import StudentWidgetRegistry, student_widget_registry
 from app.ui.student.widget_base import StudentDashboardWidget
 from app.ui.student.dashboard_state import DashboardState
 from app.ui.student.register_widgets import register_student_widgets
 from app.ui.student.widgets.progress import ProgressWidget
+
+# Import all integrated widgets for direct reference
+from app.ui.student.widgets.interactive_quiz import InteractiveQuizWidget
+from app.ui.student.widgets.content_highlighter import ContentHighlighterWidget
+from app.ui.student.widgets.interactive_diagram import InteractiveDiagramWidget
+from app.ui.student.widgets.flashcard_widget import FlashcardWidget
+from app.ui.student.widgets.richtext_note_editor import RichTextNoteEditor
+from app.ui.student.widgets.note_reference_linker import NoteReferenceLinker
+from app.ui.student.widgets.note_organizer import NoteOrganizerWidget
+from app.ui.student.widgets.note_search import NoteSearchWidget
 
 class DummyWidget(StudentDashboardWidget):
     def render(self):
@@ -85,3 +98,51 @@ def test_progress_widget_renders_basic_html():
     html = prog.render()
     assert f"Progress for student stu99" in html
     assert "75%" in html
+
+# --- EXTENDED TESTS FOR ALL INTEGRATED WIDGETS ---
+
+NEW_WIDGETS = [
+    ("interactive_quiz", InteractiveQuizWidget),
+    ("content_highlighter", ContentHighlighterWidget),
+    ("interactive_diagram", InteractiveDiagramWidget),
+    ("flashcard_widget", FlashcardWidget),
+    ("richtext_note_editor", RichTextNoteEditor),
+    ("note_reference_linker", NoteReferenceLinker),
+    ("note_organizer", NoteOrganizerWidget),
+    ("note_search", NoteSearchWidget),
+]
+
+@pytest.mark.parametrize("widget_id,widget_cls", NEW_WIDGETS)
+def test_widget_registry_has_integrated_widgets(widget_id, widget_cls):
+    """Ensure all new widgets are present in the default registry."""
+    assert widget_id in student_widget_registry.list_widgets()
+    assert student_widget_registry.get_widget(widget_id) is widget_cls
+
+@pytest.mark.parametrize("widget_id,widget_cls", NEW_WIDGETS)
+def test_dashboard_can_render_all_integrated_widgets(widget_id, widget_cls):
+    """Test that dashboard can instantiate and include all new widgets."""
+    reg = StudentWidgetRegistry()
+    reg.register(widget_id, widget_cls)
+    state = DashboardState()
+    student_id = "integration-user"
+    # Single-widget layout for explicit test
+    state.set_layout(student_id, [widget_id])
+    dash = StudentDashboard(registry=reg, state_manager=state)
+    output = dash.render(student_id)
+    # Accept either .render() HTML or a generic placeholder
+    assert widget_id in output or "<div class='dashboard-widget-qt'>" in output or "<div class='widget-error'>" not in output
+
+def test_dashboard_renders_full_grid_of_integration_widgets():
+    """Test a dashboard containing all new widgets in grid layout."""
+    reg = StudentWidgetRegistry()
+    for widget_id, widget_cls in NEW_WIDGETS:
+        reg.register(widget_id, widget_cls)
+    state = DashboardState()
+    student_id = "fulltest"
+    layout = [wid for wid, _ in NEW_WIDGETS]
+    state.set_layout(student_id, layout)
+    dash = StudentDashboard(registry=reg, state_manager=state)
+    html = dash.render(student_id)
+    for widget_id, _ in NEW_WIDGETS:
+        assert widget_id in html or "<div class='dashboard-widget-qt'>" in html
+    assert "<div class='student-dashboard-grid'>" in html

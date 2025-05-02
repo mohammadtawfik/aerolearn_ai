@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 298
+Total Python files: 307
 
 ## Table of Contents
 
@@ -156,7 +156,15 @@ Total Python files: 298
 │   │   │   │   ├── document_viewer.py
 │   │   │   │   ├── video_player.py
 │   │   │   │   ├── code_snippet_viewer.py
-│   │   │   │   └── image_viewer.py
+│   │   │   │   ├── image_viewer.py
+│   │   │   │   ├── interactive_quiz.py
+│   │   │   │   ├── content_highlighter.py
+│   │   │   │   ├── interactive_diagram.py
+│   │   │   │   ├── flashcard_widget.py
+│   │   │   │   ├── richtext_note_editor.py
+│   │   │   │   ├── note_reference_linker.py
+│   │   │   │   ├── note_organizer.py
+│   │   │   │   └── note_search.py
 │   │   │   ├── __init__.py
 │   │   │   ├── dashboard.py
 │   │   │   ├── widget_registry.py
@@ -309,7 +317,8 @@ Total Python files: 298
 │   │   ├── test_system_config.py
 │   │   ├── test_student_dashboard.py
 │   │   ├── test_multi_format_content_viewer.py
-│   │   └── test_student_dashboard_content_viewer.py
+│   │   ├── test_student_dashboard_content_viewer.py
+│   │   └── conftest.py
 │   ├── fixtures
 │   │   ├── sample_content
 │   │   │   ├── __init__.py
@@ -540,7 +549,7 @@ Key file relationships (files with most dependencies):
 
 - **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
 - **app\core\auth\authentication.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 
 
 ## Detailed Code Analysis
@@ -4145,6 +4154,71 @@ Typical usage:
 
 
 
+### app\ui\student\widgets\interactive_diagram.py
+
+**Description:**
+
+File location: /app/ui/student/widgets/interactive_diagram.py
+
+Purpose:
+    Provides an extensible interactive diagram widget for student engagement in AeroLearn AI content.
+    Supports clickable/selectable elements (nodes), annotations, and provides hooks for integration with lessons or quizzes.
+
+Context:
+    Fulfills the Interactive Diagrams Framework aspect of Task 3.2.3, per day16_plan.md.
+
+Usage:
+    To be embedded in student content viewers or quizzes for diagram-based interaction.
+
+Author:
+    AeroLearn AI Development
+
+**Classes:**
+
+- `DiagramNode`
+ (inherits from: QGraphicsEllipseItem)
+
+
+  Represents a diagram node (circle) that can be clicked, selected, and annotated.
+
+  Methods: `__init__()`, `mousePressEvent()`
+
+- `InteractiveDiagramWidget`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `populate_diagram()`, `annotate_selected_node()`, `mousePressEvent()`
+
+
+
+### app\ui\student\widgets\richtext_note_editor.py
+
+**Description:**
+
+File location: /app/ui/student/widgets/richtext_note_editor.py
+
+Purpose:
+    Provides a rich text note editor for the AeroLearn AI student interface,
+    supporting text formatting (bold, italic, underline, lists), content embedding, and basic organization,
+    as the first step of Task 3.2.4: Student Note-Taking System.
+
+Integration:
+    To be embedded within student dashboard/content views.
+    Will later be linked to note persistence and content reference features.
+
+Author:
+    AeroLearn AI Development
+
+**Classes:**
+
+- `RichTextNoteEditor`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `on_text_changed()`, `make_bold()`, `make_italic()`, `make_underline()`, ... (4 more)
+
+
+
 ### integrations\week2\orchestrator.py
 
 **Description:**
@@ -4273,6 +4347,66 @@ How to extend:
 
 
 
+### tests\ui\test_student_dashboard.py
+
+**Description:**
+
+Tests for Student Dashboard Framework
+
+Save this file as /tests/ui/test_student_dashboard.py
+
+Covers:
+- StudentDashboard: basic rendering, layout, customization
+- StudentWidgetRegistry: widget registration/listing
+- DashboardState: persistence of per-student widget layouts
+- Widget base: interface contract
+- Registration and use of sample ProgressWidget
+- Registration and integration of new widgets: InteractiveQuizWidget, ContentHighlighterWidget, 
+  InteractiveDiagramWidget, FlashcardWidget, RichTextNoteEditor, NoteReferenceLinker, 
+  NoteOrganizerWidget, NoteSearchWidget
+
+Uses pytest style, consistent with other UI component tests.
+
+**Classes:**
+
+- `DummyWidget`
+ (inherits from: StudentDashboardWidget)
+
+
+  Methods: `render()`
+
+**Functions:**
+
+- `test_widget_registry_register_and_get()`
+
+- `test_dashboardstate_set_and_get_layout()`
+
+- `test_student_dashboard_renders_registered_widgets()`
+
+- `test_dashboard_handles_missing_widget_gracefully()`
+
+- `test_studentdashboard_customize_layout()`
+
+- `test_widget_config_schema()`
+
+- `test_register_widgets_function_registers_progress_widget()`
+
+- `test_progress_widget_renders_basic_html()`
+
+- `test_widget_registry_has_integrated_widgets(widget_id, widget_cls)`
+
+  Ensure all new widgets are present in the default registry.
+
+- `test_dashboard_can_render_all_integrated_widgets(widget_id, widget_cls)`
+
+  Test that dashboard can instantiate and include all new widgets.
+
+- `test_dashboard_renders_full_grid_of_integration_widgets()`
+
+  Test a dashboard containing all new widgets in grid layout.
+
+
+
 ### app\core\drive\metadata_store.py
 
 **Classes:**
@@ -4376,13 +4510,16 @@ Student Dashboard: Main entrypoint for the student dashboard UI.
 
 This file should be saved as /app/ui/student/dashboard.py based on current project structure.
 
+This version integrates all interactive content and note-taking widgets.
+
 The dashboard provides:
 - Responsive grid layout for widgets
 - State management and persistence
 - Widget registration/integration
 - Customization hooks (stubbed)
 - Course material navigation
-- Multi-format content viewers (documents, videos, code, images)
+- Multi-format and interactive content viewers
+- Note-taking and organization tools
 
 **Classes:**
 
@@ -4474,6 +4611,35 @@ Handles conflict resolution, batch sync, and uses MetadataManager for change det
 
 
   Methods: `__init__()`, `validate()`, `get_field()`, `get_required_fields()`, `get_optional_fields()`
+
+
+
+### app\ui\student\widgets\note_organizer.py
+
+**Description:**
+
+File location: /app/ui/student/widgets/note_organizer.py
+
+Purpose:
+    Provides a UI for organizing student notes—listing all notes, tagging them, renaming, deleting, and basic note categorization.
+
+Context:
+    Fulfills Task 3.2.4 (Student Note-Taking System): note organization and tagging.
+
+Integration:
+    Callable from the dashboard/note editor or embedded as needed.
+    Expects notes_data as [{'id', 'title', 'tags', 'content_html'}].
+
+Author:
+    AeroLearn AI Development
+
+**Classes:**
+
+- `NoteOrganizerWidget`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `refresh_notes()`, `find_note_by_id()`, `select_note()`, `delete_note()`, ... (2 more)
 
 
 
@@ -4877,51 +5043,6 @@ Defines standard API for rendering, configuration and settings.
 
 
 
-### tests\ui\test_student_dashboard.py
-
-**Description:**
-
-Tests for Student Dashboard Framework
-
-Save this file as /tests/ui/test_student_dashboard.py
-
-Covers:
-- StudentDashboard: basic rendering, layout, customization
-- StudentWidgetRegistry: widget registration/listing
-- DashboardState: persistence of per-student widget layouts
-- Widget base: interface contract
-- Registration and use of sample ProgressWidget
-
-Uses pytest style, consistent with other UI component tests.
-
-**Classes:**
-
-- `DummyWidget`
- (inherits from: StudentDashboardWidget)
-
-
-  Methods: `render()`
-
-**Functions:**
-
-- `test_widget_registry_register_and_get()`
-
-- `test_dashboardstate_set_and_get_layout()`
-
-- `test_student_dashboard_renders_registered_widgets()`
-
-- `test_dashboard_handles_missing_widget_gracefully()`
-
-- `test_studentdashboard_customize_layout()`
-
-- `test_widget_config_schema()`
-
-- `test_register_widgets_function_registers_progress_widget()`
-
-- `test_progress_widget_renders_basic_html()`
-
-
-
 ### tests\core\ai\test_content_similarity.py
 
 **Description:**
@@ -5060,6 +5181,63 @@ Reason: Support optional student_id for context; fits project convention for stu
   Multi-format Document Viewer Widget for student content interaction.
 
   Methods: `__init__()`, `load_content()`, `_show_pdf()`, `_show_text_or_html()`, `_show_unsupported()`
+
+
+
+### app\ui\student\widgets\interactive_quiz.py
+
+**Description:**
+
+File location: /app/ui/student/widgets/interactive_quiz.py
+
+Purpose:
+    Provides an interactive quiz widget for student content interaction in the AeroLearn AI platform.
+
+Context:
+    This code fulfills Task 3.2.3 (first subtask) as described in /docs/development/day16_plan.md.
+
+Usage:
+    Integrated into the student dashboard/module page for quiz delivery within course content.
+
+Author:
+    AeroLearn AI Development
+
+**Classes:**
+
+- `InteractiveQuizWidget`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `create_quiz_ui()`, `show_question()`, `option_selected()`, `on_next_clicked()`
+
+
+
+### app\ui\student\widgets\flashcard_widget.py
+
+**Description:**
+
+File location: /app/ui/student/widgets/flashcard_widget.py
+
+Purpose:
+    Provides an interactive flashcard widget for spaced repetition and rapid concept review in the AeroLearn AI student interface.
+    Students flip cards, mark as 'known' (easy) or 'unknown' (review), and summary is provided for progress tracking.
+
+Context:
+    Fulfills the "flashcard component" subtask in Task 3.2.3 Interactive Content Elements (/docs/development/day16_plan.md).
+
+Integration:
+    Can be embedded in the student dashboard, module/lesson views, or called with a set of flashcards tied to a content unit.
+
+Author:
+    AeroLearn AI Development
+
+**Classes:**
+
+- `FlashcardWidget`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `update_ui()`, `flip_card()`, `mark_card()`, `next_card()`
 
 
 
@@ -5650,6 +5828,92 @@ Add student_id param to support integration context.
   Video Player Widget for student content consumption.
 
   Methods: `__init__()`, `load_content()`, `_on_media_status()`
+
+
+
+### app\ui\student\widgets\content_highlighter.py
+
+**Description:**
+
+File location: /app/ui/student/widgets/content_highlighter.py
+
+Purpose:
+    Provides an interactive widget for students to highlight and annotate content (text) in the AeroLearn AI platform.
+
+Context:
+    Fulfills Interactive Content Elements, as per Task 3.2.3 (second subtask) in /docs/development/day16_plan.md.
+
+To be used:
+    Embedded in content viewer UI; communicates with persistence backend for storing highlights/annotations.
+
+Author:
+    AeroLearn AI Development
+
+**Classes:**
+
+- `ContentHighlighterWidget`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `highlight_selection()`, `annotate_selection()`
+
+
+
+### app\ui\student\widgets\note_reference_linker.py
+
+**Description:**
+
+File location: /app/ui/student/widgets/note_reference_linker.py
+
+Purpose:
+    Allows students to link notes with specific course content (lessons, modules, highlights, or even precise locations in documents/videos),
+    supporting cross-referencing and deep linking in the AeroLearn AI note-taking workflow.
+
+Context:
+    Core for Task 3.2.4: Student Note-Taking System — content reference linking.
+
+Integration:
+    Can be used alongside the rich text editor, viewers, and persistent storage systems.
+
+Author:
+    AeroLearn AI Development
+
+**Classes:**
+
+- `NoteReferenceLinker`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `_prepare_reference_options()`, `link_selected()`
+
+
+
+### app\ui\student\widgets\note_search.py
+
+**Description:**
+
+File location: /app/ui/student/widgets/note_search.py
+
+Purpose:
+    Enables students to search and filter their notes by title, tag, or note content.
+    Supports signal-based integration with note organizer and editor widgets.
+
+Context:
+    Satisfies Task 3.2.4: Student Note-Taking System (note search and filtering).
+
+Integration:
+    Meant to be invoked from the student dashboard, note organizer, or as a standalone search feature.
+
+Author:
+    AeroLearn AI Development
+
+**Classes:**
+
+- `NoteSearchWidget`
+ (inherits from: QWidget)
+
+
+  Methods: `__init__()`, `perform_search()`, `select_result()`
 
 
 
@@ -7468,6 +7732,16 @@ Stub for basic knowledge graph visualization data output.
 
 
 
+### tests\ui\conftest.py
+
+**Functions:**
+
+- `qapp()`
+
+  Session-wide QApplication fixture for PyQt widget testing.
+
+
+
 ### tests\fixtures\__init__.py
 
 **Functions:**
@@ -7890,113 +8164,3 @@ Created: 2025-04-24
 This module is part of the AeroLearn AI project.
 
 
-
-
-## AI-Enhanced Analysis
-
-Here's the architectural enhancement to be added to the summary:
-
-```markdown
-## Architectural Insights
-
-### 1. High-Level Architectural Overview
-
-The system follows an event-driven architecture with modular component design:
-- **Event-Driven Core**: Central EventBus (publisher-subscriber pattern) handles 50+ event types across 10 categories
-- **Component Registry**: Singleton ComponentRegistry manages 300+ potential components with versioned dependencies
-- **Layered Structure**:
-  - Integration Layer: Handles external services via BaseInterface implementations
-  - Application Core: Business logic (courses, auth, batch processing)
-  - Data Layer: SQLAlchemy models with event hooks
-- **Cross-Cutting Concerns**:
-  - TransactionLogger for distributed tracing
-  - ValidationFramework for data integrity
-  - AuthorizationManager with RBAC
-
-### 2. Identified Design Patterns
-
-| Pattern            | Implementation Examples                          | Purpose                                      |
-|--------------------|--------------------------------------------------|----------------------------------------------|
-| Singleton          | ComponentRegistry, EventBus                     | Single access point to core services         |
-| Observer           | EventBus subscriptions                          | Decoupled event handling                     |
-| Factory            | Event class hierarchy in event_types.py         | Flexible event object creation               |
-| Strategy           | AuthenticationProvider implementations          | Interchangeable auth mechanisms              |
-| Decorator          | @interface_method in base_interface.py          | Method signature validation                  |
-| Registry           | ComponentRegistry with version tracking         | Central component management                 |
-| Template Method    | BatchController's _process_batch workflow       | Enforced batch processing steps              |
-
-### 3. Refactoring Opportunities
-
-1. **Event Type Consolidation**
-   - Problem: Redundant enums (EventType vs SystemEventType)
-   - Solution: Unified hierarchical enum structure
-   - Benefit: Reduce 23% of event-related boilerplate
-
-2. **Event Serialization**
-   - Problem: Manual serialize/deserialize in Event class
-   - Solution: Introduce Protobuf schema for events
-   - Benefit: 40% faster event processing
-
-3. **Model Inheritance**
-   - Problem: Repeated ORM patterns in course.py models
-   - Solution: Create AuditMixin and VersionedMixin base classes
-   - Benefit: Reduce model code by 35%
-
-4. **Batch Processing**
-   - Problem: Mixed sync/async in batch_controller.py
-   - Solution: Unified async pipeline with celery integration
-   - Benefit: 5x throughput improvement
-
-5. **Interface Validation**
-   - Problem: Manual signature checks in base_interface.py
-   - Solution: Automated AST-based validation
-   - Benefit: Catch interface violations at load time
-
-### 4. Critical Path Analysis
-
-**Event Processing Critical Path:**
-1. Event creation (10-50ms)
-2. EventBus.enqueue() → Thread pool (15ms avg)
-3. Filter matching (5ms/event)
-4. Subscriber notification (async/sync dispatch)
-5. TransactionLogger capture (always async)
-
-**Component Registration Flow:**
-1. Component.__init__() → Declare dependencies
-2. ComponentRegistry.register_component_instance()
-3. Dependency resolution (semver check)
-4. State transition (REGISTERED → INITIALIZED)
-5. SYSTEM_COMPONENT_REGISTERED event emission
-
-**Course Enrollment Critical Path:**
-1. Enrollment.request_enrollment() → DB write
-2. CONTENT_CREATED event emission
-3. AuthZ check via AuthorizationManager
-4. UserProfile update through relationship
-5. AI recommendation generation (if enabled)
-
-### 5. Class/Module Relationships
-
-```mermaid
-graph TD
-    A[EventBus] -->|notifies| B(ComponentRegistry)
-    B -->|manages| C[BaseInterface]
-    C -->|implemented by| D[AiInterface]
-    D -->|used by| E[BatchController]
-    E -->|emits| F[BatchEvent]
-    F -->|handled by| A
-    G[Course] -->|contains| H[Module]
-    H -->|contains| I[Lesson]
-    G -->|triggers| J[EnrollmentEvent]
-    J -->|processed by| K[Authorization]
-    K -->|uses| L[Permission]
-    M[TransactionLogger] -->|traces| N[All Components]
-```
-
-**Key Dependencies:**
-- `component_registry.py` depends on 15+ core interfaces
-- `authentication.py` ↔ `authorization.py` circular dependency
-- `batch_controller.py` depends on 3 AI interfaces
-- `event_types.py` imported by 82% of all modules
-- `course.py` models have 9 SQLAlchemy relationships
-```

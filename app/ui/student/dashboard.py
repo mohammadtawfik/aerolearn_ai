@@ -3,18 +3,21 @@ Student Dashboard: Main entrypoint for the student dashboard UI.
 
 This file should be saved as /app/ui/student/dashboard.py based on current project structure.
 
+This version integrates all interactive content and note-taking widgets.
+
 The dashboard provides:
 - Responsive grid layout for widgets
 - State management and persistence
 - Widget registration/integration
 - Customization hooks (stubbed)
 - Course material navigation
-- Multi-format content viewers (documents, videos, code, images)
+- Multi-format and interactive content viewers
+- Note-taking and organization tools
 """
 
 import os
 from PyQt6.QtWidgets import QLabel
-from .widget_registry import StudentWidgetRegistry
+from .widget_registry import StudentWidgetRegistry, student_widget_registry
 from .dashboard_state import DashboardState
 from .widgets.course_navigator import CourseMaterialNavigator
 from .widgets.document_viewer import DocumentViewerWidget
@@ -22,9 +25,21 @@ from .widgets.video_player import VideoPlayerWidget
 from .widgets.code_snippet_viewer import CodeSnippetViewerWidget
 from .widgets.image_viewer import ImageViewerWidget
 
+# Import interactive content widgets
+from .widgets.interactive_quiz import InteractiveQuizWidget
+from .widgets.content_highlighter import ContentHighlighterWidget
+from .widgets.interactive_diagram import InteractiveDiagramWidget
+from .widgets.flashcard_widget import FlashcardWidget
+
+# Import note-taking widgets
+from .widgets.richtext_note_editor import RichTextNoteEditor
+from .widgets.note_reference_linker import NoteReferenceLinker
+from .widgets.note_organizer import NoteOrganizerWidget
+from .widgets.note_search import NoteSearchWidget
+
 class StudentDashboard:
     def __init__(self, registry=None, state_manager=None):
-        self.registry = registry or StudentWidgetRegistry()
+        self.registry = registry or student_widget_registry
         self.state = state_manager or DashboardState()
         self.viewer = None
 
@@ -37,34 +52,85 @@ class StudentDashboard:
         Returns:
             str: Rendered dashboard HTML.
         """
-        # Create course navigator
-        course_navigator = CourseMaterialNavigator(student_id=student_id)
+        # Define all available widgets
+        widget_ids = [
+            "course_material_navigator",
+            "document_viewer",
+            "video_player",
+            "code_snippet_viewer",
+            "image_viewer",
+            # Interactive widgets
+            "interactive_quiz",
+            "content_highlighter",
+            "interactive_diagram",
+            "flashcard_widget",
+            # Note-taking widgets
+            "richtext_note_editor",
+            "note_reference_linker",
+            "note_organizer",
+            "note_search",
+        ]
+
+        # Get layout from state or use default widget list
+        grid = self.state.get_layout(student_id) or widget_ids
         
-        # Get regular widgets from layout
-        grid = self.state.get_layout(student_id)
-        widgets = []
-        for widget_id in grid:
+        # Create two-column dashboard layout
+        content = "<div class='student-dashboard-container'>"
+        
+        # Left column: Course navigator + note organization widgets
+        left_col_widgets = ["course_material_navigator", "note_organizer", "note_search"]
+        left_col_html = ""
+        for widget_id in left_col_widgets:
             widget_cls = self.registry.get_widget(widget_id)
             if widget_cls is not None:
-                widget_instance = widget_cls(student_id=student_id)
-                widgets.append(widget_instance.render())
+                try:
+                    # Try to instantiate with student_id if possible
+                    try:
+                        widget_instance = widget_cls(student_id=student_id)
+                    except TypeError:
+                        widget_instance = widget_cls()
+                        
+                    if hasattr(widget_instance, "render"):
+                        left_col_html += widget_instance.render()
+                    else:
+                        left_col_html += f"<div class='dashboard-widget-qt'>[{widget_id} widget loaded]</div>"
+                except Exception as ex:
+                    left_col_html += f"<div class='widget-error'>Widget error ({widget_id}): {str(ex)}</div>"
             else:
-                widgets.append(f"<div class='widget-error'>Missing widget: {widget_id}</div>")
+                left_col_html += f"<div class='widget-error'>Missing widget: {widget_id}</div>"
+        
+        content += f"<div class='course-navigator-column'>{left_col_html}</div>"
+        
+        # Right column: Content viewers, interactive widgets, and note editor
+        right_col_widgets = [wid for wid in grid if wid not in left_col_widgets]
+        right_col_html = "<div class='student-dashboard-grid'>"
+        
+        for widget_id in right_col_widgets:
+            widget_cls = self.registry.get_widget(widget_id)
+            if widget_cls is not None:
+                try:
+                    # Try to instantiate with student_id if possible
+                    try:
+                        widget_instance = widget_cls(student_id=student_id)
+                    except TypeError:
+                        widget_instance = widget_cls()
+                        
+                    if hasattr(widget_instance, "render"):
+                        right_col_html += f"<div class='dashboard-widget'>{widget_instance.render()}</div>"
+                    else:
+                        right_col_html += f"<div class='dashboard-widget-qt'>[{widget_id} widget loaded]</div>"
+                except Exception as ex:
+                    right_col_html += f"<div class='widget-error'>Widget error ({widget_id}): {str(ex)}</div>"
+            else:
+                right_col_html += f"<div class='widget-error'>Missing widget: {widget_id}</div>"
+        
+        right_col_html += "</div>"
         
         # Content viewer area
         content_viewer = self.render_content_viewer()
+        right_col_html += f"<div class='content-viewer-area'>{content_viewer}</div>"
         
-        # Create two-column layout with navigator on left
-        content = "<div class='student-dashboard-container'>"
-        # Left column: Course navigator
-        content += f"<div class='course-navigator-column'>{course_navigator.render()}</div>"
-        # Right column: Widget grid and content viewer
-        content += "<div class='student-dashboard-right-column'>"
-        content += "<div class='student-dashboard-grid'>" + "".join(
-            f"<div class='dashboard-widget'>{w}</div>" for w in widgets
-        ) + "</div>"
-        content += f"<div class='content-viewer-area'>{content_viewer}</div>"
-        content += "</div>"
+        content += f"<div class='student-dashboard-right-column'>{right_col_html}</div>"
         content += "</div>"
         return content
 
