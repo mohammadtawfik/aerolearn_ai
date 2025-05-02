@@ -6,24 +6,28 @@
 ---
 
 ### Task 3.2.1: Course Material Navigator (3 hours)
-- [ ] Create hierarchical navigation structure
-- [ ] Implement content type filtering and search
-- [ ] Develop breadcrumb navigation and history
-- [ ] Build favorites and recently accessed tracking
-- [ ] **Integration**: Test with all supported content types
-- [ ] **Testing**: Verify navigation works with dynamically loaded content
-- [ ] **Documentation**: Document navigator customization options
+- [x] Create hierarchical navigation structure
+- [x] Implement content type filtering and search
+- [x] Develop breadcrumb navigation and history
+- [x] Build favorites and recently accessed tracking
+- [x] **Integration**: Test with all supported content types
+- [x] **Testing**: Verify navigation works with dynamically loaded content
+- [x] **Documentation**: Document navigator customization options
+
+*Task 3.2.1 completed: Course Material Navigator implemented, fully tested (including dynamic content/tests), integrated in the student dashboard, and documented for customization/extension!*
 
 ---
 
 ### Task 3.2.2: Multi-Format Content Viewer (4 hours)
-- [ ] Implement document viewer (PDF, text, HTML)
-- [ ] Create video player with learning features
-- [ ] Develop code snippet viewer with syntax highlighting
-- [ ] Build image viewer with annotation support
-- [ ] **Integration**: Test rendering of content from different sources
-- [ ] **Testing**: Verify format detection and appropriate viewer selection
-- [ ] **Documentation**: Document viewer extension points for new formats
+- [x] Implement document viewer (PDF, text, HTML)
+- [x] Create video player with learning features
+- [x] Develop code snippet viewer with syntax highlighting
+- [x] Build image viewer with annotation support
+- [x] **Integration**: Test rendering of content from different sources
+- [x] **Testing**: Verify format detection and appropriate viewer selection
+- [x] **Documentation**: Document viewer extension points for new formats
+
+*Task 3.2.2 completed: Multi-Format Content Viewer implemented, fully tested (all viewers and integrations), available in the student dashboard, and documented for extension!*
 
 ---
 
