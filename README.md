@@ -63,6 +63,8 @@ For a deeper dive, see [docs/architecture/architecture_overview.md](docs/archite
 4. Run setup script: `python scripts/setup.py`
 5. Launch the application: `python -m app`
 
+> **Important:** Do NOT install PyQt6, PyQt5, PySide2, PySide6, or pytest-qt in your project virtual environment unless specifically testing Qt UIs. These packages may cause internal errors and make all pytest runs fail if Qt DLLs are absent or misconfigured, even if no GUI code is tested. If PyQt6/pytest-qt are needed, use a separate virtual environment dedicated to GUI/UI tests and ensure all DLL dependencies are satisfied.
+
 ---
 
 ## Development

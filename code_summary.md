@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 307
+Total Python files: 320
 
 ## Table of Contents
 
@@ -125,6 +125,13 @@ Total Python files: 307
 │   │   │   └── __init__.py
 │   │   ├── enrollment
 │   │   │   └── enrollment_service.py
+│   │   ├── assessment
+│   │   │   ├── session_manager.py
+│   │   │   ├── question_engine.py
+│   │   │   ├── grading.py
+│   │   │   ├── manual_grading.py
+│   │   │   ├── feedback.py
+│   │   │   └── __init__.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -302,7 +309,8 @@ Total Python files: 307
 │   │   ├── test_semantic_search_integration.py
 │   │   ├── test_resource_discovery_integration.py
 │   │   ├── test_week2_integration.py
-│   │   └── test_enrollment.py
+│   │   ├── test_enrollment.py
+│   │   └── test_assessment_engine_day17.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -367,6 +375,13 @@ Total Python files: 307
 │   │   │   ├── test_optimizers.py
 │   │   │   ├── test_parser.py
 │   │   │   └── __init__.py
+│   │   ├── assessment
+│   │   │   ├── __init__.py
+│   │   │   ├── test_session_manager.py
+│   │   │   ├── test_question_engine.py
+│   │   │   ├── test_grading.py
+│   │   │   ├── test_manual_grading.py
+│   │   │   └── test_feedback.py
 │   │   └── __init__.py
 │   ├── comprehensive
 │   │   ├── __init__.py
@@ -462,7 +477,20 @@ Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
 
 - Classes: 6
 - Functions: 0
-- Dependency Score: 91.00
+- Dependency Score: 94.00
+
+### app\models\assessment.py
+
+Assessment model for AeroLearn AI.
+
+Location: app/models/assessment.py
+Depends on: app/core/db/schema.py, integrations/events/event_bus.py
+
+Wraps Prog...
+
+- Classes: 11
+- Functions: 0
+- Dependency Score: 75.00
 
 ### integrations\registry\component_registry.py
 
@@ -474,6 +502,17 @@ tracking their lifecycle, depe...
 - Classes: 6
 - Functions: 0
 - Dependency Score: 71.00
+
+### app\models\content.py
+
+Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
+
+Location: app/models/content.py
+Depends on: app/models/topic.py, integrations/events/ev...
+
+- Classes: 8
+- Functions: 0
+- Dependency Score: 70.00
 
 ### integrations\events\event_bus.py
 
@@ -521,35 +560,14 @@ registra...
 - Functions: 1
 - Dependency Score: 61.00
 
-### integrations\interfaces\ai_interface.py
-
-AI interface contracts for the AeroLearn AI system.
-
-This module defines the interfaces for AI-powered components, including language models,
-content ...
-
-- Classes: 15
-- Functions: 1
-- Dependency Score: 59.00
-
-### integrations\monitoring\transaction_logger.py
-
-Transaction logging for the AeroLearn AI system.
-
-This module provides tools for tracking and logging cross-component transactions,
-making it easier t...
-
-- Classes: 6
-- Functions: 0
-- Dependency Score: 59.00
-
 ## Dependencies
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **app\core\auth\authentication.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **integrations\monitoring\transaction_logger.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
+- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **app\models\assessment.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **app\models\content.py** depends on: integrations\events\event_bus.py, app\models\course.py, integrations\events\event_types.py
+- **app\core\auth\authentication.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
 
 
 ## Detailed Code Analysis
@@ -734,6 +752,95 @@ Covers ORM models, relationships, validation, serialization, and event emission.
 
 
 
+### app\models\assessment.py
+
+**Description:**
+
+Assessment model for AeroLearn AI.
+
+Location: app/models/assessment.py
+Depends on: app/core/db/schema.py, integrations/events/event_bus.py
+
+Wraps ProgressRecord and assessment-related logic; provides validation, serialization, and event integration.
+Also defines the Answer, Rubric, ManualGrade, Submission, and Feedback classes required for all
+core assessment workflows and tests.
+
+**Classes:**
+
+- `ProgressRecord`
+
+
+  Mock implementation of ProgressRecord for testing purposes
+
+  Methods: `__init__()`
+
+- `Assessment`
+
+
+  Assessment model for evaluating student knowledge
+
+  Methods: `__init__()`, `add_question()`, `grade()`
+
+- `Answer`
+
+
+  General answer schema for MCQ, text, code, etc.
+
+  Methods: `__init__()`
+
+- `Rubric`
+
+
+  Defines grading criteria for assessments
+
+  Methods: `by_id()`
+
+- `ManualGrade`
+
+
+  Represents a manually assigned grade with details
+
+- `Submission`
+
+
+  Represents a student's submission for an assessment
+
+  Methods: `__post_init__()`
+
+- `Feedback`
+
+
+  Feedback provided on a submission
+
+- `ManualGradingAssignment`
+
+
+  Represents a manual grading assignment for an assessment session, supporting kwargs for test compatibility.
+
+  Methods: `__init__()`
+
+- `QuestionType`
+ (inherits from: Enum)
+
+
+  Defines the types of questions supported in assessments
+
+  Methods: `mcq()`, `text()`, `code()`, `essay()`
+
+- `AssessmentSession`
+
+
+  Represents an in-progress or completed assessment attempt by a specific user.
+
+  Methods: `submit_answer()`, `finalize()`, `cancel()`, `is_completed()`, `is_active()`
+
+- `AssessmentModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+
+
 ### integrations\registry\component_registry.py
 
 **Description:**
@@ -787,6 +894,63 @@ tracking their lifecycle, dependencies, and version information.
   Central registry for AeroLearn AI system components.
 
   Methods: `__new__()`, `__init__()`, `register_component()`, `register_component_instance()`, `unregister_component()`, ... (8 more)
+
+
+
+### app\models\content.py
+
+**Description:**
+
+Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
+
+Location: app/models/content.py
+Depends on: app/models/topic.py, integrations/events/event_bus.py
+
+Handles Topic, Module, Lesson, Quiz logic; validation, serialization, and event integration.
+
+**Classes:**
+
+- `Quiz`
+
+
+  Methods: `__init__()`
+
+- `Question`
+
+
+  Methods: `__init__()`
+
+- `Content`
+
+
+  Main content representation class that unifies all content types
+
+  Methods: `__init__()`, `from_lesson()`, `from_topic()`
+
+- `TopicModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `ModuleModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `LessonModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `QuizModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
+
+- `QuestionModel`
+
+
+  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
 
 
 
@@ -1224,63 +1388,6 @@ making it easier to trace operations as they flow through different parts of the
 
 
 
-### app\models\content.py
-
-**Description:**
-
-Content model for AeroLearn AI (Topic, Module, Lesson, Quiz).
-
-Location: app/models/content.py
-Depends on: app/models/topic.py, integrations/events/event_bus.py
-
-Handles Topic, Module, Lesson, Quiz logic; validation, serialization, and event integration.
-
-**Classes:**
-
-- `Quiz`
-
-
-  Methods: `__init__()`
-
-- `Question`
-
-
-  Methods: `__init__()`
-
-- `Content`
-
-
-  Main content representation class that unifies all content types
-
-  Methods: `__init__()`, `from_lesson()`, `from_topic()`
-
-- `TopicModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
-
-- `ModuleModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
-
-- `LessonModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
-
-- `QuizModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
-
-- `QuestionModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
-
-
-
 ### integrations\monitoring\integration_health.py
 
 **Description:**
@@ -1492,6 +1599,44 @@ by orchestration and integration components.
   Abstract interface for storage service integration.
 
   Methods: `exists()`, `upload()`, `download()`, `delete()`, `list()`
+
+
+
+### app\models\user.py
+
+**Description:**
+
+User model for AeroLearn AI.
+
+Location: /app/models/user.py (canonical User model for FK integrity)
+This must be the single source of User ORM, with __tablename__ = 'user'
+All FK and relationship references must import/use this model and tablename.
+
+Implements validation, event integration, and serialization.
+Includes admin roles, MFA support, and permission checks.
+
+**Classes:**
+
+- `User`
+ (inherits from: Base)
+
+
+  Canonical User model with tablename 'user' for FK references.
+
+  Methods: `__repr__()`, `get_progress()`
+
+- `UserProfile`
+ (inherits from: Base)
+
+
+  User profile information.
+
+- `UserModel`
+
+
+  Wrapper class for User entity with business logic.
+
+  Methods: `__init__()`, `id()`, `username()`, `email()`, `is_active()`, ... (9 more)
 
 
 
@@ -1719,6 +1864,41 @@ and handle events from the event bus. It also defines the EventFilter interface 
 
 
 
+### app\core\assessment\session_manager.py
+
+**Description:**
+
+File: session_manager.py
+Location: /app/core/assessment/
+Purpose: Manages assessment sessions, timing, state transitions. Integrates with question engine and grading logic.
+
+This file is created in accordance with the Day 17 development plan and current project conventions.
+
+**Classes:**
+
+- `AssessmentSessionStatus`
+ (inherits from: Enum)
+
+
+- `AssessmentSession`
+
+
+  Methods: `__init__()`, `is_active()`, `is_completed()`, `quiz()`, `get_questions()`, ... (16 more)
+
+- `GradingEngine`
+
+
+  Handles grading of assessment sessions
+
+  Methods: `grade_session()`
+
+- `AssessmentSessionManager`
+
+
+  Methods: `__init__()`, `create_session()`, `get_session()`, `end_session()`, `start_session()`
+
+
+
 ### app\core\auth\user_profile.py
 
 **Classes:**
@@ -1736,44 +1916,6 @@ and handle events from the event bus. It also defines the EventFilter interface 
   Core logic for user profile management (CRUD, validation, bulk ops).
 
   Methods: `__init__()`, `_validate_user_data()`, `create_user()`, `get_user()`, `update_user()`, ... (5 more)
-
-
-
-### app\models\user.py
-
-**Description:**
-
-User model for AeroLearn AI.
-
-Location: /app/models/user.py (canonical User model for FK integrity)
-This must be the single source of User ORM, with __tablename__ = 'user'
-All FK and relationship references must import/use this model and tablename.
-
-Implements validation, event integration, and serialization.
-Includes admin roles, MFA support, and permission checks.
-
-**Classes:**
-
-- `User`
- (inherits from: Base)
-
-
-  Canonical User model with tablename 'user' for FK references.
-
-  Methods: `__repr__()`
-
-- `UserProfile`
- (inherits from: Base)
-
-
-  User profile information.
-
-- `UserModel`
-
-
-  Wrapper class for User entity with business logic.
-
-  Methods: `__init__()`, `id()`, `username()`, `email()`, `is_active()`, ... (8 more)
 
 
 
@@ -3039,6 +3181,33 @@ Assumptions:
 
 
 
+### app\core\assessment\feedback.py
+
+**Description:**
+
+File: feedback.py
+Location: /app/core/assessment/
+Purpose: Feedback delivery to students, notifications, analytics. Fulfills the feedback-related tasks in the Day 17 Plan.
+- Adds FeedbackService as a system-level API expected by test and integration code.
+
+All new assessment engine logic is placed under app/core/assessment/ per project conventions.
+
+**Classes:**
+
+- `FeedbackEngine`
+
+
+  Methods: `__init__()`, `deliver_feedback()`, `_notify()`, `track_response()`, `feedback_effectiveness()`, ... (3 more)
+
+- `FeedbackService`
+
+
+  Service façade for feedback delivery, notification, and analytics,
+
+  Methods: `send_feedback()`, `get_feedback_history()`, `get_notifications()`, `get_analytics()`
+
+
+
 ### app\ui\common\component_base.py
 
 **Classes:**
@@ -3366,6 +3535,31 @@ Local Cache System for AeroLearn AI
 
 
 
+### app\core\assessment\grading.py
+
+**Description:**
+
+File: grading.py
+Location: /app/core/assessment/
+Purpose: Core auto-grading logic: MCQs, text/NLP, code (with stubbed runners), partial credit system.
+
+Fulfills assessment grading requirements in the Day 17 Plan.
+
+**Classes:**
+
+- `GradingRuleError`
+ (inherits from: Exception)
+
+
+- `GradingEngine`
+
+
+  Handles grading of assessment questions and sessions.
+
+  Methods: `grade_multiple_choice()`, `grade_text()`, `grade_code()`, `grade_partial_credit()`, `grade()`, ... (1 more)
+
+
+
 ### app\core\db\sync_manager.py
 
 **Description:**
@@ -3427,6 +3621,33 @@ Handles creation, rebuilding, update and optimization of vector indices for effi
 
 
 
+### app\core\assessment\manual_grading.py
+
+**Description:**
+
+File: manual_grading.py
+Location: /app/core/assessment/
+Purpose: Manual grading API for professors (rubric/scoring, annotation, batch grading support),
+           fulfilling manual grading task in the Day 17 Plan.
+         Service-layer ManualGradingService for assignment and grading integration, enabling orchestration
+         and correct imports from tests/integration/test_assessment_engine_day17.py.
+
+**Classes:**
+
+- `ManualGradingInterface`
+
+
+  Methods: `view_submission()`, `apply_rubric()`, `annotate()`, `batch_grade()`
+
+- `ManualGradingService`
+
+
+  Service-layer class for managing manual grading workflow:
+
+  Methods: `assign()`, `grade()`, `batch_grade()`, `_generate_feedback()`
+
+
+
 ### app\ui\admin\user_management.py
 
 **Description:**
@@ -3447,40 +3668,6 @@ This file should be saved at: /app/ui/admin/user_management.py
   Admin-facing interface for managing users:
 
   Methods: `__init__()`, `create_user()`, `read_user()`, `update_user()`, `delete_user()`, ... (9 more)
-
-
-
-### app\models\assessment.py
-
-**Description:**
-
-Assessment model for AeroLearn AI.
-
-Location: app/models/assessment.py
-Depends on: app/core/db/schema.py, integrations/events/event_bus.py
-
-Wraps ProgressRecord and assessment-related logic; provides validation, serialization, and event integration.
-
-**Classes:**
-
-- `ProgressRecord`
-
-
-  Mock implementation of ProgressRecord for testing purposes
-
-  Methods: `__init__()`
-
-- `Assessment`
-
-
-  Assessment model for evaluating student knowledge
-
-  Methods: `__init__()`, `add_question()`, `grade()`
-
-- `AssessmentModel`
-
-
-  Methods: `__init__()`, `id()`, `serialize()`, `validate()`
 
 
 
@@ -4407,6 +4594,42 @@ Uses pytest style, consistent with other UI component tests.
 
 
 
+### tests\core\assessment\test_manual_grading.py
+
+**Description:**
+
+File: test_manual_grading.py
+Location: /tests/core/assessment/
+Purpose: Unit tests for ManualGradingInterface: rubric application, annotation, batch grading.
+Fixes assertion to match 'percent' as float (not callable).
+
+**Classes:**
+
+- `DummyRubric`
+
+
+  Methods: `__init__()`
+
+- `DummyAnswer`
+
+
+  Methods: `__init__()`
+
+- `DummySubmission`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_apply_rubric()`
+
+- `test_annotate()`
+
+- `test_batch_grade()`
+
+
+
 ### app\core\drive\metadata_store.py
 
 **Classes:**
@@ -4455,6 +4678,28 @@ This file should be saved as /app/core/search/keyword_search.py according to the
   Concrete implementation of a keyword-based search backend.
 
   Methods: `search()`, `_compute_score()`
+
+
+
+### app\core\assessment\question_engine.py
+
+**Description:**
+
+File: question_engine.py
+Location: /app/core/assessment/
+Purpose: Renders questions, validates answers, provides interface for user interaction and integrates into assessment sessions.
+Imports fixed to match model structure.
+
+**Classes:**
+
+- `QuestionRenderError`
+ (inherits from: Exception)
+
+
+- `QuestionEngine`
+
+
+  Methods: `render()`, `validate_answer()`
 
 
 
@@ -4690,6 +4935,52 @@ Author:
 - `test_plugin_registration_and_detection()`
 
 - `test_error_handling()`
+
+
+
+### tests\integration\test_assessment_engine_day17.py
+
+**Description:**
+
+Integration Tests – Assessment Engine (AeroLearn AI Day 17 Integration)
+
+This file must be saved at: /tests/integration/test_assessment_engine_day17.py
+
+Covers:
+  - Assessment session management and delivery integration
+  - Auto-grading multi-type questions (MCQ, text NLP, code)
+  - Manual grading (rubrics, feedback)
+  - Feedback notification and analytics
+
+Assumes all core and model implementations are complete.
+
+**Functions:**
+
+- `test_user()`
+
+- `test_professor()`
+
+- `quiz_mixed_types()`
+
+- `assessment_session(test_user, quiz_mixed_types)`
+
+- `test_assessment_session_lifecycle(assessment_session)`
+
+- `test_question_rendering_and_answer_validation(assessment_session)`
+
+- `test_timed_assessment_controls(monkeypatch, assessment_session)`
+
+- `test_autograding_flow(assessment_session)`
+
+- `test_partial_credit_and_mixed_types(assessment_session)`
+
+- `test_manual_grading_assignment_and_feedback(test_user, test_professor, assessment_session)`
+
+- `test_feedback_notification_and_analytics(test_user, assessment_session)`
+
+- `test_cross_module_assessment_integration(test_user)`
+
+- `test_full_pipeline_student_progress_updates(test_user)`
 
 
 
@@ -5086,6 +5377,38 @@ Purpose: Unit tests for content similarity and recommendation logic.
 - `test_content_relationships()`
 
 - `test_interconcept_relationships()`
+
+
+
+### tests\core\assessment\test_grading.py
+
+**Description:**
+
+File: test_grading.py
+Location: /tests/core/assessment/
+Purpose: Unit tests for the GradingEngine: MCQ, text, code, partial credit.
+
+**Classes:**
+
+- `DummyQuestion`
+
+
+  Methods: `__init__()`
+
+- `DummyAnswer`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_grade_mcq()`
+
+- `test_grade_text()`
+
+- `test_grade_code()`
+
+- `test_grade_partial_credit()`
 
 
 
@@ -5641,6 +5964,62 @@ Purpose:
 - `test_cancel_enrollment(service, db_session, dummy_user, dummy_course)`
 
 - `test_get_enrollment_status(service, db_session, dummy_user, dummy_approver, dummy_course)`
+
+
+
+### tests\core\assessment\test_question_engine.py
+
+**Description:**
+
+File: test_question_engine.py
+Location: /tests/core/assessment/
+Purpose: Unit tests for the QuestionEngine (rendering and answer validation).
+
+**Classes:**
+
+- `DummyQuestion`
+
+
+  Methods: `__init__()`
+
+- `DummyAnswer`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_render_question()`
+
+- `test_validate_answer_mcq()`
+
+
+
+### tests\core\assessment\test_feedback.py
+
+**Description:**
+
+File: test_feedback.py
+Location: /tests/core/assessment/
+Purpose: Unit tests for FeedbackEngine: feedback delivery, notification, response tracking, analytics.
+
+**Classes:**
+
+- `DummySubmission`
+
+
+  Methods: `__init__()`
+
+- `DummyFeedback`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_deliver_feedback(monkeypatch)`
+
+- `test_feedback_response_tracking_and_analytics()`
 
 
 
@@ -6285,6 +6664,32 @@ Per project structure (see code_summary.md), all test content/data factories go 
 - `create_sample_repositories()`
 
   Returns (repositories, users_dict, auth_manager_mock) for semantic search integration tests.
+
+
+
+### tests\core\assessment\test_session_manager.py
+
+**Description:**
+
+File: test_session_manager.py
+Location: /tests/core/assessment/
+Purpose: Unit tests for the AssessmentSessionManager and AssessmentSession classes.
+
+Ensure session start, answer, pause/resume, and timeout logic.
+
+**Classes:**
+
+- `DummyAssessment`
+
+
+- `DummyAnswer`
+
+
+**Functions:**
+
+- `test_create_and_complete_session()`
+
+- `test_session_timeout()`
 
 
 
@@ -7932,6 +8337,16 @@ Extend as needed for submodule registrations or integration-wide constants in th
 
 
 
+### app\core\assessment\__init__.py
+
+**Description:**
+
+File: __init__.py
+Location: /app/core/assessment/
+Purpose: Marks assessment folder as a Python package and centralizes exports.
+
+
+
 ### app\ui\common\__init__.py
 
 **Description:**
@@ -8128,6 +8543,16 @@ to support pytest discovery and modular test extensions.
 
 
 
+### tests\core\assessment\__init__.py
+
+**Description:**
+
+File: __init__.py
+Location: /tests/core/assessment
+Purpose: Marks the assessment test module as a Python package.
+
+
+
 ### tests\comprehensive\__init__.py
 
 
@@ -8164,3 +8589,166 @@ Created: 2025-04-24
 This module is part of the AeroLearn AI project.
 
 
+
+
+## AI-Enhanced Analysis
+
+Here are the additional architectural sections to enhance the summary:
+
+## Architectural Insights
+
+### 1. High-Level Architectural Overview
+The system follows a layered event-driven architecture with modular components:
+
+```
+┌──────────────────────────────┐
+│         Presentation         │
+│   (UI/API Controllers)       │
+└──────────────┬───────────────┘
+               ▼
+┌──────────────────────────────┐
+│      Application Core         │
+│  ┌─────────────────────────┐ │
+│  │ Domain Models           │ │  (Course, Assessment, Content)
+│  │ - Business Logic        │ │
+│  │ - Event Emission        │ │
+│  └────────────┬────────────┘ │
+│               ▼              │
+│  ┌─────────────────────────┐ │
+│  │ Services                │ │  (Auth, Batch, Validation)
+│  │ - Transactional         │ │
+│  │ - Cross-model           │ │
+│  └────────────┬────────────┘ │
+└───────────────┼──────────────┘
+               ▼
+┌──────────────────────────────┐
+│   Infrastructure Layer       │
+│  ┌─────────────────────────┐ │
+│  │ Event System            ◄─┼─────┐
+│  │ - EventBus (Singleton)  │ │     │
+│  │ - 30+ Event Types       │ │     │
+│  └────────────┬────────────┘ │     │
+│  ┌─────────────────────────┐ │     │
+│  │ Component Registry      │ │     │
+│  │ - Plugin Architecture   │ │     │
+│  │ - Dependency Management │ │     │
+│  └────────────┬────────────┘ │     │
+└───────────────┼──────────────┘     │
+                ▼                    │
+┌──────────────────────────────┐     │
+│   External Integrations      │     │
+│  - Storage Systems           │     │
+│  - AI Providers              │─────┘
+└──────────────────────────────┘
+```
+
+### 2. Identified Design Patterns
+| Pattern            | Implementation Examples                          | Purpose                                      |
+|--------------------|--------------------------------------------------|----------------------------------------------|
+| Singleton          | EventBus, ComponentRegistry                     | Global access point for core services        |
+| Publisher-Subscriber | EventBus/EventTypes system                     | Decoupled component communication           |
+| Registry           | ComponentRegistry with versioned components     | Dynamic plugin management                    |
+| Factory            | Rubric.by_id(), QuestionType factory methods    | Flexible object creation                     |
+| Strategy           | ValidationFramework in BatchController          | Interchangeable validation algorithms        |
+| Decorator          | @require_permission in authorization            | Cross-cutting security concerns              |
+| Template Method    | BaseInterface with abstract register_interface() | Consistent component registration flow       |
+
+### 3. Refactoring Opportunities
+
+**Structural Improvements:**
+1. Event System Consolidation:
+   - Current: Duplication between EventType enum and category-specific classes (SystemEventType)
+   - Proposed: Convert to hierarchical event taxonomy using protobuf-style naming
+
+2. Model Hydration:
+   - Anti-pattern: Separate Model classes (CourseModel) from ORM entities
+   - Solution: Merge into active record pattern with enhanced domain logic
+
+3. Dependency Injection:
+   - Current: Direct EventBus references in models (tight coupling)
+   - Improvement: Introduce DI container for testability
+
+**Code Quality Enhancements:**
+```python
+# Before: Inconsistent serialization
+class Course:
+    def serialize(self): 
+        return {raw SQLAlchemy fields}
+
+# After: Standardized DTO pattern
+class CourseDTO:
+    @staticmethod
+    def from_orm(obj):
+        return unified_schema.dump(obj)
+```
+
+**Performance Considerations:**
+- Batch processing in BatchController lacks parallelization
+- EventBus uses synchronous notification model
+- ComponentRegistry dependency checks are O(n^2) during registration
+
+### 4. Critical Path Analysis
+
+**Key System Flows:**
+1. Course Enrollment:
+```
+UI → EnrollmentService → [Course.validate_prerequisites()]
+                      → [EventBus.publish(ENROLLMENT_REQUESTED)]
+                      → [Authorization.check_permissions()]
+                      → Database commit
+```
+
+2. Content Analysis Pipeline:
+```
+ContentUpload → BatchController → ValidationFramework
+               → (if valid) → VectorIndex.update()
+                             → AIEvent(CONTENT_ANALYZED)
+                             → KnowledgeGraph.refresh()
+```
+
+**Performance Bottlenecks:**
+- Synchronous event handling in EventBus._notify_subscriber_threadsafe
+- BatchController's single-threaded _process_batches
+- ORM N+1 queries in Course.get_enrollment_requests()
+
+### 5. Class Relationships
+
+```mermaid
+graph TD
+    %% Event System
+    Event[Base Event] -->|inherited by| SystemEvent
+    Event --> ContentEvent
+    Event --> UserEvent
+    EventType -.-> EventCategory
+    
+    %% Core Models
+    Course --> Module
+    Module --> Lesson
+    Lesson --> Content
+    Course --> Enrollment
+    Assessment -->|uses| Rubric
+    Assessment --> QuestionType
+    
+    %% Infrastructure
+    EventBus --> ComponentRegistry
+    ComponentRegistry -->|manages| Component
+    Component -->|declares| Interface[BaseInterface]
+    
+    %% Auth System
+    AuthenticationService -->|uses| CredentialManager
+    AuthenticationService -->|emits| AuthEvent
+    AuthorizationManager --> Role
+    Role --> Permission
+    UserPermissions -->|maps| UserProfile
+    
+    %% Integration Points
+    BatchController -->|depends on| EventBus
+    BatchController -->|uses| ValidationFramework
+    Content -->|triggers| ContentEvent
+```
+
+**Key Module Dependencies:**
+- All models depend on EventBus for state change notifications
+- ComponentRegistry acts as central hub for system components
+- BatchController coordinates between ValidationFramework and UploadService
+- AuthenticationService depends on AuthorizationManager for RBAC

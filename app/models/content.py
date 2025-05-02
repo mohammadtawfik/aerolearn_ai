@@ -12,11 +12,11 @@ from app.models.topic import Topic
 
 # Mock classes for Quiz and Question if they're needed elsewhere in the file
 class Quiz:
-    def __init__(self, id=None, title="", lesson_id=None):
+    def __init__(self, id=None, title="", lesson_id=None, questions=None):
         self.id = id
         self.title = title
         self.lesson_id = lesson_id
-        self.questions = []
+        self.questions = questions if questions is not None else []
 
 class Question:
     def __init__(self, id=None, text="", quiz_id=None):

@@ -1,3 +1,21 @@
+---
+> ⚠️ **DEVELOPER WARNING – ENVIRONMENT & IMPORT ERRORS** ⚠️  
+>
+> Recent project history exposed two recurring mistakes that waste developer time and break tests/envs:
+>
+> **1. Environment Packages:**  
+> - **Never install `pytest-qt`, `PyQt6`, `PyQt5`, `PySide6`, or `PySide2` in the project venv unless specifically developing/testing a Qt UI feature.**
+> - Their presence can corrupt all test runs with DLL import errors, even if you aren't writing GUI code.
+> - Use a separate venv for Qt or GUI work. Document and announce this before merging.
+>
+> **2. Import Hygiene:**  
+> - **Always confirm where models/classes are defined before importing.**
+> - E.g., the `Answer` class lives in `app/models/assessment.py`. Importing it from anywhere else causes project-breaking ImportErrors.
+> - Use code search or consult `code_summary.md` before changing deep imports.
+>
+> **Mistakes here create major delays for all. Read this before beginning Day 17–31 work.**
+---
+
 # AeroLearn AI – Day 29 Plan
 *Location: `/docs/development/day29_plan.md`*
 
