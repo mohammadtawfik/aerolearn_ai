@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 320
+Total Python files: 327
 
 ## Table of Contents
 
@@ -75,7 +75,9 @@ Total Python files: 320
 │   │   │   ├── settings_manager.py
 │   │   │   ├── metrics.py
 │   │   │   ├── __init__.py
-│   │   │   └── notification_center.py
+│   │   │   ├── notification_center.py
+│   │   │   ├── pattern_detection.py
+│   │   │   └── interventions.py
 │   │   ├── config
 │   │   │   ├── api_secrets.py
 │   │   │   ├── api_secrets_example.py
@@ -259,7 +261,10 @@ Total Python files: 320
 │   │   │   ├── ai
 │   │   │   │   └── test_conversation.py
 │   │   │   ├── monitoring
-│   │   │   │   └── test_notification_center.py
+│   │   │   │   ├── test_notification_center.py
+│   │   │   │   ├── test_metrics.py
+│   │   │   │   ├── test_pattern_detection.py
+│   │   │   │   └── test_interventions.py
 │   │   │   ├── __init__.py
 │   │   │   └── test_integration_health.py
 │   │   ├── ui
@@ -269,7 +274,8 @@ Total Python files: 320
 │   │   ├── models
 │   │   │   ├── __init__.py
 │   │   │   ├── test_metadata_manager.py
-│   │   │   └── test_content_type_registry.py
+│   │   │   ├── test_content_type_registry.py
+│   │   │   └── test_progress.py
 │   │   ├── test_crypto.py
 │   │   ├── test_credential_manager.py
 │   │   ├── test_local_cache_and_sync.py
@@ -310,7 +316,8 @@ Total Python files: 320
 │   │   ├── test_resource_discovery_integration.py
 │   │   ├── test_week2_integration.py
 │   │   ├── test_enrollment.py
-│   │   └── test_assessment_engine_day17.py
+│   │   ├── test_assessment_engine_day17.py
+│   │   └── test_learning_analytics_integration.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -490,7 +497,7 @@ Wraps Prog...
 
 - Classes: 11
 - Functions: 0
-- Dependency Score: 75.00
+- Dependency Score: 78.00
 
 ### integrations\registry\component_registry.py
 
@@ -564,9 +571,9 @@ registra...
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **app\models\assessment.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **app\models\content.py** depends on: integrations\events\event_bus.py, app\models\course.py, integrations\events\event_types.py
+- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
+- **app\models\assessment.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
+- **app\models\content.py** depends on: app\models\course.py, integrations\events\event_types.py, integrations\events\event_bus.py
 - **app\core\auth\authentication.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
 
 
@@ -1506,6 +1513,93 @@ Supersedes previous basic Conversation/ConversationManager implementation.
 - `default_user_validator(user_id)`
 
 - `default_handler(user_input, user_id, state, extra)`
+
+
+
+### app\core\monitoring\metrics.py
+
+**Description:**
+
+System Metrics & Alert Manager — AeroLearn AI
+Save at: /app/core/monitoring/metrics.py
+
+Features:
+- Define metrics types and schema
+- Register/report metrics for components
+- Threshold-based alerting (with callback hooks)
+- Real-time status query API
+- Learning analytics and progress tracking metrics
+
+**Classes:**
+
+- `MetricType`
+ (inherits from: Enum)
+
+
+- `AlertLevel`
+ (inherits from: Enum)
+
+
+- `Metric`
+
+
+  Methods: `__init__()`, `to_dict()`
+
+- `MetricAlert`
+
+
+  Methods: `__init__()`
+
+- `SystemMetricsManager`
+
+
+  Methods: `__new__()`, `__init__()`, `register_metric()`, `report_metric()`, `get_metric()`, ... (4 more)
+
+**Functions:**
+
+- `track_learning_objective(user_id, objective_id, activities)`
+
+  Track the degree of achievement for a specific learning objective by user.
+
+- `monitor_time_on_task(user_id, activity_logs)`
+
+  Monitor total time on task for a user.
+
+- `calculate_completion_rate(user_id, module_ids, completion_logs)`
+
+  Calculate overall module completion rate for the user.
+
+- `analyze_performance_trends(user_id, performance_history)`
+
+  Analyze trends in student performance over time.
+
+- `assessment_performance_analytics(user_id, records)`
+
+  Summarize assessment performance for user: mean, min, max, count.
+
+- `engagement_score(user_id, interactions)`
+
+  Sum engagement points for a user by interaction type.
+
+- `competency_mapping(user_id, assessments)`
+
+  Return set of competency_id values achieved by user; achieved if score >= threshold.
+
+- `comparative_cohort_analytics(group1, group2)`
+
+  Compare two cohorts by average progress/engagement.
+
+- `save_analytics_result(student_id, data)`
+
+  Save analytics results for a student to in-memory storage.
+
+- `retrieve_analytics_result(student_id)`
+
+  Retrieve previously saved analytics results for a student.
+
+- `clear_analytics_storage()`
+
+  Clear all stored analytics results.
 
 
 
@@ -2547,46 +2641,6 @@ See method and signal docstrings for more.
 
 
 
-### app\core\monitoring\metrics.py
-
-**Description:**
-
-System Metrics & Alert Manager — AeroLearn AI
-Save at: /app/core/monitoring/metrics.py
-
-Features:
-- Define metrics types and schema
-- Register/report metrics for components
-- Threshold-based alerting (with callback hooks)
-- Real-time status query API
-
-**Classes:**
-
-- `MetricType`
- (inherits from: Enum)
-
-
-- `AlertLevel`
- (inherits from: Enum)
-
-
-- `Metric`
-
-
-  Methods: `__init__()`, `to_dict()`
-
-- `MetricAlert`
-
-
-  Methods: `__init__()`
-
-- `SystemMetricsManager`
-
-
-  Methods: `__new__()`, `__init__()`, `register_metric()`, `report_metric()`, `get_metric()`, ... (4 more)
-
-
-
 ### app\core\db\course_admin.py
 
 **Description:**
@@ -2941,46 +2995,6 @@ Dependencies:
 
 
 
-### app\models\progress.py
-
-**Description:**
-
-app/models/progress.py
-======================
-
-Data models for student progress tracking across modules, lessons, quizzes, with standardized metrics.
-
-Location: app/models/progress.py
-
-**Classes:**
-
-- `ProgressMetricType`
- (inherits from: Enum)
-
-
-- `ProgressEntry`
-
-
-  Represents progress data for a specific metric and time-point.
-
-  Methods: `__init__()`, `serialize()`
-
-- `ProgressTimeline`
-
-
-  Time-series progress for a specific user/content.
-
-  Methods: `__init__()`, `add_entry()`, `get_metric_over_time()`, `serialize()`
-
-- `ComparativeProgress`
-
-
-  Supports comparison of progress metrics between users or groups.
-
-  Methods: `__init__()`, `set_value()`, `serialize()`
-
-
-
 ### tests\integration\component_harness.py
 
 **Classes:**
@@ -3009,6 +3023,32 @@ Location: app/models/progress.py
 **Functions:**
 
 - `_add_project_root_to_syspath()`
+
+
+
+### app\models\progress.py
+
+**Description:**
+
+app/models/progress.py
+======================
+
+Data models for student progress tracking across modules, lessons, quizzes, with standardized metrics.
+
+Location: app/models/progress.py
+
+**Classes:**
+
+- `ProgressStatus`
+ (inherits from: Enum)
+
+
+- `Progress`
+
+
+  Core progress tracking model with status and step tracking.
+
+  Methods: `__init__()`, `update_status()`, `percent_complete()`, `aggregate()`, `serialize()`, ... (3 more)
 
 
 
@@ -3734,6 +3774,32 @@ Requires PyQt6 (or compatible PySide6).
 
 
   Methods: `__repr__()`
+
+
+
+### tests\unit\core\monitoring\test_interventions.py
+
+**Classes:**
+
+- `DummyStudent`
+
+
+  Methods: `__init__()`
+
+- `DummyProfessor`
+
+
+  Methods: `__init__()`
+
+- `DummyProgressRecord`
+
+
+  Methods: `__init__()`
+
+- `TestInterventionSuggestionSystem`
+
+
+  Methods: `test_early_warning_indicators()`, `test_targeted_resource_recommendations()`, `test_personalized_learning_path_suggestions()`, `test_professor_notifications_for_at_risk()`
 
 
 
@@ -4643,6 +4709,49 @@ Fixes assertion to match 'percent' as float (not callable).
 
 
 
+### app\core\monitoring\pattern_detection.py
+
+**Description:**
+
+Pattern detection, analytics integration, and learning progress trigger logic.
+Implements: activity sequence analysis, resource utilization, study habit, learning style.
+
+**Functions:**
+
+- `detect_activity_sequences(event_log)`
+
+  Analyze order and transitions in user learning events.
+
+- `detect_resource_utilization(event_log)`
+
+  Detect overall and per-type resource usage from logs.
+
+- `infer_study_habits(event_log)`
+
+  Identify study habit patterns (e.g., cramming, steady, random).
+
+- `classify_learning_style(event_log)`
+
+  Classify the learning style: e.g., 'visual', 'auditory', 'kinesthetic', 'mixed'.
+
+- `run_pattern_detection(progress_records)`
+
+  Analyze raw progress records and return detected patterns (e.g., at-risk).
+
+- `aggregate_learning_data(records)`
+
+  Aggregate and combine learning activity data from multiple models/components.
+
+- `should_trigger_intervention(analytics)`
+
+  Decide if intervention should be triggered based on analytics.
+
+- `get_intervention_recommendations(student_id, analytics)`
+
+  Generate personalized intervention recommendations for a specific student.
+
+
+
 ### app\core\extraction\structured_data_extractor.py
 
 **Classes:**
@@ -4783,6 +4892,22 @@ The dashboard provides:
 
 
   Methods: `__init__()`, `generate_key()`, `generate_salt()`, `encrypt()`, `decrypt()`
+
+
+
+### tests\unit\core\monitoring\test_metrics.py
+
+**Classes:**
+
+- `TestProgressTrackingMetrics`
+
+
+  Methods: `test_learning_objective_achievement()`, `test_time_on_task_monitoring()`, `test_completion_rate_analytics()`, `test_performance_trend_analysis()`
+
+- `TestPerformanceMetricsCalculation`
+
+
+  Methods: `test_assessment_performance_analytics()`, `test_engagement_scoring_system()`, `test_competency_mapping()`, `test_comparative_cohort_analytics()`
 
 
 
@@ -5448,6 +5573,44 @@ This uses real project models (User, Module, Lesson, etc).
   Simple file-based persistence for demonstration.
 
   Methods: `__init__()`, `_load()`, `_save()`, `save_metadata()`, `get_metadata()`, ... (3 more)
+
+
+
+### app\core\monitoring\interventions.py
+
+**Description:**
+
+Interventions and notification logic for monitoring and supporting students.
+
+Location: /app/core/monitoring/interventions.py
+
+Implements the four main features required by unit test_interventions.py:
+- Early warning indicators for at-risk students
+- Targeted resource recommendations
+- Personalized learning path suggestions
+- Professor notifications for at-risk students
+
+**Functions:**
+
+- `early_warning_indicator(progress_records)`
+
+  Return list of at-risk students based on provided progress records.
+
+- `recommend_resources(student_profile, analytics)`
+
+  Suggest targeted resources (resource IDs) based on student and analytics.
+
+- `suggest_learning_path(student_profile, learning_objectives)`
+
+  Generate an ordered list of learning activity IDs as a personalized path.
+
+- `notify_professor_at_risk_students(professor, students_at_risk)`
+
+  Notify professor with data on at-risk students.
+
+- `create_intervention(student_id, pattern)`
+
+  Stub: Create an intervention for the given student based on a pattern.
 
 
 
@@ -6787,6 +6950,46 @@ Shows standard widget pattern for extension.
   Suggests tags for content using simple keyword matching or ML backend.
 
   Methods: `suggest()`
+
+
+
+### tests\unit\core\monitoring\test_pattern_detection.py
+
+**Classes:**
+
+- `TestLearningPatternDetection`
+
+
+  Methods: `test_activity_sequence_analysis()`, `test_resource_utilization_patterns()`, `test_study_habit_identification()`, `test_learning_style_classification()`
+
+
+
+### tests\unit\models\test_progress.py
+
+**Description:**
+
+Unit tests for the Progress model in app/models/progress.py.
+
+This file ensures correct instantiation, updating, aggregation, and serialization
+of user/module progress tracking records.
+
+**Classes:**
+
+- `TestProgressModel`
+
+
+  Methods: `test_progress_creation()`, `test_update_progress_status()`, `test_progress_aggregation()`, `test_progress_serialization()`
+
+
+
+### tests\integration\test_learning_analytics_integration.py
+
+**Classes:**
+
+- `TestLearningAnalyticsIntegration`
+
+
+  Methods: `test_full_progress_to_intervention_pipeline()`, `test_cross_component_data_aggregation()`, `test_intervention_trigger_accuracy()`, `test_data_persistence_and_retrieval()`
 
 
 
@@ -8593,162 +8796,125 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional architectural sections to enhance the summary:
+Here are the additional architectural analysis sections to add:
 
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows a layered event-driven architecture with modular components:
+The system follows a modular event-driven architecture with three primary layers:
 
 ```
-┌──────────────────────────────┐
-│         Presentation         │
-│   (UI/API Controllers)       │
-└──────────────┬───────────────┘
-               ▼
-┌──────────────────────────────┐
-│      Application Core         │
-│  ┌─────────────────────────┐ │
-│  │ Domain Models           │ │  (Course, Assessment, Content)
-│  │ - Business Logic        │ │
-│  │ - Event Emission        │ │
-│  └────────────┬────────────┘ │
-│               ▼              │
-│  ┌─────────────────────────┐ │
-│  │ Services                │ │  (Auth, Batch, Validation)
-│  │ - Transactional         │ │
-│  │ - Cross-model           │ │
-│  └────────────┬────────────┘ │
-└───────────────┼──────────────┘
-               ▼
-┌──────────────────────────────┐
-│   Infrastructure Layer       │
-│  ┌─────────────────────────┐ │
-│  │ Event System            ◄─┼─────┐
-│  │ - EventBus (Singleton)  │ │     │
-│  │ - 30+ Event Types       │ │     │
-│  └────────────┬────────────┘ │     │
-│  ┌─────────────────────────┐ │     │
-│  │ Component Registry      │ │     │
-│  │ - Plugin Architecture   │ │     │
-│  │ - Dependency Management │ │     │
-│  └────────────┬────────────┘ │     │
-└───────────────┼──────────────┘     │
-                ▼                    │
-┌──────────────────────────────┐     │
-│   External Integrations      │     │
-│  - Storage Systems           │     │
-│  - AI Providers              │─────┘
-└──────────────────────────────┘
+[Presentation Layer] 
+    │
+    ˅
+[Application Layer] (Core business logic: Courses, Assessments, Auth)
+    │
+    ˅ 
+[Integration Layer] (Event Bus, Component Registry, External Interfaces)
 ```
+
+Key architectural characteristics:
+- Event-driven communication through EventBus (Observer pattern)
+- Component-based architecture with lifecycle management via ComponentRegistry
+- Clear separation between core domain models (app/models) and system infrastructure
+- Hybrid synchronous/asynchronous operation handling
+- Plugin architecture using interface contracts (base_interface.py)
 
 ### 2. Identified Design Patterns
-| Pattern            | Implementation Examples                          | Purpose                                      |
-|--------------------|--------------------------------------------------|----------------------------------------------|
-| Singleton          | EventBus, ComponentRegistry                     | Global access point for core services        |
-| Publisher-Subscriber | EventBus/EventTypes system                     | Decoupled component communication           |
-| Registry           | ComponentRegistry with versioned components     | Dynamic plugin management                    |
-| Factory            | Rubric.by_id(), QuestionType factory methods    | Flexible object creation                     |
-| Strategy           | ValidationFramework in BatchController          | Interchangeable validation algorithms        |
-| Decorator          | @require_permission in authorization            | Cross-cutting security concerns              |
-| Template Method    | BaseInterface with abstract register_interface() | Consistent component registration flow       |
+
+| Pattern                | Implementation Examples                          | Purpose                                      |
+|------------------------|--------------------------------------------------|----------------------------------------------|
+| Publisher-Subscriber   | EventBus with EventType hierarchy                | Decoupled component communication            |
+| Singleton              | ComponentRegistry, EventBus                      | System-wide single instance access           |
+| Factory                | Component creation via Registry                  | Dynamic component initialization             |
+| Strategy               | AuthenticationProvider implementations          | Interchangeable auth mechanisms              |
+| Observer               | BatchController listeners                        | Progress monitoring/notification             |
+| Decorator              | @require_permission in authorization             | Dynamic permission enforcement               |
+| Active Record          | SQLAlchemy-based models (Course, Enrollment)     | ORM data access pattern                      |
+| Registry               | ComponentRegistry                                | Central component management                 |
 
 ### 3. Refactoring Opportunities
 
-**Structural Improvements:**
-1. Event System Consolidation:
-   - Current: Duplication between EventType enum and category-specific classes (SystemEventType)
-   - Proposed: Convert to hierarchical event taxonomy using protobuf-style naming
+1. **Event System Improvements**
+   - Consolidate duplicate event hierarchies (SystemEvent/SystemEventType)
+   - Implement event versioning for backward compatibility
+   - Add dead-letter queue for failed event processing
 
-2. Model Hydration:
-   - Anti-pattern: Separate Model classes (CourseModel) from ORM entities
-   - Solution: Merge into active record pattern with enhanced domain logic
+2. **Component Management**
+   - Introduce dependency injection in ComponentRegistry
+   - Add circuit breaker pattern for component dependencies
+   - Implement semantic version validation in InterfaceVersion
 
-3. Dependency Injection:
-   - Current: Direct EventBus references in models (tight coupling)
-   - Improvement: Introduce DI container for testability
+3. **Model Layer Optimization**
+   - Extract common ORM behaviors to mixin classes
+   - Introduce Unit of Work pattern for transactional operations
+   - Implement lazy loading for complex relationships
 
-**Code Quality Enhancements:**
-```python
-# Before: Inconsistent serialization
-class Course:
-    def serialize(self): 
-        return {raw SQLAlchemy fields}
-
-# After: Standardized DTO pattern
-class CourseDTO:
-    @staticmethod
-    def from_orm(obj):
-        return unified_schema.dump(obj)
-```
-
-**Performance Considerations:**
-- Batch processing in BatchController lacks parallelization
-- EventBus uses synchronous notification model
-- ComponentRegistry dependency checks are O(n^2) during registration
+4. **Batch Processing**
+   - Replace threading with async/await in BatchController
+   - Add chunking strategy for large batch operations
+   - Implement retry policies with exponential backoff
 
 ### 4. Critical Path Analysis
 
-**Key System Flows:**
+**Key User Flows:**
 1. Course Enrollment:
-```
-UI → EnrollmentService → [Course.validate_prerequisites()]
-                      → [EventBus.publish(ENROLLMENT_REQUESTED)]
-                      → [Authorization.check_permissions()]
-                      → Database commit
-```
+   ``` 
+   UI → EnrollmentEvent → EventBus → Course.enroll() → 
+   ComponentRegistry → AuthService → DB Commit → 
+   ContentEvent (indexing)
+   ```
 
-2. Content Analysis Pipeline:
-```
-ContentUpload → BatchController → ValidationFramework
-               → (if valid) → VectorIndex.update()
-                             → AIEvent(CONTENT_ANALYZED)
-                             → KnowledgeGraph.refresh()
-```
+2. Content Upload:
+   ```
+   BatchController → ValidationFramework → 
+   UploadService → EventBus (CONTENT_CREATED) → 
+   AI Analysis → Vector Index Update
+   ```
+
+3. AI Recommendation:
+   ```
+   UI Request → EventBus (AI_QUERY_PROCESSED) → 
+   AI Component → Vector DB → 
+   EventBus (AI_RECOMMENDATION_GENERATED) → UI Update
+   ```
 
 **Performance Bottlenecks:**
-- Synchronous event handling in EventBus._notify_subscriber_threadsafe
-- BatchController's single-threaded _process_batches
-- ORM N+1 queries in Course.get_enrollment_requests()
+- EventBus synchronous notification chain
+- ORM relationship loading in complex course hierarchies
+- BatchController's mixed sync/async architecture
+- ComponentRegistry dependency resolution algorithm
 
-### 5. Class Relationships
+### 5. Class/Module Relationships
 
 ```mermaid
 graph TD
-    %% Event System
-    Event[Base Event] -->|inherited by| SystemEvent
-    Event --> ContentEvent
-    Event --> UserEvent
-    EventType -.-> EventCategory
-    
-    %% Core Models
-    Course --> Module
-    Module --> Lesson
-    Lesson --> Content
-    Course --> Enrollment
-    Assessment -->|uses| Rubric
-    Assessment --> QuestionType
-    
-    %% Infrastructure
-    EventBus --> ComponentRegistry
-    ComponentRegistry -->|manages| Component
-    Component -->|declares| Interface[BaseInterface]
-    
-    %% Auth System
-    AuthenticationService -->|uses| CredentialManager
-    AuthenticationService -->|emits| AuthEvent
-    AuthorizationManager --> Role
-    Role --> Permission
-    UserPermissions -->|maps| UserProfile
-    
-    %% Integration Points
-    BatchController -->|depends on| EventBus
-    BatchController -->|uses| ValidationFramework
-    Content -->|triggers| ContentEvent
+    A[EventBus] --> B[ComponentRegistry]
+    A --> C[Course]
+    A --> D[Assessment]
+    B --> E[BaseInterface]
+    C --> F[Module]
+    C --> G[Enrollment]
+    F --> H[Lesson]
+    H --> I[Content]
+    J[Authentication] --> A
+    J --> K[Authorization]
+    L[BatchController] --> M[UploadService]
+    L --> A
+    N[AI Components] --> O[VectorIndex]
+    N --> A
 ```
 
-**Key Module Dependencies:**
-- All models depend on EventBus for state change notifications
-- ComponentRegistry acts as central hub for system components
-- BatchController coordinates between ValidationFramework and UploadService
-- AuthenticationService depends on AuthorizationManager for RBAC
+Key Relationships:
+- **EventBus** acts as central nervous system connecting all components
+- **ComponentRegistry** manages lifecycle of all interface implementations
+- **Course** aggregates Modules/Lessons while handling enrollment state
+- **Authentication** and **Authorization** form a security matrix
+- **BatchController** coordinates between validation, upload, and event systems
+
+This architecture enables:
+- Horizontal scaling of event processors
+- Hot-swappable components via interface contracts
+- End-to-end tracking through event correlation
+- Policy-driven security enforcement
+- Atomic batch operations with rollback capabilities
