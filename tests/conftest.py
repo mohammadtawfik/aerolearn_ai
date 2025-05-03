@@ -1,6 +1,7 @@
 # --- UNIVERSAL PROJECT ROOT IMPORT PATCH ---
 import os
 import sys
+import pytest
 
 def _add_project_root_to_syspath():
     here = os.path.abspath(os.path.dirname(__file__))
@@ -30,3 +31,26 @@ def _ensure_app_on_syspath():
     if root and root not in sys.path:
         sys.path.insert(0, root)
 _ensure_app_on_syspath()
+
+# Define mandatory documentation files that must exist
+DOCS_MANDATORY = [
+    "docs/doc_index.md",
+    "docs/architecture/architecture_overview.md",
+    "docs/development/sprint_plan.md",
+    "docs/architecture/service_health_protocol.md",
+    "docs/architecture/dependency_tracking_protocol.md"
+]
+
+@pytest.fixture(autouse=True, scope="session")
+def docs_awareness():
+    """Fail test run if key docs are missing, and print/log doc context."""
+    missing = []
+    loaded = []
+    for f in DOCS_MANDATORY:
+        if not os.path.exists(f):
+            missing.append(f)
+        else:
+            loaded.append(f)
+    if missing:
+        raise RuntimeError(f"Critical documentation missing for test run: {missing}")
+    print(f"[DOCS PRE-LOAD] Loaded docs for TDD/dev cycle:\n" + "\n".join(f"- {f}" for f in loaded))

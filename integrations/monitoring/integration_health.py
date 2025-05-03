@@ -6,6 +6,7 @@ data structures for monitoring the health of system integrations.
 """
 
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from datetime import datetime
 from enum import Enum, auto
 from typing import Dict, List, Optional, Any, Callable
@@ -161,6 +162,8 @@ class IntegrationHealth(Component):
     
     This class collects health metrics from components, detects health status
     changes, and provides visualization data for monitoring interfaces.
+    It also supports real-time notifications of health status changes through
+    a listener pattern.
     """
     
     def __init__(self, polling_interval: float = 60.0):
@@ -184,6 +187,7 @@ class IntegrationHealth(Component):
         self.status_cache: Dict[str, HealthStatus] = {}
         self._stop_polling = threading.Event()
         self._polling_thread: Optional[threading.Thread] = None
+        self._health_listeners: List[Callable[[str, HealthStatus, HealthStatus], None]] = []
     
     def register_health_provider(self, component_id: str, provider: HealthProvider) -> None:
         """
@@ -332,6 +336,9 @@ class IntegrationHealth(Component):
                     # from integrations.events.event_bus import EventBus
                     # EventBus().publish(event)
                     print(f"Health status changed for {component_id}: {old_status} -> {new_status}")
+                    
+                    # Notify health status listeners
+                    self._notify_health_listeners(component_id, old_status, new_status)
             except Exception as e:
                 # If status collection fails, set to UNKNOWN
                 self.status_cache[component_id] = HealthStatus.UNKNOWN
@@ -438,6 +445,42 @@ class IntegrationHealth(Component):
             }
         
         return result
+        
+    def add_status_listener(self, callback: Callable[[str, Dict[str, Any]], None]) -> None:
+        """
+        Register a callback to be triggered on integration status updates.
+        
+        The callback will be called with (point_name, status_data) whenever
+        a transaction is logged or a failure is reported.
+        
+        Args:
+            callback: Function that takes (point_name, status_data) parameters
+        """
+        self._listeners.append(callback)
+        
+    def remove_status_listener(self, callback: Callable[[str, Dict[str, Any]], None]) -> None:
+        """
+        Remove a previously registered status listener.
+        
+        Args:
+            callback: The callback function to remove
+        """
+        if callback in self._listeners:
+            self._listeners.remove(callback)
+            
+    def _notify_status_listeners(self, point: str, status: Dict[str, Any]) -> None:
+        """
+        Internal method to notify all registered listeners about a status change.
+        
+        Args:
+            point: Integration point name
+            status: Status data dictionary
+        """
+        for listener in self._listeners:
+            try:
+                listener(point, status)
+            except Exception as e:
+                print(f"Error in status listener: {str(e)}")
     
     def collect_metric(self, key: str, value: Any) -> None:
         """
@@ -493,3 +536,261 @@ class IntegrationHealth(Component):
             )
         
         return stop_timer
+        
+    def add_health_listener(self, callback: Callable[[str, HealthStatus, HealthStatus], None]) -> None:
+        """
+        Register a callback to be notified when component health status changes.
+        
+        Args:
+            callback: Function that takes (component_id, old_status, new_status) parameters
+        """
+        self._health_listeners.append(callback)
+        
+    def remove_health_listener(self, callback: Callable[[str, HealthStatus, HealthStatus], None]) -> None:
+        """
+        Remove a previously registered health listener.
+        
+        Args:
+            callback: The callback function to remove
+        """
+        if callback in self._health_listeners:
+            self._health_listeners.remove(callback)
+            
+    def _notify_health_listeners(self, component_id: str, old_status: HealthStatus, new_status: HealthStatus) -> None:
+        """
+        Internal method to notify all registered listeners about health status changes.
+        
+        Args:
+            component_id: Component identifier
+            old_status: Previous health status
+            new_status: New health status
+        """
+        for listener in self._health_listeners:
+            try:
+                listener(component_id, old_status, new_status)
+            except Exception as e:
+                print(f"Error in health listener: {str(e)}")
+
+
+class IntegrationMonitor:
+    """
+    Monitors integration points for transaction success, performance, and failures.
+    
+    This class provides methods to log transactions, report failures, and retrieve
+    performance statistics for integration points. It also supports real-time
+    status notifications through a listener pattern.
+    """
+    
+    def __init__(self):
+        """Initialize the integration monitor."""
+        self._transactions = {}
+        self._failures = defaultdict(list)
+        self._performance_stats = defaultdict(lambda: {"count": 0, "total_ms": 0, "failures": 0})
+        self._listeners = []
+    
+    def log_transaction(self, point: str, success: bool, duration_ms: Optional[float] = None) -> str:
+        """
+        Log a transaction with an integration point.
+        
+        Args:
+            point: Name of the integration point
+            success: Whether the transaction was successful
+            duration_ms: Duration of the transaction in milliseconds
+            
+        Returns:
+            Transaction ID (str) that can be used to retrieve transaction details later
+        """
+        txn_id = str(uuid.uuid4())
+        self._transactions[txn_id] = {
+            "point": point,
+            "success": success,
+            "timestamp": datetime.now(),
+            "duration_ms": duration_ms
+        }
+        
+        # Update performance stats
+        stats = self._performance_stats[point]
+        stats["count"] += 1
+        if not success:
+            stats["failures"] += 1
+        if duration_ms is not None:
+            stats["total_ms"] += duration_ms
+        
+        # Notify listeners about this transaction
+        self._notify_status_listeners(point, {
+            "type": "transaction",
+            "success": success,
+            "txn_id": txn_id,
+            "duration_ms": duration_ms
+        })
+        
+        return txn_id
+    
+    def get_transaction(self, txn_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get details of a specific transaction.
+        
+        Args:
+            txn_id: Transaction ID
+            
+        Returns:
+            Transaction details or None if not found
+        """
+        return self._transactions.get(txn_id)
+    
+    def report_failure(self, point: str, error: Any) -> None:
+        """
+        Report a failure with an integration point.
+        
+        Args:
+            point: Name of the integration point
+            error: Error information (exception or error message)
+        """
+        failure_entry = {
+            "timestamp": datetime.now(),
+            "error": str(error)
+        }
+        self._failures[point].append(failure_entry)
+        
+        # Update failure count in performance stats
+        if point in self._performance_stats:
+            self._performance_stats[point]["failures"] += 1
+            
+        # Notify listeners about this failure
+        self._notify_status_listeners(point, {
+            "type": "failure",
+            "error": str(error),
+            "details": failure_entry
+        })
+    
+    def get_recent_failures(self, point: str) -> List[Dict[str, Any]]:
+        """
+        Get recent failures for an integration point.
+        
+        Args:
+            point: Name of the integration point
+            
+        Returns:
+            List of recent failures
+        """
+        return self._failures.get(point, [])
+    
+    def get_performance_stats(self, point: str) -> Dict[str, Any]:
+        """
+        Get performance statistics for an integration point.
+        
+        Args:
+            point: Name of the integration point
+            
+        Returns:
+            Performance statistics dictionary containing:
+            - count: Total number of transactions
+            - total_ms: Total duration in milliseconds
+            - failures: Number of failed transactions
+            - success_rate: Ratio of successful transactions (if count > 0)
+            - avg_duration_ms: Average transaction duration (if count > 0)
+        """
+        stats = self._performance_stats.get(point, {"count": 0, "total_ms": 0, "failures": 0})
+        
+        # Calculate derived metrics
+        result = dict(stats)
+        if stats["count"] > 0:
+            result["success_rate"] = (stats["count"] - stats["failures"]) / stats["count"]
+            if stats["total_ms"] > 0:
+                result["avg_duration_ms"] = stats["total_ms"] / stats["count"]
+        
+        return result
+
+
+class IntegrationPointRegistry:
+    """
+    Registry for integration points in the system.
+    
+    This class maintains a registry of all integration points and provides
+    methods to register and retrieve them. It also supports notifications
+    when integration points are registered or updated.
+    """
+    
+    def __init__(self):
+        """Initialize the integration point registry."""
+        self._points = {}
+        self._listeners = []
+    
+    def register_integration_point(self, name: str, metadata: Optional[Dict[str, Any]] = None) -> None:
+        """
+        Register an integration point.
+        
+        Args:
+            name: Name of the integration point
+            metadata: Additional metadata about the integration point, such as:
+                     - type: The type of integration (API, database, etc.)
+                     - owner: Team or person responsible for this integration
+                     - description: Human-readable description
+                     - url: Endpoint URL if applicable
+        """
+        point_data = {
+            "name": name,
+            "registered_at": datetime.now(),
+            "metadata": metadata or {}
+        }
+        
+        is_update = name in self._points
+        self._points[name] = point_data
+        
+        # Notify listeners
+        self._notify_listeners(name, point_data, is_update)
+    
+    def get_all_points(self) -> List[str]:
+        """
+        Get all registered integration points.
+        
+        Returns:
+            List of integration point names
+        """
+        return list(self._points.keys())
+    
+    def get_point_details(self, name: str) -> Optional[Dict[str, Any]]:
+        """
+        Get details of a specific integration point.
+        
+        Args:
+            name: Name of the integration point
+            
+        Returns:
+            Integration point details or None if not found
+        """
+        return self._points.get(name)
+        
+    def add_registry_listener(self, callback: Callable[[str, Dict[str, Any], bool], None]) -> None:
+        """
+        Register a callback to be notified when integration points are registered or updated.
+        
+        Args:
+            callback: Function that takes (name, point_data, is_update) parameters
+        """
+        self._listeners.append(callback)
+        
+    def remove_registry_listener(self, callback: Callable[[str, Dict[str, Any], bool], None]) -> None:
+        """
+        Remove a previously registered listener.
+        
+        Args:
+            callback: The callback function to remove
+        """
+        if callback in self._listeners:
+            self._listeners.remove(callback)
+            
+    def _notify_listeners(self, name: str, point_data: Dict[str, Any], is_update: bool) -> None:
+        """
+        Internal method to notify all registered listeners about registry changes.
+        
+        Args:
+            name: Integration point name
+            point_data: Integration point data
+            is_update: Whether this is an update to an existing point
+        """
+        for listener in self._listeners:
+            try:
+                listener(name, point_data, is_update)
+            except Exception as e:
+                print(f"Error in registry listener: {str(e)}")

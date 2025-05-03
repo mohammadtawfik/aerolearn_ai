@@ -14,7 +14,8 @@ import uuid
 import time
 
 from integrations.events.event_types import Event, EventCategory, EventPriority
-from integrations.registry.component_registry import Component, ComponentState
+from integrations.registry.component_state import ComponentState
+from integrations.registry.component_registry import Component
 
 
 class StatusSeverity(Enum):
@@ -48,7 +49,27 @@ class StatusChangeEvent(Event):
             message: Human-readable description of the status change
             metadata: Additional data related to the status change
         """
-        super().__init__()
+        # Prepare data for parent Event class
+        event_type = "status_change"
+        category = EventCategory.SYSTEM
+        source_component = component_id
+        data = {
+            "old_state": old_state,
+            "new_state": new_state,
+            "severity": severity.name,
+            "message": message,
+            "metadata": metadata or {},
+        }
+        
+        # Initialize parent Event with required arguments
+        super().__init__(
+            event_type=event_type,
+            category=category,
+            source_component=source_component,
+            data=data
+        )
+        
+        # Set additional properties
         self.component_id = component_id
         self.old_state = old_state
         self.new_state = new_state
@@ -56,7 +77,6 @@ class StatusChangeEvent(Event):
         self.message = message
         self.metadata = metadata or {}
         self.timestamp = datetime.now()
-        self.category = EventCategory.SYSTEM
         
         # Set priority based on severity
         if severity == StatusSeverity.CRITICAL:
@@ -228,9 +248,9 @@ class ComponentStatusTracker(Component):
             history_limit: Maximum number of status history entries to keep per component
         """
         super().__init__(
-            component_id="system.component_status_tracker",
-            component_type="monitoring",
-            version="1.0.0"
+            "system.component_status_tracker",
+            "monitoring",
+            "1.0.0"
         )
         self.name = "Component Status Tracker"
         self.history_limit = history_limit
@@ -526,6 +546,24 @@ class ComponentStatusTracker(Component):
             self._component_dependents[dependency_id] = set()
         self._component_dependents[dependency_id].add(component_id)
     
+    def get_dependency_graph(self) -> Dict[str, Set[str]]:
+        """
+        Return the full dependency graph.
+        
+        Returns:
+            Dictionary mapping component IDs to sets of dependency IDs
+        """
+        return self._component_dependencies
+    
+    def get_dependents_graph(self) -> Dict[str, Set[str]]:
+        """
+        Return the full dependents graph (inverse of dependency graph).
+        
+        Returns:
+            Dictionary mapping component IDs to sets of dependent component IDs
+        """
+        return self._component_dependents
+    
     def _check_dependent_components(self, component_id: str, state: ComponentState) -> None:
         """
         Check if dependent components need to be notified of a state change.
@@ -589,3 +627,84 @@ class ComponentStatusTracker(Component):
             result['state_counts'][status.state.name] += 1
         
         return result
+        
+    def check_version_compatibility(self, component_versions: Dict[str, str]) -> Dict[str, List[str]]:
+        """
+        Check version compatibility between components and their dependencies.
+        
+        Given a mapping {component_id: version}, returns a dict of incompatibilities.
+        
+        Args:
+            component_versions: Dictionary mapping component IDs to their versions
+            
+        Returns:
+            Dictionary mapping component IDs to lists of incompatible dependencies
+        """
+        incompatibilities = {}
+        for comp, deps in self._component_dependencies.items():
+            for dep in deps:
+                if (comp in component_versions and dep in component_versions and
+                        component_versions[comp] != component_versions[dep]):
+                    incompatibilities.setdefault(comp, []).append(dep)
+        return incompatibilities
+    
+    def impact_analysis(self, changed_component: str) -> List[str]:
+        """
+        Perform impact analysis for a changed component.
+        
+        Given a component_id, return all (transitive) dependents that will be
+        affected by a change.
+        
+        Args:
+            changed_component: ID of the component that changed
+            
+        Returns:
+            List of component IDs that will be affected by the change
+        """
+        affected = set()
+        
+        # BFS to find all affected components
+        queue = list(self._component_dependents.get(changed_component, []))
+        while queue:
+            current = queue.pop(0)
+            if current not in affected:
+                affected.add(current)
+                queue.extend(self._component_dependents.get(current, []))
+                
+        return list(affected)
+    
+    def visualize_dependencies(self) -> Dict[str, Any]:
+        """
+        Generate a visualization-friendly representation of the dependency graph.
+        
+        Returns:
+            Dictionary with nodes and links for visualization
+        """
+        nodes = []
+        links = []
+        
+        # Create nodes for all components
+        all_components = set(self._component_dependencies.keys()) | set(self._component_dependents.keys())
+        for component_id in all_components:
+            status = self.get_component_status(component_id)
+            node = {
+                'id': component_id,
+                'name': component_id.split('.')[-1].replace('_', ' ').title(),
+                'state': status.state.name if status else 'UNKNOWN'
+            }
+            nodes.append(node)
+        
+        # Create links for dependencies
+        for component_id, dependencies in self._component_dependencies.items():
+            for dependency_id in dependencies:
+                link = {
+                    'source': component_id,
+                    'target': dependency_id,
+                    'type': 'dependency'
+                }
+                links.append(link)
+        
+        return {
+            'nodes': nodes,
+            'links': links
+        }

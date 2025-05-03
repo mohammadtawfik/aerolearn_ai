@@ -6,6 +6,57 @@ Implements: activity sequence analysis, resource utilization, study habit, learn
 from typing import List, Dict, Any, Optional
 from collections import defaultdict
 
+
+class ComponentStatus:
+    """
+    Represents the operational status of a monitoring component.
+    """
+    def __init__(self, component_name: str, is_active: bool = True, status_code: int = 200, 
+                 message: str = "OK", details: Optional[Dict[str, Any]] = None):
+        self.component_name = component_name
+        self.is_active = is_active
+        self.status_code = status_code
+        self.message = message
+        self.details = details or {}
+        self.timestamp = None  # Will be set when status is recorded
+        
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert status to dictionary representation"""
+        return {
+            "component": self.component_name,
+            "active": self.is_active,
+            "status_code": self.status_code,
+            "message": self.message,
+            "details": self.details,
+            "timestamp": self.timestamp
+        }
+
+
+class HealthReport:
+    """
+    Aggregates component statuses into a comprehensive health report.
+    """
+    def __init__(self):
+        self.components: Dict[str, ComponentStatus] = {}
+        self.overall_status: str = "healthy"
+        self.timestamp = None
+        
+    def add_component_status(self, status: ComponentStatus) -> None:
+        """Add a component status to the report"""
+        self.components[status.component_name] = status
+        
+        # Update overall status if any component is not active
+        if not status.is_active:
+            self.overall_status = "degraded"
+            
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert health report to dictionary representation"""
+        return {
+            "overall_status": self.overall_status,
+            "timestamp": self.timestamp,
+            "components": {name: status.to_dict() for name, status in self.components.items()}
+        }
+
 def detect_activity_sequences(event_log: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Analyze order and transitions in user learning events.
