@@ -10,14 +10,17 @@
 | `docs\api\content_similarity_api.md` | Content Similarity Module API | 2025-04-30 14:06:37 |
 | `docs\api\course_enrollment_api.md` | Course Enrollment API Documentation | 2025-05-01 18:08:55 |
 | `docs\api\course_management_api.md` | Course Management API & Admin Guide | 2025-04-30 07:43:05 |
+| `docs\api\feature_development_tracker.md` | Feature Development Tracker – API & Usage Documentation | 2025-05-04 09:34:42 |
 | `docs\api\feedback_format_specifications.md` | Feedback Format Specifications – AeroLearn AI | 2025-05-02 10:11:12 |
 | `docs\api\grading_rule_specifications.md` | Grading Rule Specifications – AeroLearn AI | 2025-05-02 10:10:42 |
 | `docs\api\interventions_api.md` | Intervention Suggestion System API | 2025-05-02 11:32:20 |
 | `docs\api\manual_grading_procedures.md` | Manual Grading Procedures – AeroLearn AI | 2025-05-02 10:10:56 |
 | `docs\api\metadata_schema_and_extension_points.md` | Metadata Schema and Extension Points | 2025-04-27 16:40:07 |
+| `docs\api\milestone_tracker.md` | Milestone Tracker – API & Usage Documentation | 2025-05-04 09:42:07 |
 | `docs\api\notification_api.md` | AeroLearn AI Notification Center – API Guide | 2025-05-01 19:37:39 |
 | `docs\api\progress_metrics.md` | Progress Metrics API | 2025-05-01 19:19:25 |
 | `docs\api\prompt_templates.md` | Prompt Templates API Documentation | 2025-05-01 13:17:01 |
+| `docs\api\resource_allocation_api.md` | Resource Allocation API & Best Practices | 2025-05-04 09:54:37 |
 | `docs\api\resource_discovery_api.md` | External Resource Discovery API | 2025-05-01 08:32:25 |
 | `docs\api\search_api.md` | Search API Documentation | 2025-05-01 06:38:36 |
 | `docs\api\service_health_protocol.md` | Service Health Monitoring Protocol | 2025-05-02 12:02:18 |
@@ -59,7 +62,7 @@
 | `docs\development\day18_changelog.md` | Day 18 Changelog & Milestone Report | 2025-05-02 11:32:34 |
 | `docs\development\day18_plan.md` |  | 2025-05-02 11:34:01 |
 | `docs\development\day19_plan.md` |  | 2025-05-04 09:24:56 |
-| `docs\development\day20_plan.md` |  | 2025-05-02 08:42:41 |
+| `docs\development\day20_plan.md` |  | 2025-05-04 10:22:05 |
 | `docs\development\day21_plan.md` |  | 2025-05-02 08:42:47 |
 | `docs\development\day22_plan.md` |  | 2025-05-02 08:42:45 |
 | `docs\development\day23_plan.md` |  | 2025-05-02 08:42:50 |
@@ -78,7 +81,9 @@
 | `docs\development\tdd_workflow_guidelines.md` | AeroLearn AI: Test-Driven Development (TDD) Working Instructions | 2025-05-03 09:44:37 |
 | `docs\development\test_coverage_notes_day18.md` | Day 18: Test Strategy & Coverage Notes | 2025-05-02 11:32:47 |
 | `docs\development\user_management_plan.md` | Task 11.2: User Management Implementation Plan (Completed) | 2025-04-29 16:14:33 |
-| `docs\doc_index.md` | Documentation Index | 2025-05-04 09:04:27 |
+| `docs\doc_index.md` | Documentation Index | 2025-05-04 10:20:43 |
+| `docs\generated\README.md` | Documentation Generation Process | 2025-05-04 10:19:10 |
+| `docs\generated\index.md` | AeroLearn AI Generated Documentation Site | 2025-05-04 10:19:10 |
 | `docs\index.md` | AeroLearn AI Documentation — Index | 2025-04-27 06:14:40 |
 | `docs\integration_framework.md` | AeroLearn AI Integration Framework | 2025-04-26 10:59:12 |
 | `docs\reports\security_review_report.md` | <! | 2025-05-01 16:02:29 |
