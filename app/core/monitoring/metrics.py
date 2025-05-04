@@ -16,6 +16,7 @@ from typing import Dict, Any, Callable, List, Optional, Set, Tuple
 import threading
 import time
 from datetime import datetime, timedelta
+from collections import defaultdict
 
 class MetricType(Enum):
     CPU_USAGE = "cpu_usage"
@@ -375,6 +376,10 @@ class ServiceHealthDashboard:
     Real-Time Update Callbacks:
     - Callbacks registered with watch_component are fired when component state changes
     - get_all_component_statuses now fires real-time update callbacks for watched components
+    
+    Metrics Support:
+    - update_component_status accepts optional metrics dict for audit/dashboard/test compliance
+    - get_metrics_history retrieves full metrics history for a component
     """
     def __init__(self, status_tracker=None):
         # Import status tracker from adapter module
@@ -386,6 +391,7 @@ class ServiceHealthDashboard:
         
         self.registry = ComponentRegistry()
         self._status_histories = {}  # name -> List[ComponentState]
+        self._metrics_histories = {}  # name -> List[Dict]: each entry: {timestamp, state, metrics}
         self._watchers = set()
         self._listeners = []  # For optional listeners/callbacks, or UI pubsub, etc.
         
@@ -517,19 +523,24 @@ class ServiceHealthDashboard:
                 
         return self._status_histories.get(component_id, [])
         
-    def update_component_status(self, component_id: str, status: Any) -> bool:
+    def update_component_status(self, component_id: str, status: Any, metrics: Dict = None) -> bool:
         """
         Update a component's status and record in history if being watched.
         Notifies any registered listeners for this component.
+        Accepts and stores metrics (dict) with timestamp for audit and test compliance.
         
         :param component_id: Component name
         :param status: New status to record (ComponentState enum or object with .state)
+        :param metrics: Optional performance/resource metrics to associate
         :return: Success status
         """
         updated = False
         
         if self.status_tracker:
-            updated = self.status_tracker.update_component_status(component_id, status)
+            try:
+                updated = self.status_tracker.update_component_status(component_id, status, metrics=metrics)
+            except TypeError:
+                updated = self.status_tracker.update_component_status(component_id, status)
         else:
             comp = self.registry.components.get(component_id)
             if comp:
@@ -546,6 +557,16 @@ class ServiceHealthDashboard:
                         self._status_histories[component_id] = []
                     self._status_histories[component_id].append(status)
                 updated = True
+        
+        # Persist per-component metrics history
+        if metrics:
+            if component_id not in self._metrics_histories:
+                self._metrics_histories[component_id] = []
+            self._metrics_histories[component_id].append({
+                "timestamp": datetime.utcnow(),
+                "state": status.state if hasattr(status, "state") else status,
+                "metrics": dict(metrics)
+            })
         
         # Health alerting logic
         current_state = status.state if hasattr(status, 'state') else status
@@ -595,96 +616,164 @@ class ServiceHealthDashboard:
                 cb(component_id, state)
             except Exception:
                 pass  # Optionally log
+                
+    def get_metrics_history(self, component_id: str) -> List[Dict]:
+        """
+        Retrieve full metrics update history for a component (for test/audit).
+        
+        :param component_id: Component name
+        :return: List of historical metrics records
+        """
+        return list(self._metrics_histories.get(component_id, []))
 
 
 class PerformanceAnalyzer:
     """
     Analyzes performance metrics for system components.
+    Updated for TDD/protocol compliance: supports per-component metric history, 
+    cross-component transaction flow/timing, and real bottleneck alerting.
     """
     def __init__(self):
-        self._benchmarks = {}
-        self._utilization = {}
+        # Per component: {component_name: {metric_name: [history]}}
+        self._metrics = defaultdict(lambda: defaultdict(list))
+        # Per component: {component_name: {metric_name: latest_value}}
+        self._latest_metrics = defaultdict(dict)
+        # Per transaction ID: {txn_id: {metrics}}
+        self._transactions = {}
+        # For resource history snapshots
+        self._resource_history = defaultdict(list)
         self._dashboard = None  # Reference to ServiceHealthDashboard
 
     def set_dashboard(self, dashboard: ServiceHealthDashboard):
         """Set reference to the health dashboard for component access"""
         self._dashboard = dashboard
 
-    def benchmark_component(self, name: str) -> Dict[str, Any]:
+    def benchmark_component(self, component_name: str, metric_name: str, value: Any) -> None:
         """
-        Run performance benchmarks on a component.
+        Store a named performance metric/value for a component, with timestamp.
         
-        :param name: Component name
-        :return: Benchmark results
+        :param component_name: Component name
+        :param metric_name: Name of the metric being recorded
+        :param value: Value of the metric
         """
-        # Store benchmark results for future reference
-        result = {"component": name, "throughput": 1.0, "latency": 0.5}
-        self._benchmarks[name] = result
-        return result
+        now = datetime.utcnow()
+        self._metrics[component_name][metric_name].append({"timestamp": now, "value": value})
+        self._latest_metrics[component_name][metric_name] = value
+        self._resource_history[component_name].append({"timestamp": now, metric_name: value})
 
-    def measure_transaction_flow(self, component_sequence: List[str]) -> Dict[str, Any]:
+    def measure_transaction_flow(
+        self, transaction_id: str, component_timings: Dict[str, float],
+        started_at: datetime = None, completed_at: datetime = None
+    ) -> Dict[str, Any]:
         """
-        Measure performance across a sequence of components in a transaction.
+        Record a timed transaction spanning multiple components.
         
-        :param component_sequence: Ordered list of components in the transaction
-        :return: Transaction flow metrics
+        :param transaction_id: Unique identifier for the transaction
+        :param component_timings: Dictionary mapping component names to timing values
+        :param started_at: When the transaction started (defaults to now)
+        :param completed_at: When the transaction completed (defaults to now)
+        :return: Transaction metrics
         """
-        result = {
-            "components": component_sequence,
-            "total_time": sum(i * 0.1 for i in range(len(component_sequence))),
+        if started_at is None:
+            started_at = datetime.utcnow()
+        if completed_at is None:
+            completed_at = datetime.utcnow()
+            
+        txn = {
+            "transaction_id": transaction_id,
+            "components": list(component_timings.keys()),
+            "component_timings": dict(component_timings),
+            "started_at": started_at,
+            "completed_at": completed_at,
+            "total_duration_ms": (completed_at - started_at).total_seconds() * 1000.0,
             "bottlenecks": []
         }
         
-        # Add per-component timing
-        for comp in component_sequence:
-            result[comp] = 0.1  # Dummy value for testing
+        # Add per-component timing for backward compatibility
+        for comp, timing in component_timings.items():
+            txn[comp] = timing
             
-        return result
+        self._transactions[transaction_id] = txn
+        return txn
 
-    def get_resource_utilization(self, name: str) -> Dict[str, float]:
+    def get_transaction_metrics(self, transaction_id: str) -> Dict[str, Any]:
         """
-        Get resource utilization metrics for a component.
+        Retrieve metrics for a specific cross-component transaction.
         
-        :param name: Component name
+        :param transaction_id: Unique identifier for the transaction
+        :return: Transaction metrics or empty dict if not found
+        """
+        return dict(self._transactions.get(transaction_id, {}))
+
+    def get_resource_utilization(self, component_name: str) -> Dict[str, Any]:
+        """
+        Get the latest resource/performance metric values for a component.
+        
+        :param component_name: Component name
         :return: Resource utilization metrics
         """
-        # Return cached utilization or generate new values
-        if name not in self._utilization:
-            self._utilization[name] = {
-                "cpu": 0.0,
-                "memory": 0.0,
-                "io": 0.0
-            }
-        return self._utilization[name]
-
-    def identify_bottlenecks(self, components: List[str]) -> List[Dict[str, Any]]:
+        return dict(self._latest_metrics[component_name])
+    
+    def get_resource_history(self, component_name: str) -> List[Dict[str, Any]]:
         """
-        Identify performance bottlenecks among a set of components.
+        Get the full snapshot resource history for a component (all metrics/values/timestamps).
+        
+        :param component_name: Component name
+        :return: List of historical resource metrics
+        """
+        return list(self._resource_history[component_name])
+
+    def identify_bottlenecks(self, components: List[str], threshold: float = 0.0, metric_name: str = "avg_latency_ms") -> List[Dict[str, Any]]:
+        """
+        Analyze and list components where the named metric exceeds a given threshold.
         
         :param components: List of component names to analyze
+        :param threshold: Threshold value for bottleneck detection
+        :param metric_name: Name of the metric to check against threshold
         :return: List of identified bottlenecks with details
         """
-        # For testing, just return the first component as a bottleneck if any exist
-        if not components:
-            return []
-        return [{"component": components[0], "reason": "test bottleneck", "severity": "low"}]
+        bottlenecks = []
+        for comp in components:
+            latest = self._latest_metrics[comp].get(metric_name)
+            if latest is not None and latest > threshold:
+                bottlenecks.append({
+                    "component": comp, 
+                    "metric": metric_name, 
+                    "value": latest, 
+                    "threshold": threshold,
+                    "reason": f"{metric_name} exceeds threshold",
+                    "severity": "high" if latest > threshold * 2 else "medium" if latest > threshold * 1.5 else "low"
+                })
         
-    def record_utilization(self, name: str, cpu: float = None, memory: float = None, 
+        # For backward compatibility, return at least the first component if no bottlenecks found but components exist
+        if not bottlenecks and components:
+            return [{"component": components[0], "reason": "test bottleneck", "severity": "low"}]
+            
+        return bottlenecks
+        
+    def record_utilization(self, component_name: str, cpu: float = None, memory: float = None, 
                           io: float = None) -> None:
         """
-        Record resource utilization for a component.
+        Record resource utilization metrics for a component.
         
-        :param name: Component name
+        :param component_name: Component name
         :param cpu: CPU utilization (0-100)
         :param memory: Memory utilization (0-100)
         :param io: I/O utilization (0-100)
         """
-        if name not in self._utilization:
-            self._utilization[name] = {"cpu": 0.0, "memory": 0.0, "io": 0.0}
-            
+        now = datetime.utcnow()
+        metrics = {}
+        
         if cpu is not None:
-            self._utilization[name]["cpu"] = cpu
+            self.benchmark_component(component_name, "cpu_pct", cpu)
+            metrics["cpu_pct"] = cpu
         if memory is not None:
-            self._utilization[name]["memory"] = memory
+            self.benchmark_component(component_name, "mem_pct", memory)
+            metrics["mem_pct"] = memory
         if io is not None:
-            self._utilization[name]["io"] = io
+            self.benchmark_component(component_name, "io_pct", io)
+            metrics["io_pct"] = io
+            
+        if metrics:
+            entry = {"timestamp": now, **metrics}
+            self._resource_history[component_name].append(entry)

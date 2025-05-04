@@ -15,18 +15,20 @@ logger = logging.getLogger(__name__)
 class Component:
     """Base class for all registrable components in the system."""
     
-    def __init__(self, name: str, component_type: str = None, version: str = None, 
+    def __init__(self, name: str, description: str = None, component_type: str = None, version: str = None, 
                  state: ComponentState = ComponentState.UNKNOWN):
         """
         Initialize a component.
         
         Args:
             name: Unique identifier for this component instance
+            description: Human-readable description for dashboards/registry
             component_type: Type identifier for this kind of component (defaults to name)
             version: Version string
             state: Initial component state
         """
         self.name = name
+        self.description = description or ""
         self.component_type = component_type or name
         self.version = version
         self.state = state
@@ -62,7 +64,7 @@ class ComponentRegistry:
         self._dependency_graph: Dict[str, Set[str]] = defaultdict(set)
     
     def register_component(self, name: str, state: ComponentState = ComponentState.UNKNOWN, 
-                          version: str = None, component_type: str = None) -> Component:
+                          version: str = None, component_type: str = None, description: str = None) -> Component:
         """
         Register a component in the registry.
         Status tracking must be registered outside of the core registry (adapter or service).
@@ -72,6 +74,7 @@ class ComponentRegistry:
             state: Initial component state
             version: Version string
             component_type: Type of component (defaults to name)
+            description: Human-readable description for dashboards/registry
             
         Returns:
             The registered component
@@ -83,7 +86,7 @@ class ComponentRegistry:
             raise ValueError(f"Component already registered with name: {name}")
         
         component_type = component_type or name
-        comp = Component(name=name, component_type=component_type, version=version, state=state)
+        comp = Component(name=name, description=description, component_type=component_type, version=version, state=state)
         self._components[name] = comp
         
         # Register by type
@@ -95,7 +98,7 @@ class ComponentRegistry:
         if name not in self._dependency_graph:
             self._dependency_graph[name] = set()
         
-        logger.info(f"Component registered: {name} (type: {component_type}, version: {version})")
+        logger.info(f"Component registered: {name} (type: {component_type}, version: {version}, desc: {description})")
         return comp
     
     def unregister_component(self, name: str) -> bool:
