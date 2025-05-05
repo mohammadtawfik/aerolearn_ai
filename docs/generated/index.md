@@ -43,6 +43,15 @@ Methods:
     - get_current_role(): Returns the current session's role (for UI navigation).
     - get_current_user(): Returns the current user profile or None.
 
+### `app/core/auth/authentication.py` — `AuthSession`
+
+Simple session object representing an authenticated user session.
+
+### `app/core/auth/authentication.py` — `Authenticator`
+
+Minimal authentication entrypoint for integration testing.
+Provides a protocol-compliant interface required by integration and TDD tests.
+
 ### `app/core/auth/session.py` — `Session`
 
 Represents an authenticated session.
@@ -521,6 +530,16 @@ Retrieve previously saved analytics results for a student.
 
 Clear all stored analytics results.
 Useful for test setup/teardown.
+
+### `app/core/monitoring/metrics.py` — `ProgressMetrics`
+
+Records user progress per course and provides progress event interface.
+Designed for test-driven, in-memory use; expandable for database backing.
+
+### `app/core/monitoring/metrics.py` — `AnalyticsEngine`
+
+Minimal stub: Analytics system that queries progress from ProgressMetrics.
+Meant to satisfy TDD and integration test interface; no persistence.
 
 ### `app/core/monitoring/metrics.py` — `PerformanceAnalyzer`
 
@@ -1543,151 +1562,152 @@ Main orchestrator for Week 2 integration efforts.
 ## Documentation Index Crosscheck
 
 ### ❗ Missing in Scan (Listed in doc_index.md, not found in scan):
-- docs/api/notification_api.md
+- docs/development/tdd_workflow_guidelines.md
+- docs/api/feedback_format_specifications.md
 - docs/user_guides/content_analysis_workflows.md
 - docs/development/day28_plan.md
-- docs/architecture/system_monitoring.md
-- docs/architecture/dependency_tracking_protocol.md
-- docs/architecture/week2_integration.md
-- docs/api/assessment_delivery_workflow.md
-- docs/development/test_coverage_notes_day18.md
-- docs/user_guides/content_extraction.md
-- docs/api/tagging_system.md
-- docs/api/upload_system_api.md
-- docs/development/day12_plan.md
-- docs/user_guides/student_dashboard_features.md
-- docs/ui/professor_upload_widget_api.md
-- docs/development/day22_plan.md
-- docs/api/interventions_api.md
-- docs/api/metadata_schema_and_extension_points.md
-- docs/api/resource_allocation_api.md
-- docs/architecture/knowledge_graph.md
-- docs/development/sprint_plan.md
-- docs/ui/interactive_elements_guidelines.md
-- docs/development/day16_plan.md
-- docs/architecture/integration_architecture.md
-- docs/api/user_management_api.md
-- docs/development/day21_plan.md
-- docs/ui/multi_format_content_viewer.md
-- docs/architecture/analytics_integration.md
-- docs/user_guides/prompt_engineering.md
-- docs/architecture/architecture_overview.md
-- docs/development/day30_plan.md
-- docs/architecture/health_monitoring_protocol.md
-- docs/development/pytest-qt-pyqt6-fix.md
-- docs/api/grading_rule_specifications.md
-- docs/user_guides/course_organization_features.md
-- docs/development/day20_plan.md
-- docs/user_guides/admin_workflows.md
-- docs/development/student_course_navigator.md
-- docs/index.md
 - docs/development/day26_plan.md
-- docs/development/day23_plan.md
-- docs/api/course_management_api.md
-- docs/api/batch_content_metadata_api.md
-- docs/ui/professor_upload_widget_user.md
-- docs/development/advanced_ai_integration_workflows.md
-- docs/development/day25_plan.md
-- docs/README.md
-- docs/ui/content_viewer_extension.md
-- docs/generated/index.md
-- docs/development/day11_done_criteria.md
-- docs/user_guides/admin_user_mgmt.md
-- docs/development/tdd_docs_awareness_protocol.md
-- docs/api/batch_content_metadata_examples.md
-- docs/api/milestone_tracker.md
-- docs/architecture/service_health_protocol.md
-- docs/reports/test_coverage_report.md
-- docs/api/manual_grading_procedures.md
-- docs/architecture/dependency_maps.md
-- docs/user_guides/admin_course_mgmt.md
-- docs/api/service_health_protocol.md
-- docs/architecture/admin_security.md
-- docs/user_guides/conversation_usage.md
-- docs/doc_index.md
-- docs/reports/week2_progress_report.md
-- docs/development/day24_plan.md
-- docs/ui/note_taking_features.md
-- docs/development/day14_plan.md
-- docs/user_guides/advanced_ai_integration_workflows.md
-- docs/development/day15_plan.md
-- docs/api/progress_metrics.md
-- docs/user_guides/concept_relationships.md
-- docs/architecture/health_monitoring.md
-- docs/api/resource_discovery_api.md
-- docs/api/content_similarity_api.md
-- docs/development/day19_plan.md
-- docs/architecture/project_roadmap.md
-- docs/development/user_management_plan.md
-- docs/api/search_api.md
-- docs/generated/README.md
-- docs/integration_framework.md
-- docs/development/day18_changelog.md
-- docs/api/student_dashboard_widgets.md
-- docs/user_guides/testing_procedures.md
-- docs/architecture/vector_db.md
-- docs/api/prompt_templates.md
-- docs/development/tdd_workflow_guidelines.md
-- docs/api/batch_operations.md
-- docs/architecture/course_organization_integration.md
-- docs/development/day27_plan.md
-- docs/api/vector_db_api.md
-- docs/api/feature_development_tracker.md
-- docs/architecture/content_type_registry.md
-- docs/development/day18_plan.md
-- docs/architecture/content_similarity.md
-- docs/user_guides/enrollment_workflow.md
-- docs/api/week2_api.md
-- docs/development/change_simulation_process.md
 - docs/ui/student_dashboard_widget_api.md
+- docs/development/day21_plan.md
+- docs/development/sprint_plan.md
+- docs/user_guides/enrollment_workflow.md
 - docs/ui/navigator_customization.md
-- docs/user_guides/external_integration.md
-- docs/architecture/course_structure.md
-- docs/user_guides/week2_features.md
-- docs/content_management_integration.md
-- docs/api/feedback_format_specifications.md
-- docs/development/day13_plan.md
-- docs/user_guides/semantic_search.md
-- docs/development/day17_plan.md
-- docs/reports/security_review_report.md
-- docs/architecture/conversation_architecture.md
-- docs/architecture/compatibility_impact_analysis.md
-- docs/development/day10_done_criteria.md
-- docs/api/course_enrollment_api.md
+- docs/development/day11_done_criteria.md
+- docs/api/feature_development_tracker.md
+- docs/ui/interactive_elements_guidelines.md
+- docs/user_guides/advanced_ai_integration_workflows.md
+- docs/development/day19_plan.md
 - docs/development/day31_plan.md
+- docs/api/assessment_delivery_workflow.md
+- docs/api/content_similarity_api.md
+- docs/development/day17_plan.md
+- docs/architecture/course_structure.md
+- docs/reports/test_coverage_report.md
+- docs/api/upload_system_api.md
+- docs/doc_index.md
+- docs/api/prompt_templates.md
+- docs/api/grading_rule_specifications.md
+- docs/architecture/dependency_tracking_protocol.md
+- docs/generated/README.md
+- docs/development/day16_plan.md
+- docs/api/search_api.md
+- docs/api/batch_content_metadata_api.md
+- docs/user_guides/admin_user_mgmt.md
+- docs/architecture/compatibility_impact_analysis.md
+- docs/user_guides/admin_course_mgmt.md
+- docs/api/milestone_tracker.md
+- docs/development/day27_plan.md
+- docs/architecture/knowledge_graph.md
+- docs/architecture/conversation_architecture.md
+- docs/development/user_management_plan.md
+- docs/development/day20_plan.md
+- docs/reports/week2_progress_report.md
+- docs/ui/professor_upload_widget_api.md
+- docs/development/day30_plan.md
+- docs/api/interventions_api.md
+- docs/user_guides/conversation_usage.md
+- docs/api/week2_api.md
+- docs/architecture/health_monitoring.md
+- docs/development/tdd_docs_awareness_protocol.md
+- docs/index.md
+- docs/development/day18_plan.md
+- docs/api/resource_discovery_api.md
+- docs/api/vector_db_api.md
+- docs/api/tagging_system.md
+- docs/api/service_health_protocol.md
+- docs/development/day13_plan.md
+- docs/development/test_coverage_notes_day18.md
+- docs/user_guides/student_dashboard_features.md
+- docs/development/pytest-qt-pyqt6-fix.md
+- docs/architecture/week2_integration.md
+- docs/api/course_management_api.md
+- docs/architecture/content_type_registry.md
+- docs/api/user_management_api.md
+- docs/development/day23_plan.md
+- docs/ui/multi_format_content_viewer.md
+- docs/development/day15_plan.md
+- docs/development/day24_plan.md
+- docs/development/integration_test_documentation.md
+- docs/README.md
+- docs/ui/note_taking_features.md
+- docs/architecture/health_monitoring_protocol.md
+- docs/architecture/course_organization_integration.md
+- docs/user_guides/concept_relationships.md
+- docs/development/change_simulation_process.md
+- docs/api/resource_allocation_api.md
+- docs/user_guides/admin_workflows.md
+- docs/development/day14_plan.md
+- docs/content_management_integration.md
+- docs/architecture/vector_db.md
+- docs/api/course_enrollment_api.md
+- docs/integration_framework.md
+- docs/user_guides/testing_procedures.md
+- docs/api/student_dashboard_widgets.md
+- docs/architecture/service_health_protocol.md
+- docs/api/batch_operations.md
+- docs/reports/security_review_report.md
+- docs/ui/professor_upload_widget_user.md
+- docs/development/day25_plan.md
+- docs/ui/content_viewer_extension.md
+- docs/architecture/analytics_integration.md
+- docs/architecture/project_roadmap.md
+- docs/development/day18_changelog.md
+- docs/architecture/system_monitoring.md
+- docs/user_guides/prompt_engineering.md
+- docs/development/student_course_navigator.md
+- docs/api/batch_content_metadata_examples.md
+- docs/user_guides/course_organization_features.md
+- docs/user_guides/external_integration.md
+- docs/development/advanced_ai_integration_workflows.md
+- docs/architecture/dependency_maps.md
 - docs/development/day29_plan.md
+- docs/generated/index.md
+- docs/api/notification_api.md
+- docs/api/metadata_schema_and_extension_points.md
+- docs/api/progress_metrics.md
+- docs/architecture/integration_architecture.md
+- docs/architecture/architecture_overview.md
+- docs/development/day12_plan.md
+- docs/development/day22_plan.md
+- docs/user_guides/content_extraction.md
+- docs/architecture/admin_security.md
+- docs/user_guides/semantic_search.md
+- docs/architecture/content_similarity.md
+- docs/user_guides/week2_features.md
+- docs/api/manual_grading_procedures.md
+- docs/development/day10_done_criteria.md
 
 ### ⚠️ Unmatched in Index (Found in scan/output, not listed in doc_index.md):
-- api/search_api.md
+- api/tagging_system.md
+- api/interventions_api.md
+- api/batch_operations.md
+- api/milestone_tracker.md
+- api/content_similarity_api.md
+- api/course_management_api.md
+- api/feature_development_tracker.md
+- architecture/health_monitoring_protocol.md
+- api/metadata_schema_and_extension_points.md
+- api/batch_content_metadata_api.md
+- architecture/dependency_tracking_protocol.md
+- api/resource_discovery_api.md
+- api/student_dashboard_widgets.md
+- api/batch_content_metadata_examples.md
+- api/manual_grading_procedures.md
+- api/notification_api.md
+- api/upload_system_api.md
+- api/feedback_format_specifications.md
+- api/assessment_delivery_workflow.md
+- api/course_enrollment_api.md
 - architecture/service_health_protocol.md
 - api/progress_metrics.md
-- architecture/health_monitoring_protocol.md
-- api/assessment_delivery_workflow.md
-- api/batch_content_metadata_examples.md
-- api/tagging_system.md
-- api/vector_db_api.md
-- api/course_management_api.md
-- api/service_health_protocol.md
-- api/batch_operations.md
-- api/course_enrollment_api.md
-- api/week2_api.md
-- api/batch_content_metadata_api.md
-- api/upload_system_api.md
-- api/user_management_api.md
+- api/search_api.md
 - api/resource_allocation_api.md
-- api/manual_grading_procedures.md
-- api/resource_discovery_api.md
-- api/grading_rule_specifications.md
-- api/interventions_api.md
-- api/milestone_tracker.md
-- api/metadata_schema_and_extension_points.md
-- api/feature_development_tracker.md
-- api/notification_api.md
+- api/vector_db_api.md
 - api/prompt_templates.md
-- api/content_similarity_api.md
-- architecture/dependency_tracking_protocol.md
-- api/feedback_format_specifications.md
-- api/student_dashboard_widgets.md
+- api/user_management_api.md
+- api/grading_rule_specifications.md
+- api/week2_api.md
+- api/service_health_protocol.md
 
 ### Errors and Undocumented Sections:
 - Undocumented: app/core/auth/credential_manager.py::CredentialManager

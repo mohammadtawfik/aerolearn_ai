@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 375
+Total Python files: 376
 
 ## Table of Contents
 
@@ -366,7 +366,8 @@ Total Python files: 375
 │   │   ├── test_week2_integration.py
 │   │   ├── test_enrollment.py
 │   │   ├── test_assessment_engine_day17.py
-│   │   └── test_learning_analytics_integration.py
+│   │   ├── test_learning_analytics_integration.py
+│   │   └── test_weekly_integration_workflows.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -521,6 +522,17 @@ Total Python files: 375
 
 ## Key Files
 
+### integrations\registry\component_registry.py
+
+Component registry for the AeroLearn AI system.
+
+This module provides a protocol-compliant implementation of the component registry
+for service health...
+
+- Classes: 2
+- Functions: 0
+- Dependency Score: 106.00
+
 ### integrations\events\event_types.py
 
 Event type definitions for the AeroLearn AI event system.
@@ -532,17 +544,6 @@ inter-compon...
 - Functions: 0
 - Dependency Score: 105.00
 
-### integrations\registry\component_registry.py
-
-Component registry for the AeroLearn AI system.
-
-This module provides a protocol-compliant implementation of the component registry
-for service health...
-
-- Classes: 2
-- Functions: 0
-- Dependency Score: 103.00
-
 ### app\models\course.py
 
 Course model for AeroLearn AI.
@@ -553,6 +554,19 @@ Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
 - Classes: 6
 - Functions: 0
 - Dependency Score: 94.00
+
+### app\core\monitoring\metrics.py
+
+System Metrics & Alert Manager — AeroLearn AI
+Save at: /app/core/monitoring/metrics.py
+
+Features:
+- Define metrics types and schema
+- Register/report ...
+
+- Classes: 8
+- Functions: 11
+- Dependency Score: 92.00
 
 ### integrations\monitoring\component_status_adapter.py
 
@@ -584,18 +598,11 @@ Wraps Prog...
 - Functions: 0
 - Dependency Score: 78.00
 
-### app\core\monitoring\metrics.py
+### app\core\auth\authentication.py
 
-System Metrics & Alert Manager — AeroLearn AI
-Save at: /app/core/monitoring/metrics.py
-
-Features:
-- Define metrics types and schema
-- Register/report ...
-
-- Classes: 6
-- Functions: 11
-- Dependency Score: 77.00
+- Classes: 10
+- Functions: 0
+- Dependency Score: 76.00
 
 ### app\models\content.py
 
@@ -619,31 +626,50 @@ implementin...
 - Functions: 0
 - Dependency Score: 67.00
 
-### app\core\upload\batch_controller.py
-
-BatchUploadController: Coordinate and track multiple simultaneous uploads.
-
-- Aggregates progress
-- Controls pause/resume/cancel for all or any
-- Repo...
-
-- Classes: 4
-- Functions: 2
-- Dependency Score: 65.00
-
 ## Dependencies
 
 Key file relationships (files with most dependencies):
 
 - **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **app\core\monitoring\metrics.py** depends on: integrations\registry\component_registry.py
 - **integrations\monitoring\component_status_adapter.py** depends on: integrations\registry\component_registry.py
 - **integrations\monitoring\integration_health.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
 - **app\models\assessment.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **app\core\monitoring\metrics.py** depends on: integrations\registry\component_registry.py
+- **app\core\auth\authentication.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
 - **app\models\content.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py, app\models\course.py
 
 
 ## Detailed Code Analysis
+
+### integrations\registry\component_registry.py
+
+**Description:**
+
+Component registry for the AeroLearn AI system.
+
+This module provides a protocol-compliant implementation of the component registry
+for service health monitoring and dependency tracking, focusing on registration, 
+state management, and dependency graph analysis for dashboards and adapters.
+
+Protocol: /docs/architecture/dependency_tracking_protocol.md, /docs/architecture/service_health_protocol.md
+
+**Classes:**
+
+- `Component`
+
+
+  Protocol-compliant component for registry and service health monitoring.
+
+  Methods: `__init__()`, `name()`, `name()`, `declare_dependency()`, `set_state()`, ... (1 more)
+
+- `ComponentRegistry`
+
+
+  Central registry for AeroLearn AI system components.
+
+  Methods: `__new__()`, `__init__()`, `register_component()`, `unregister_component()`, `get_component()`, ... (17 more)
+
+
 
 ### integrations\events\event_types.py
 
@@ -773,36 +799,6 @@ organizational clarity.
 
 
 
-### integrations\registry\component_registry.py
-
-**Description:**
-
-Component registry for the AeroLearn AI system.
-
-This module provides a protocol-compliant implementation of the component registry
-for service health monitoring and dependency tracking, focusing on registration, 
-state management, and dependency graph analysis for dashboards and adapters.
-
-Protocol: /docs/architecture/dependency_tracking_protocol.md, /docs/architecture/service_health_protocol.md
-
-**Classes:**
-
-- `Component`
-
-
-  Protocol-compliant component for registry and service health monitoring.
-
-  Methods: `__init__()`, `name()`, `name()`, `declare_dependency()`, `set_state()`, ... (1 more)
-
-- `ComponentRegistry`
-
-
-  Central registry for AeroLearn AI system components.
-
-  Methods: `__new__()`, `__init__()`, `register_component()`, `unregister_component()`, `get_component()`, ... (17 more)
-
-
-
 ### app\models\course.py
 
 **Description:**
@@ -852,6 +848,115 @@ Covers ORM models, relationships, validation, serialization, and event emission.
 
 
   Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
+
+
+
+### app\core\monitoring\metrics.py
+
+**Description:**
+
+System Metrics & Alert Manager — AeroLearn AI
+Save at: /app/core/monitoring/metrics.py
+
+Features:
+- Define metrics types and schema
+- Register/report metrics for components
+- Threshold-based alerting (with callback hooks)
+- Real-time status query API
+- Learning analytics and progress tracking metrics
+- Component health monitoring and status history
+
+**Classes:**
+
+- `MetricType`
+ (inherits from: Enum)
+
+
+- `AlertLevel`
+ (inherits from: Enum)
+
+
+- `Metric`
+
+
+  Methods: `__init__()`, `to_dict()`
+
+- `MetricAlert`
+
+
+  Methods: `__init__()`
+
+- `SystemMetricsManager`
+
+
+  Methods: `__new__()`, `__init__()`, `register_metric()`, `report_metric()`, `get_metric()`, ... (4 more)
+
+- `ProgressMetrics`
+
+
+  Records user progress per course and provides progress event interface.
+
+  Methods: `__init__()`, `record_progress()`, `get_progress()`, `reset()`
+
+- `AnalyticsEngine`
+
+
+  Minimal stub: Analytics system that queries progress from ProgressMetrics.
+
+  Methods: `__init__()`, `get_progress()`
+
+- `PerformanceAnalyzer`
+
+
+  Analyzes performance metrics for system components.
+
+  Methods: `__init__()`, `set_dashboard()`, `benchmark_component()`, `measure_transaction_flow()`, `get_transaction_metrics()`, ... (4 more)
+
+**Functions:**
+
+- `track_learning_objective(user_id, objective_id, activities)`
+
+  Track the degree of achievement for a specific learning objective by user.
+
+- `monitor_time_on_task(user_id, activity_logs)`
+
+  Monitor total time on task for a user.
+
+- `calculate_completion_rate(user_id, module_ids, completion_logs)`
+
+  Calculate overall module completion rate for the user.
+
+- `analyze_performance_trends(user_id, performance_history)`
+
+  Analyze trends in student performance over time.
+
+- `assessment_performance_analytics(user_id, records)`
+
+  Summarize assessment performance for user: mean, min, max, count.
+
+- `engagement_score(user_id, interactions)`
+
+  Sum engagement points for a user by interaction type.
+
+- `competency_mapping(user_id, assessments)`
+
+  Return set of competency_id values achieved by user; achieved if score >= threshold.
+
+- `comparative_cohort_analytics(group1, group2)`
+
+  Compare two cohorts by average progress/engagement.
+
+- `save_analytics_result(student_id, data)`
+
+  Save analytics results for a student to in-memory storage.
+
+- `retrieve_analytics_result(student_id)`
+
+  Retrieve previously saved analytics results for a student.
+
+- `clear_analytics_storage()`
+
+  Clear all stored analytics results.
 
 
 
@@ -1120,98 +1225,72 @@ core assessment workflows and tests.
 
 
 
-### app\core\monitoring\metrics.py
-
-**Description:**
-
-System Metrics & Alert Manager — AeroLearn AI
-Save at: /app/core/monitoring/metrics.py
-
-Features:
-- Define metrics types and schema
-- Register/report metrics for components
-- Threshold-based alerting (with callback hooks)
-- Real-time status query API
-- Learning analytics and progress tracking metrics
-- Component health monitoring and status history
+### app\core\auth\authentication.py
 
 **Classes:**
 
-- `MetricType`
- (inherits from: Enum)
+- `AuthEvent`
+ (inherits from: Event)
 
 
-- `AlertLevel`
- (inherits from: Enum)
-
-
-- `Metric`
-
-
-  Methods: `__init__()`, `to_dict()`
-
-- `MetricAlert`
-
+  Event representing authentication-related changes (login, logout, failure).
 
   Methods: `__init__()`
 
-- `SystemMetricsManager`
+- `AuthenticationProvider`
+ (inherits from: ABC)
 
 
-  Methods: `__new__()`, `__init__()`, `register_metric()`, `report_metric()`, `get_metric()`, ... (4 more)
+  Interface for authentication providers.
 
-- `PerformanceAnalyzer`
+  Methods: `authenticate()`
+
+- `LocalAuthenticationProvider`
+ (inherits from: AuthenticationProvider)
 
 
-  Analyzes performance metrics for system components.
+  Simple authentication provider with in-memory user verification and event emission.
 
-  Methods: `__init__()`, `set_dashboard()`, `benchmark_component()`, `measure_transaction_flow()`, `get_transaction_metrics()`, ... (4 more)
+  Methods: `__init__()`, `authenticate()`, `logout()`
 
-**Functions:**
+- `MFAProvider`
 
-- `track_learning_objective(user_id, objective_id, activities)`
 
-  Track the degree of achievement for a specific learning objective by user.
+  Simple TOTP-like provider for MFA codes — 
 
-- `monitor_time_on_task(user_id, activity_logs)`
+  Methods: `__init__()`, `generate_code()`, `verify_code()`
 
-  Monitor total time on task for a user.
+- `AdminAuthService`
 
-- `calculate_completion_rate(user_id, module_ids, completion_logs)`
 
-  Calculate overall module completion rate for the user.
+  Methods: `__init__()`, `authenticate_admin()`, `log_activity()`, `enforce_permission()`, `get_activity_log()`
 
-- `analyze_performance_trends(user_id, performance_history)`
+- `AdminRoles`
 
-  Analyze trends in student performance over time.
 
-- `assessment_performance_analytics(user_id, records)`
+- `AdminPermissions`
 
-  Summarize assessment performance for user: mean, min, max, count.
 
-- `engagement_score(user_id, interactions)`
+- `AuthenticationService`
 
-  Sum engagement points for a user by interaction type.
 
-- `competency_mapping(user_id, assessments)`
+  Main service interface for authentication logic.
 
-  Return set of competency_id values achieved by user; achieved if score >= threshold.
+  Methods: `__init__()`, `authenticate()`, `authenticate_admin()`, `logout()`, `enforce_permission()`, ... (2 more)
 
-- `comparative_cohort_analytics(group1, group2)`
+- `AuthSession`
 
-  Compare two cohorts by average progress/engagement.
 
-- `save_analytics_result(student_id, data)`
+  Simple session object representing an authenticated user session.
 
-  Save analytics results for a student to in-memory storage.
+  Methods: `__init__()`
 
-- `retrieve_analytics_result(student_id)`
+- `Authenticator`
 
-  Retrieve previously saved analytics results for a student.
 
-- `clear_analytics_storage()`
+  Minimal authentication entrypoint for integration testing.
 
-  Clear all stored analytics results.
+  Methods: `__init__()`, `login()`, `logout()`, `get_session()`
 
 
 
@@ -1429,61 +1508,6 @@ interfaces in the system should inherit from the base classes defined here.
 - `register_all_interfaces()`
 
   Register all interfaces defined in the system.
-
-
-
-### app\core\auth\authentication.py
-
-**Classes:**
-
-- `AuthEvent`
- (inherits from: Event)
-
-
-  Event representing authentication-related changes (login, logout, failure).
-
-  Methods: `__init__()`
-
-- `AuthenticationProvider`
- (inherits from: ABC)
-
-
-  Interface for authentication providers.
-
-  Methods: `authenticate()`
-
-- `LocalAuthenticationProvider`
- (inherits from: AuthenticationProvider)
-
-
-  Simple authentication provider with in-memory user verification and event emission.
-
-  Methods: `__init__()`, `authenticate()`, `logout()`
-
-- `MFAProvider`
-
-
-  Simple TOTP-like provider for MFA codes — 
-
-  Methods: `__init__()`, `generate_code()`, `verify_code()`
-
-- `AdminAuthService`
-
-
-  Methods: `__init__()`, `authenticate_admin()`, `log_activity()`, `enforce_permission()`, `get_activity_log()`
-
-- `AdminRoles`
-
-
-- `AdminPermissions`
-
-
-- `AuthenticationService`
-
-
-  Main service interface for authentication logic.
-
-  Methods: `__init__()`, `authenticate()`, `authenticate_admin()`, `logout()`, `enforce_permission()`, ... (2 more)
 
 
 
@@ -3102,6 +3126,30 @@ Provides:
 
 
 
+### app\core\monitoring\ServiceHealthDashboard_Class.py
+
+**Classes:**
+
+- `StatusRecord`
+
+
+  Standardized record for component status tracking and audit logging.
+
+- `ServiceHealthDashboard`
+
+
+  Protocol-compliant Service Health Dashboard.
+
+  Methods: `__new__()`, `__init__()`, `get_all_component_statuses()`, `get_dependency_graph()`, `watch_component()`, ... (10 more)
+
+**Functions:**
+
+- `_reset_for_test()`
+
+  Reset (clear) the singleton for test isolation.
+
+
+
 ### app\core\monitoring\resource_registry.py
 
 **Classes:**
@@ -3242,6 +3290,23 @@ component dependencies and ensuring proper component initialization order.
 
 
 
+### app\core\db\db_client.py
+
+**Description:**
+
+Database Client for AeroLearn AI
+Handles SQLAlchemy engine and session management.
+Edit DB_URL in schema.py as required for different environments.
+
+**Classes:**
+
+- `DBClient`
+
+
+  Methods: `__new__()`, `_initialize()`, `get_session()`, `dispose()`, `session_scope()`, ... (11 more)
+
+
+
 ### app\core\monitoring\pattern_detection.py
 
 **Description:**
@@ -3298,30 +3363,6 @@ Implements: activity sequence analysis, resource utilization, study habit, learn
 - `get_intervention_recommendations(student_id, analytics)`
 
   Generate personalized intervention recommendations for a specific student.
-
-
-
-### app\core\monitoring\ServiceHealthDashboard_Class.py
-
-**Classes:**
-
-- `StatusRecord`
-
-
-  Standardized record for component status tracking and audit logging.
-
-- `ServiceHealthDashboard`
-
-
-  Protocol-compliant Service Health Dashboard.
-
-  Methods: `__new__()`, `__init__()`, `get_all_component_statuses()`, `get_dependency_graph()`, `watch_component()`, ... (10 more)
-
-**Functions:**
-
-- `_reset_for_test()`
-
-  Reset (clear) the singleton for test isolation.
 
 
 
@@ -4319,23 +4360,6 @@ Run:
 - `search_courses_by_tag_partial(session, partial)`
 
 - `main()`
-
-
-
-### app\core\db\db_client.py
-
-**Description:**
-
-Database Client for AeroLearn AI
-Handles SQLAlchemy engine and session management.
-Edit DB_URL in schema.py as required for different environments.
-
-**Classes:**
-
-- `DBClient`
-
-
-  Methods: `__new__()`, `_initialize()`, `get_session()`, `dispose()`, `session_scope()`, ... (6 more)
 
 
 
@@ -6330,6 +6354,48 @@ Location: /tests/integration/test_batch_content_metadata.py
 - `test_metadata_search_and_filter(dummy_files)`
 
 - `test_integration_upload_metadata_contenttype(dummy_files, upload_service)`
+
+
+
+### tests\integration\test_weekly_integration_workflows.py
+
+**Description:**
+
+Day 21 Weekly Integration Testing – AeroLearn AI
+- Location: /tests/integration/test_weekly_integration_workflows.py
+- Aligns with /docs/development/day21_plan.md Task 3.8.1
+- Strictly follows protocols in /docs/architecture/*protocol.md and referenced interfaces from the architecture overview.
+
+Test Coverage:
+1. Student system <-> content repository connectivity.
+2. Progress tracking <-> analytics engine propagation.
+3. End-to-end authentication flow (login, session validation).
+4. Data consistency checks: cross-component data flow (e.g., enrollment status, course access).
+5. Service and health registration/monitoring integration.
+
+**Functions:**
+
+- `db_client()`
+
+- `authenticator()`
+
+- `progress_metrics()`
+
+- `analytics_engine(progress_metrics)`
+
+- `component_registry()`
+
+- `health_dashboard()`
+
+- `test_student_to_content_repository_integration(db_client)`
+
+- `test_progress_tracking_linked_to_analytics(progress_metrics, analytics_engine)`
+
+- `test_end_to_end_authentication_flow(authenticator, db_client)`
+
+- `test_cross_component_data_consistency(db_client, authenticator, analytics_engine)`
+
+- `test_services_registered_and_monitored(component_registry, health_dashboard)`
 
 
 
@@ -10122,138 +10188,139 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional architectural sections to enhance the summary:
+Here are the additional sections to enhance the project summary:
 
-### 6. Architectural Overview
+---
 
-**Core Architectural Pattern:** Event-Driven Microservices Architecture with Component Registry
+## Architectural Enhancements
 
-**Key Architectural Components:**
-1. **Event Bus System** (EventBus)
-   - Central nervous system using publisher-subscriber pattern
-   - Handles 30+ event types across 10 categories
-   - Priority-based event handling (LOW to CRITICAL)
-   - Critical event persistence and replay capabilities
+### 1. High-Level Architectural Overview
+The system follows a hybrid layered/event-driven architecture with three primary planes:
 
-2. **Component Registry** (ComponentRegistry)
-   - Singleton service for system-wide component management
-   - Dependency graph tracking with cycle detection
-   - Version compatibility checks and risk analysis
-   - State history tracking for 375+ components
+**Core Planes**:
+1. **Component Orchestration Plane** (ComponentRegistry)
+   - Singleton registry pattern for system-wide component management
+   - Manages dependency graphs and state transitions
+   - Implements Protocol-compliant health monitoring
 
-3. **Monitoring Subsystem**
-   - Tri-layered monitoring:
-     - ComponentStatusAdapter (health checks)
-     - IntegrationHealth (metric collection)
-     - PerformanceAnalyzer (bottleneck detection)
-   - Real-time dashboard integration
-   - Threshold-based alerting system
+2. **Event Fabric** (EventBus + EventTypes)
+   - Pub/sub system with 10+ event categories
+   - Priority-based delivery system (CRITICAL to LOW)
+   - Cross-cutting concerns handled through event interceptors
 
-4. **Data Model Core**
-   - Hierarchical content structure:
-     ``` 
-     Course → Module → Lesson → Quiz → Question
-     ```
-   - Event-aware models with automatic:
-     - Serialization/deserialization
-     - Validation hooks
-     - State change notifications
+3. **Domain Model Layer** (Course/Assessment/Content)
+   - SQLAlchemy-based ORM core
+   - Event-aware models with automatic state propagation
+   - Versioned entity pattern for audit trails
 
-### 7. Identified Design Patterns
-
-| Pattern             | Implementation Examples                          | Purpose                                  |
-|---------------------|--------------------------------------------------|------------------------------------------|
-| Singleton           | ComponentRegistry, EventBus, SystemMetricsManager | Global access point enforcement          |
-| Observer            | EventBus subscribers, HealthStatus listeners     | Decoupled event notification             |
-| Registry            | ComponentRegistry, IntegrationPointRegistry      | Centralized component management         |
-| Strategy            | ValidationFramework, MetricAlert callbacks       | Interchangeable algorithm implementation |
-| Decorator           | @classmethod in Event deserialization            | Behavior extension                       |
-| Factory Method      | Rubric.by_id(), QuestionType helpers             | Flexible object creation                 |
-| State               | ComponentState transitions                       | Component lifecycle management           |
-| Composite           | Course-Module-Lesson hierarchy                   | Tree structure representation            |
-
-### 8. Refactoring Opportunities
-
-**Structural Improvements:**
-1. **Event Type Consolidation**
-   - Current: 18 event type classes with overlapping constants
-   - Proposal: Merge into hierarchical Enum structure
-   - Estimated LOC Reduction: ~200
-
-2. **Dependency Injection**
-   - Current: Tight coupling with singleton instances
-   - Improvement: Introduce DI container for:
-     - ComponentRegistry
-     - EventBus
-     - ServiceHealthDashboard
-
-3. **Batch Processing Optimization**
-   - Current: Thread-based batch controller (batch_controller.py)
-   - Proposed: Move to async Celery tasks with:
-     - Redis-backed progress tracking
-     - Chunked parallel processing
-
-**Code Quality Issues:**
-- Circular imports between `component_status_adapter.py` and `component_registry.py`
-- Duplicate status tracking in `Component` vs `ComponentStatus`
-- Inconsistent serialization formats across models
-
-### 9. Critical Path Analysis
-
-**System Initialization Path:**
+**Key Architectural Flows**:
 ```mermaid
 graph TD
-    A[EventBus Initialization] --> B[ComponentRegistry Setup]
-    B --> C[Core Models Registration]
-    C --> D[Health Monitoring Startup]
-    D --> E[Batch Controller Init]
+    A[Component Registration] --> B[State Management]
+    B --> C[Dependency Resolution]
+    C --> D[Health Dashboard]
+    E[Domain Events] --> F[Event Bus]
+    F --> G[Metrics Collection]
+    F --> H[System Reactions]
 ```
 
-**Key Execution Paths:**
-1. **Content Modification Flow:**
-   ```
-   Model Update → ContentEvent → EventBus → 
-   Indexer Update → Metrics Recording → Health Check
-   ```
+### 2. Identified Design Patterns
 
-2. **Batch Upload Critical Path:**
-   ```
-   File Validation → BatchEvent.STARTED → 
-   Parallel Uploads → Progress Aggregation → 
-   Completion Metrics → SystemHealth Update
-   ```
+| Pattern | Implementation Examples | Purpose |
+|---------|-------------------------|---------|
+| Singleton | ComponentRegistry, EventBus, SystemMetricsManager | Global access to core services |
+| Registry | ComponentRegistry.register_component() | Central component management |
+| Observer | EventBus.subscribe()/Component._notify_state_change | State change propagation |
+| Factory Method | Course.create_from_template(), QuestionType factory methods | Object creation flexibility |
+| Decorator | @property for computed fields, event handlers | Behavior extension |
+| Strategy | Multiple authentication providers | Algorithm variation |
+| Facade | ComponentStatusAdapter | Simplified monitoring interface |
 
-3. **Component Failure Cascade:**
-   ```
-   Component Error → SYSTEM_COMPONENT_ERROR → 
-   Dependency Graph Analysis → Impacted Components → 
-   Health Dashboard Update → Alert Escalation
-   ```
+### 3. Refactoring Opportunities
 
-### 10. Component Relationships
+**Code Quality Improvements**:
+1. **Component Registry**
+   - Introduce Component interface/ABC for better type safety
+   - Replace dict-based component storage with typed collections
+   - Split circular dependency checks into dedicated service
 
+2. **Event System**
+   - Add event versioning to ContentEvent/UserEvent classes
+   - Implement dead-letter queue for failed event deliveries
+   - Introduce event schema validation layer
+
+3. **Model Layer**
+   - Extract shared validation logic from Course/Module/Lesson into mixins
+   - Replace manual serialization with marshmallow schemas
+   - Implement Unit of Work pattern for enrollment transactions
+
+**Performance Hotspots**:
+- ComponentRegistry._has_circular_dependency() - O(n²) complexity
+- EventBus thread contention during peak loads
+- ORM N+1 queries in Course.enroll_bulk()
+
+### 4. Critical Path Analysis
+
+**Key System Flows**:
+1. Component Lifecycle Path:
+```python
+Component() 
+→ Registry.register() 
+→ DependencyGraph.update() 
+→ HealthDashboard.refresh()
+→ MetricsManager.record_metric()
+```
+
+2. Course Enrollment Critical Path:
+```python
+Enrollment.request_enrollment() 
+→ EventBus.publish(ENROLLMENT_REQUESTED) 
+→ AuthService.validate_permissions() 
+→ CourseModel.update_availability()
+→ Metrics.report_metric("enrollments")
+```
+
+3. Event Processing Chain:
+```python
+EventBus.publish() 
+→ PriorityQueue.sort() 
+→ AsyncDispatcher.deliver() 
+→ Subscriber.on_event()
+→ ComponentStatusAdapter.update_state()
+```
+
+### 5. Class Relationships
+
+**Core Component Interactions**:
 ```mermaid
-graph LR
-    EventBus --> |Notifies| ComponentRegistry
-    ComponentRegistry --> |Tracks| ComponentStatusAdapter
-    ComponentStatusAdapter --> |Feeds| ServiceHealthDashboard
-    ServiceHealthDashboard --> |Visualizes| IntegrationHealth
-    IntegrationHealth --> |Alerts| EventBus
-    
-    Course --> |Contains| Module
-    Module --> |Contains| Lesson
-    Lesson --> |Triggers| ContentEvent
-    ContentEvent --> |Published to| EventBus
-    
-    BatchController --> |Uses| UploadService
-    UploadService --> |Reports to| PerformanceAnalyzer
-    PerformanceAnalyzer --> |Updates| SystemMetricsManager
+classDiagram
+    ComponentRegistry "1" *-- "*" Component : manages
+    Component o-- ComponentState : state
+    EventBus "1" *-- "*" EventSubscriber : notifies
+    Course "1" *-- "*" Module : contains
+    Module "1" *-- "*" Lesson : contains
+    Assessment "1" *-- "*" Question : contains
+    ComponentStatusAdapter --|> ComponentRegistry : extends
+    ComponentStatusAdapter --|> HealthDashboard : integrates
+    AuthenticationService ..> EventBus : emits
+    MetricsManager ..> ComponentRegistry : monitors
 ```
 
-**Key Cross-Module Dependencies:**
-- `component_registry.py` ←→ `component_status_adapter.py` (bidirectional state sync)
-- `event_types.py` → `event_bus.py` (event definition → dispatch)
-- `course.py` → `assessment.py` (enrollment → progress tracking)
-- `metrics.py` ← `component_status_adapter.py` (health → metrics correlation)
+**Cross-Module Dependencies**:
+- `component_registry.py` ←→ `component_status_adapter.py` (bi-directional state sync)
+- `event_bus.py` ←→ ALL domain models (event publishing)
+- `authentication.py` → `event_types.py` (AuthEvent propagation)
+- `course.py` ↔ `assessment.py` (progress tracking)
+- `metrics.py` ← `integration_health.py` (health metric collection)
 
-This analysis reveals a sophisticated event-driven architecture with strong monitoring capabilities, but shows opportunities for improved loose coupling and async processing modernization.
+**Event Type Utilization**:
+| Event Category | Main Consumers | Criticality |
+|----------------|----------------|-------------|
+| SYSTEM_* | ComponentRegistry, HealthDashboard | High |
+| CONTENT_* | Course/Module/Lesson models, AI services | Medium |
+| USER_* | AuthService, EnrollmentService | Critical |
+| AI_* | AnalyticsEngine, RecommendationService | Medium |
+
+---
+
+This analysis reveals a well-structured system with clear separation of concerns, but shows opportunities for performance optimization in core pathways and increased type safety in foundational components. The event-driven architecture provides good extensibility but requires careful monitoring of cross-component dependencies.

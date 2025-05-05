@@ -332,6 +332,68 @@ def clear_analytics_storage():
     _analytics_storage.clear()
 
 
+# Progress Metrics and Analytics Engine
+class ProgressMetrics:
+    """
+    Records user progress per course and provides progress event interface.
+    Designed for test-driven, in-memory use; expandable for database backing.
+    """
+    def __init__(self):
+        # Dict[user_id][course_id] = percent_complete
+        self._progress_store: Dict[str, Dict[str, Any]] = {}
+
+    def record_progress(self, user_id: str, course_id: str, percent_complete: int) -> Dict:
+        """
+        Record a user's progress in a specific course
+        
+        :param user_id: User identifier
+        :param course_id: Course identifier
+        :param percent_complete: Progress percentage (0-100)
+        :return: Progress data dictionary
+        """
+        if user_id not in self._progress_store:
+            self._progress_store[user_id] = {}
+        self._progress_store[user_id][course_id] = {
+            "percent_complete": percent_complete,
+            "status": "in_progress" if percent_complete < 100 else "completed"
+        }
+        return self._progress_store[user_id][course_id]
+
+    def get_progress(self, user_id: str, course_id: str) -> Dict[str, Any]:
+        """
+        Get a user's progress in a specific course
+        
+        :param user_id: User identifier
+        :param course_id: Course identifier
+        :return: Progress data dictionary
+        """
+        return self._progress_store.get(user_id, {}).get(course_id, {
+            "percent_complete": 0,
+            "status": "not_enrolled"
+        })
+
+    def reset(self):
+        """Clear all stored progress data"""
+        self._progress_store.clear()
+
+class AnalyticsEngine:
+    """
+    Minimal stub: Analytics system that queries progress from ProgressMetrics.
+    Meant to satisfy TDD and integration test interface; no persistence.
+    """
+    def __init__(self, progress_metrics: ProgressMetrics = None):
+        self.progress_metrics = progress_metrics or ProgressMetrics()
+
+    def get_progress(self, user_id: str, course_id: str) -> Dict[str, Any]:
+        """
+        Get a user's progress in a specific course
+        
+        :param user_id: User identifier
+        :param course_id: Course identifier
+        :return: Progress data dictionary
+        """
+        return self.progress_metrics.get_progress(user_id, course_id)
+
 # Import for component registry integration
 try:
     from integrations.registry.component_registry import ComponentRegistry, ComponentState
