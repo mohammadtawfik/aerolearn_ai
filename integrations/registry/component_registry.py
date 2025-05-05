@@ -523,3 +523,19 @@ class ComponentRegistry:
         """
         comp = self.get_component(name)
         return comp.state if comp else ComponentState.UNKNOWN
+        
+    def clear(self) -> None:
+        """
+        Remove all registered components and dependencies from the registry.
+        This method is required for test isolation and protocol compliance.
+        """
+        # Clear all components
+        self.components.clear()
+        
+        # Clear type-based component storage
+        self._components_by_type.clear()
+        
+        # Clear dependency tracking
+        self._dependency_graph.clear()
+        
+        logger.info("Component registry cleared")

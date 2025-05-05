@@ -5,7 +5,13 @@ import time
 from datetime import datetime, timedelta
 from collections import defaultdict
 from dataclasses import dataclass, field
-#from .metrics import StatusRecord
+
+# Import ComponentState from the preferred location with fallback
+try:
+    from integrations.monitoring.component_status_adapter import ComponentState
+except ImportError:
+    from integrations.registry.component_state import ComponentState
+
 from integrations.registry.component_registry import ComponentRegistry
 
 # Module-level singleton instance with thread safety
@@ -20,7 +26,7 @@ class StatusRecord:
     Used for health dashboard, status history, and compliance reporting.
     """
     component_id: str
-    state: Any  # ComponentState enum
+    state: ComponentState  # Explicitly typed as ComponentState
     timestamp: datetime = field(default_factory=datetime.utcnow)
     metrics: Dict[str, Any] = field(default_factory=dict)
     message: Optional[str] = None
@@ -91,6 +97,9 @@ class ServiceHealthDashboard:
 
         # Track last notified state for real-time update callbacks
         self._last_notified_state = {}  # {component_id: ComponentState or None}
+        
+        # Legacy listeners for protocol compliance
+        self._legacy_listeners = []
 
     def get_all_component_statuses(self) -> Dict[str, Any]:
         """
@@ -106,7 +115,12 @@ class ServiceHealthDashboard:
             all_statuses = self.status_tracker.update_all_statuses()
             # Process each component status
             for cid, status in all_statuses.items():
-                updated_statuses[cid] = status
+                # Unwrap status if needed
+                if hasattr(status, "state"):
+                    updated_statuses[cid] = status.state
+                else:
+                    updated_statuses[cid] = status
+                
                 # Fire real-time update callback if this is a watched component AND
                 # the state has changed since last notification
                 if cid in self._watchers:
@@ -123,21 +137,25 @@ class ServiceHealthDashboard:
             components = self.registry.get_all_components()
 
         for name, comp in components.items():
+            # Get component state with unwrapping if needed
+            comp_state = comp.state if hasattr(comp, "state") else ComponentState.UNKNOWN
+            if hasattr(comp_state, "state"):
+                comp_state = comp_state.state
+                
             # Create a ComponentStatus-like object for compatibility
             status = type("ComponentStatus", (), {
                 "component_id": name,
-                "state": comp.state if hasattr(comp, "state") else ComponentState.UNKNOWN,
+                "state": comp_state,
                 "timestamp": datetime.utcnow(),
                 "metrics": getattr(comp, "metrics", {})
             })()
-            updated_statuses[name] = status
+            updated_statuses[name] = comp_state  # Store unwrapped state
 
             if name in self._watchers:
                 last = self._last_notified_state.get(name, None)
-                state_now = comp.state if hasattr(comp, "state") else ComponentState.UNKNOWN
-                if last != state_now:
+                if last != comp_state:
                     self._notify_listeners(name, status)
-                    self._last_notified_state[name] = state_now
+                    self._last_notified_state[name] = comp_state
 
         return updated_statuses
 
@@ -194,12 +212,13 @@ class ServiceHealthDashboard:
 
         return True
 
-    def status_for(self, name: str) -> Any:
+    def status_for(self, name: str) -> ComponentState:
         """
         Get the current status for a specific component.
 
         :param name: Component name
         :return: ComponentState enum value for test compatibility
+        :raises: KeyError if component not found
         """
         # First try status tracker
         if self.status_tracker and hasattr(self.status_tracker, 'get_component_status'):
@@ -221,10 +240,16 @@ class ServiceHealthDashboard:
             comp = self.registry.get_component(name)
 
         if comp and hasattr(comp, 'state'):
-            return comp.state
-        return ComponentState.UNKNOWN
+            state = comp.state
+            # Unwrap state if it's a wrapper object
+            if hasattr(state, 'state'):
+                return state.state
+            return state
+            
+        # Raise KeyError for strict protocol compliance
+        raise KeyError(f"No such component registered: {name}")
 
-    def get_status_history(self, component_id: str, time_range=None) -> List[StatusRecord]:
+    def get_status_history(self, component_id: str, time_range: Tuple[datetime, datetime] = None) -> List[StatusRecord]:
         """
         Get historical status records for a component.
 
@@ -242,17 +267,29 @@ class ServiceHealthDashboard:
             start, end = time_range
             return [r for r in records if start <= r.timestamp <= end]
         return records
+        
+    def get_component_history(self, component_id: str, time_range: Tuple[datetime, datetime] = None) -> List[StatusRecord]:
+        """
+        Protocol-compliant alias for get_status_history.
+        
+        :param component_id: Component name
+        :param time_range: Optional tuple of (start_time, end_time) to filter records
+        :return: List of historical status records
+        """
+        return self.get_status_history(component_id, time_range)
 
-    def update_component_status(self, component_id: str, state: Any, details: Dict = None) -> bool:
+    def update_component_status(self, component_id: str, state: ComponentState, metrics: Dict = None, message: str = None) -> bool:
         """
         Update a component's status and record in history if being watched.
         Notifies any registered listeners for this component.
-        Accepts and stores details (dict) with timestamp for audit and test compliance.
+        Accepts and stores metrics and message for audit and test compliance.
 
         :param component_id: Component name
-        :param state: New state to record (ComponentState enum or object with .state)
-        :param details: Optional performance/resource metrics to associate
+        :param state: New state to record (ComponentState enum)
+        :param metrics: Optional performance/resource metrics to associate
+        :param message: Optional human-readable message about the status
         :return: Success status
+        :raises: Exception if component not found
         """
         updated = False
 
@@ -264,58 +301,66 @@ class ServiceHealthDashboard:
         elif hasattr(self.registry, 'get_component'):
             comp = self.registry.get_component(component_id)
 
-        if comp:
-            if hasattr(comp, 'state'):
-                # Handle both ComponentState enum values and objects with .state
-                if hasattr(state, 'state'):
-                    comp.state = state.state
-                else:
-                    comp.state = state
+        # Strict: Raise if the component is absent (test expects this)
+        if comp is None:
+            raise Exception(f"Component not found: {component_id}")
 
+        if hasattr(comp, 'state'):
+            comp_state = getattr(comp, 'state')
+            # If state is a wrapper class (ComponentStatus), set .state property if present; else set directly
+            if hasattr(comp_state, 'state'):
+                comp_state.state = state
+            else:
+                comp.state = state
             updated = True
 
-        # Extract the actual state value
-        current_state = state.state if hasattr(state, 'state') else state
+        # Always record in history regardless of whether component is being watched
+        self._append_history(component_id, state, metrics, message)
+        
+        # Add to watchers so listener/alert fire for all status-updated components
+        self._watchers.add(component_id)
 
-        # Always record in history if being watched, regardless of update success
-        if component_id in self._watchers:
-            self._append_history(component_id, current_state, details)
-
-        # Health alerting logic
+        # Health alerting logic - fire alerts only on transition to alert states
         alert_states = (ComponentState.DEGRADED, ComponentState.DOWN, ComponentState.FAILED)
-        last_alerted = self._last_alerted_state.get(component_id)
-        if current_state in alert_states:
-            if last_alerted != current_state:
-                self._fire_alert(component_id, current_state)
-                self._last_alerted_state[component_id] = current_state
-        else:
-            self._last_alerted_state[component_id] = None
+        prev_state = self._last_alerted_state.get(component_id, None)
+        
+        # Fire alert only on transition into alert state (not on repeated alerts)
+        if (state in alert_states) and (prev_state not in alert_states):
+            self._fire_alert(component_id, state)
+        
+        # Always update the last alerted state
+        self._last_alerted_state[component_id] = state
 
-        # Notify listeners
+        # Notify listeners for all state changes
         self._notify_listeners(component_id, state)
 
         # Update last notified state for real-time updates
-        if component_id in self._watchers:
-            self._last_notified_state[component_id] = current_state
+        self._last_notified_state[component_id] = state
 
         return updated
 
-    def _append_history(self, component_id: str, state: Any, details: Dict = None):
+    def _append_history(self, component_id: str, state: ComponentState, metrics: Dict = None, message: str = None):
         """
         Add a status record to the component's history.
 
         :param component_id: Component name
         :param state: Component state
-        :param details: Optional details dictionary
+        :param metrics: Optional metrics dictionary
+        :param message: Optional status message
         """
         if component_id not in self._component_history:
             self._component_history[component_id] = []
+
+        # Unwrap state if it's a wrapper object
+        if hasattr(state, 'state'):
+            state = state.state
 
         record = StatusRecord(
             component_id=component_id,
             state=state,
             timestamp=datetime.utcnow(),
-            metrics=details or {},
+            metrics=metrics or {},
+            message=message
         )
         self._component_history[component_id].append(record)
 
@@ -340,8 +385,8 @@ class ServiceHealthDashboard:
         :param callback: Function to call on any status update
         :return: Callback ID for potential future deregistration
         """
+        self._legacy_listeners.append(callback)
         cb_id = str(id(callback))
-        self._listeners[cb_id] = ('*', callback)  # '*' means all components
         return cb_id
 
     def _fire_alert(self, component_id, state):
@@ -372,12 +417,20 @@ class ServiceHealthDashboard:
         :param component_id: Component name
         :param status: New component status
         """
+        # Notify component-specific listeners
         for listener_id, (cid, callback) in list(self._listeners.items()):
-            if cid == component_id:
+            if cid == component_id or cid == '*':  # '*' means all components
                 try:
                     callback(component_id, status)
                 except Exception:
                     pass  # Optionally log
+                    
+        # Notify legacy listeners (from register_status_listener)
+        for lcb in getattr(self, '_legacy_listeners', []):
+            try:
+                lcb(component_id, status)
+            except Exception:
+                pass
 
     def get_all_history(self) -> Dict[str, List[StatusRecord]]:
         """
