@@ -143,12 +143,16 @@ class ServiceHealthDashboard:
 
 ## Reference Implementation Locations
 
-- **Monitoring core:** `/app/core/monitoring/metrics.py` (dashboard, interface, service monitoring)
+- **Monitoring core:** 
+  - `/app/core/monitoring/metrics.py` (system metrics, analytics, and non-dashboard utilities)
+  - **`/app/core/monitoring/ServiceHealthDashboard_Class.py` (canonical implementation of ServiceHealthDashboard, health dashboard protocol)**
 - **Component/registry:** `/integrations/registry/component_registry.py`
 - **Status Adapter:** `/integrations/monitoring/component_status_adapter.py`
 - **Component Status:** `/integrations/monitoring/component_status.py` (component status tracker, dependency registry)
 - **Integration Health:** `/integrations/monitoring/integration_health.py` (integration points/events/failures)
 - **Tests:** `/tests/integration/monitoring/test_service_health_dashboard.py`
+
+_Note: As of May 2025, `ServiceHealthDashboard` is now exclusively implemented in `/app/core/monitoring/ServiceHealthDashboard_Class.py` for clarity and modularity._
 
 ## Testing Requirements
 

@@ -17,6 +17,9 @@ import threading
 import time
 from datetime import datetime, timedelta
 from collections import defaultdict
+from dataclasses import dataclass, field
+from .ServiceHealthDashboard_Class import ServiceHealthDashboard
+from .ServiceHealthDashboard_Class import StatusRecord
 
 class MetricType(Enum):
     CPU_USAGE = "cpu_usage"
@@ -355,282 +358,15 @@ except ImportError:
         DOWN = "down"
         FAILED = "failed"
 
-class ServiceHealthDashboard:
-    """
-    Monitors and visualizes component/service health across the AeroLearn system.
-    Always uses the adapter-based SYSTEM_STATUS_TRACKER for system-wide view.
-    
-    Connections:
-    - Uses the global adapter-based SYSTEM_STATUS_TRACKER for up-to-date and historical status.
-    - Accepts optional status_tracker only for test harness to inject shared instance.
-    
-    Test compatibility notes:
-    - status_for(name) returns the ComponentState enum or status object with .state property
-    - get_all_component_statuses returns a dict mapping name to stateful object (with .state)
-    - Properly distinguishes between DEGRADED/DOWN/FAILED states for test assertions
-    
-    Health Alert Callbacks:
-    - Use `register_alert_callback(cb)` to register alert callbacks.
-    - On a transition to DEGRADED/DOWN/FAILED, all registered callbacks are invoked with (component_id, new_state).
-    
-    Real-Time Update Callbacks:
-    - Callbacks registered with watch_component are fired when component state changes
-    - get_all_component_statuses now fires real-time update callbacks for watched components
-    
-    Metrics Support:
-    - update_component_status accepts optional metrics dict for audit/dashboard/test compliance
-    - get_metrics_history retrieves full metrics history for a component
-    """
-    def __init__(self, status_tracker=None):
-        # Import status tracker from adapter module
-        try:
-            from integrations.monitoring.component_status_adapter import SYSTEM_STATUS_TRACKER
-            self.status_tracker = status_tracker or SYSTEM_STATUS_TRACKER
-        except ImportError:
-            self.status_tracker = status_tracker
-        
-        self.registry = ComponentRegistry()
-        self._status_histories = {}  # name -> List[ComponentState]
-        self._metrics_histories = {}  # name -> List[Dict]: each entry: {timestamp, state, metrics}
-        self._watchers = set()
-        self._listeners = []  # For optional listeners/callbacks, or UI pubsub, etc.
-        
-        # Alert callback registry and per-component prior state tracker
-        self._alert_callbacks = []
-        self._last_alerted_state = {}  # {component_id: ComponentState or None}
-        
-        # Track last notified state for real-time update callbacks
-        self._last_notified_state = {}  # {component_id: ComponentState or None}
+# Enforce singleton dashboard instance at the module level
+_DASHBOARD_SINGLETON = None
 
-    def get_all_component_statuses(self) -> Dict[str, Any]:
-        """
-        Get the current (live) status of all registered components.
-        Also fires real-time state update callbacks for watched components when state changes.
-        
-        :return: Dictionary mapping component names to objects with .state property
-                 for test compatibility
-        """
-        updated_statuses = {}
-        if self.status_tracker:
-            all_statuses = self.status_tracker.update_all_statuses()
-            # Process each component status
-            for cid, status in all_statuses.items():
-                updated_statuses[cid] = status
-                # Fire real-time update callback if this is a watched component AND
-                # the state has changed since last notification
-                if cid in self._watchers:
-                    last = self._last_notified_state.get(cid, None)
-                    state_now = status.state if hasattr(status, "state") else status
-                    # Find all callbacks registered for this component
-                    relevant_callbacks = [
-                        cb for comp_id, cb in self._listeners if comp_id == cid
-                    ]
-                    if last != state_now:
-                        for cb in relevant_callbacks:
-                            try:
-                                cb(cid, status)
-                            except Exception:
-                                pass  # Optionally log
-                        self._last_notified_state[cid] = state_now
-            return updated_statuses
-        
-        # Fallback to registry only if status_tracker is None (should be rare)
-        for name, comp in self.registry.components.items():
-            updated_statuses[name] = comp
-            if name in self._watchers:
-                last = self._last_notified_state.get(name, None)
-                state_now = comp.state if hasattr(comp, "state") else comp
-                relevant_callbacks = [
-                    cb for comp_id, cb in self._listeners if comp_id == name
-                ]
-                if last != state_now:
-                    for cb in relevant_callbacks:
-                        try:
-                            cb(name, comp)
-                        except Exception:
-                            pass  # Optionally log
-                    self._last_notified_state[name] = state_now
-        return updated_statuses
-
-    def get_dependency_graph(self) -> Dict[str, List[str]]:
-        """
-        Get the dependency relationships between components.
-        
-        :return: Dictionary mapping component names to lists of dependencies
-        """
-        if self.status_tracker and hasattr(self.status_tracker, "_dependency_graph"):
-            return self.status_tracker._dependency_graph
-        return self.registry.get_dependency_graph()
-
-    def watch_component(self, component_id: str, callback=None) -> bool:
-        """
-        Register a component for active monitoring and status history tracking.
-        Optionally register a callback for real-time update notifications.
-        
-        :param component_id: Component name to watch
-        :param callback: Optional callback function for status updates
-        :return: Success status
-        """
-        self._watchers.add(component_id)
-        
-        # Initialize history tracking if not already present
-        if component_id not in self._status_histories:
-            self._status_histories[component_id] = []
-            
-        # Record current state if component exists
-        comp = self.registry.components.get(component_id)
-        if comp and hasattr(comp, 'state'):
-            self._status_histories[component_id].append(comp.state)
-        
-        # Register callback if provided
-        if callback:
-            self._listeners.append((component_id, callback))
-            
-        return True
-
-    def status_for(self, name: str) -> Any:
-        """
-        Get the current status for a specific component.
-        
-        :param name: Component name
-        :return: ComponentState enum value or object with .state property
-                 for test compatibility
-        """
-        if self.status_tracker:
-            status = self.status_tracker.get_component_status(name)
-            if status:
-                # Return the state enum directly if tests expect that
-                if hasattr(status, 'state'):
-                    return status.state
-                return status
-                
-        comp = self.registry.components.get(name)
-        if comp and hasattr(comp, 'state'):
-            return comp.state
-        return ComponentState.UNKNOWN
-
-    def get_status_history(self, component_id: str) -> List[Dict[str, Any]]:
-        """
-        Get historical status records for a component.
-        
-        :param component_id: Component name
-        :return: List of historical status records
-        """
-        if self.status_tracker:
-            history = self.status_tracker.get_status_history(component_id)
-            if history:
-                return history
-                
-        return self._status_histories.get(component_id, [])
-        
-    def update_component_status(self, component_id: str, status: Any, metrics: Dict = None) -> bool:
-        """
-        Update a component's status and record in history if being watched.
-        Notifies any registered listeners for this component.
-        Accepts and stores metrics (dict) with timestamp for audit and test compliance.
-        
-        :param component_id: Component name
-        :param status: New status to record (ComponentState enum or object with .state)
-        :param metrics: Optional performance/resource metrics to associate
-        :return: Success status
-        """
-        updated = False
-        
-        if self.status_tracker:
-            try:
-                updated = self.status_tracker.update_component_status(component_id, status, metrics=metrics)
-            except TypeError:
-                updated = self.status_tracker.update_component_status(component_id, status)
-        else:
-            comp = self.registry.components.get(component_id)
-            if comp:
-                if hasattr(comp, 'state'):
-                    # Handle both ComponentState enum values and objects with .state
-                    if hasattr(status, 'state'):
-                        comp.state = status.state
-                    else:
-                        comp.state = status
-                
-                # Record in history if being watched
-                if component_id in self._watchers:
-                    if component_id not in self._status_histories:
-                        self._status_histories[component_id] = []
-                    self._status_histories[component_id].append(status)
-                updated = True
-        
-        # Persist per-component metrics history
-        if metrics:
-            if component_id not in self._metrics_histories:
-                self._metrics_histories[component_id] = []
-            self._metrics_histories[component_id].append({
-                "timestamp": datetime.utcnow(),
-                "state": status.state if hasattr(status, "state") else status,
-                "metrics": dict(metrics)
-            })
-        
-        # Health alerting logic
-        current_state = status.state if hasattr(status, 'state') else status
-        alert_states = (ComponentState.DEGRADED, ComponentState.DOWN, ComponentState.FAILED)
-        last_alerted = self._last_alerted_state.get(component_id)
-        if current_state in alert_states:
-            if last_alerted != current_state:
-                self._fire_alert(component_id, current_state)
-                self._last_alerted_state[component_id] = current_state
-        else:
-            self._last_alerted_state[component_id] = None
-        
-        # Notify listeners
-        for cid, callback in self._listeners:
-            if cid == component_id:
-                try:
-                    callback(component_id, status)
-                except Exception:
-                    pass  # Optionally log
-        
-        # Update last notified state for real-time updates
-        if component_id in self._watchers:
-            self._last_notified_state[component_id] = current_state
-                    
-        return updated
-
-
-    def register_alert_callback(self, callback):
-        """
-        Register a callback function to be called when component health degrades.
-        The callback will be called as callback(component_id, state) when a component
-        transitions to a DEGRADED, DOWN, or FAILED state.
-        
-        :param callback: Function to call on health threshold crossing
-        """
-        self._alert_callbacks.append(callback)
-    
-    def _fire_alert(self, component_id, state):
-        """
-        Call all registered alert callbacks for a health threshold crossing.
-        
-        :param component_id: Component name that triggered the alert
-        :param state: New component state that triggered the alert
-        """
-        for cb in list(self._alert_callbacks):
-            try:
-                cb(component_id, state)
-            except Exception:
-                pass  # Optionally log
-                
-    def get_metrics_history(self, component_id: str) -> List[Dict]:
-        """
-        Retrieve full metrics update history for a component (for test/audit).
-        
-        :param component_id: Component name
-        :return: List of historical metrics records
-        """
-        return list(self._metrics_histories.get(component_id, []))
 
 
 class PerformanceAnalyzer:
     """
     Analyzes performance metrics for system components.
-    Updated for TDD/protocol compliance: supports per-component metric history, 
+    Protocol-compliant implementation supporting per-component metric history, 
     cross-component transaction flow/timing, and real bottleneck alerting.
     """
     def __init__(self):
@@ -647,6 +383,7 @@ class PerformanceAnalyzer:
     def set_dashboard(self, dashboard: ServiceHealthDashboard):
         """Set reference to the health dashboard for component access"""
         self._dashboard = dashboard
+        return self  # For method chaining
 
     def benchmark_component(self, component_name: str, metric_name: str, value: Any) -> None:
         """

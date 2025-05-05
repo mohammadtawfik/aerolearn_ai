@@ -33,6 +33,7 @@
 | `docs\architecture\admin_security.md` | AeroLearn AI – Admin Security Model & Authentication Flow | 2025-04-29 15:52:34 |
 | `docs\architecture\analytics_integration.md` | Learning Analytics Integration Pipeline | 2025-05-02 11:31:55 |
 | `docs\architecture\architecture_overview.md` | AeroLearn AI System Architecture | 2025-04-27 06:05:50 |
+| `docs\architecture\compatibility_impact_analysis.md` | AeroLearn AI Compatibility Impact Analysis | 2025-05-05 08:47:05 |
 | `docs\architecture\content_similarity.md` | Content Similarity Architecture | 2025-04-30 14:06:36 |
 | `docs\architecture\content_type_registry.md` | AeroLearn AI Content Type Registry | 2025-04-27 16:15:41 |
 | `docs\architecture\conversation_architecture.md` | Location: /docs/architecture/conversation_architecture.md | 2025-05-01 11:47:49 |
@@ -45,12 +46,13 @@
 | `docs\architecture\integration_architecture.md` | Week 2 Integration Architecture Overview | 2025-05-01 14:47:39 |
 | `docs\architecture\knowledge_graph.md` | AeroLearn AI Knowledge Graph Architecture | 2025-05-01 07:59:25 |
 | `docs\architecture\project_roadmap.md` | <! | 2025-05-01 16:03:51 |
-| `docs\architecture\service_health_protocol.md` | Service Health Monitoring Protocol | 2025-05-03 12:14:27 |
+| `docs\architecture\service_health_protocol.md` | Service Health Monitoring Protocol | 2025-05-05 15:55:25 |
 | `docs\architecture\system_monitoring.md` | AeroLearn AI — System Monitoring & Configuration Architecture | 2025-04-30 11:38:06 |
 | `docs\architecture\vector_db.md` | AeroLearn AI Vector Database Architecture | 2025-04-30 18:54:36 |
 | `docs\architecture\week2_integration.md` | <! | 2025-05-01 16:03:19 |
 | `docs\content_management_integration.md` | Content Management Integration Testing – AeroLearn AI | 2025-04-27 16:53:06 |
 | `docs\development\advanced_ai_integration_workflows.md` | Advanced AI Integration Workflows | 2025-05-01 08:42:39 |
+| `docs\development\change_simulation_process.md` | Change Propagation Simulation: API, Contracts, and Process | 2025-05-05 16:43:09 |
 | `docs\development\day10_done_criteria.md` | Day 10: Course Structure & Organization — Done Criteria (Final, All Passed) | 2025-04-29 15:09:30 |
 | `docs\development\day11_done_criteria.md` | Day 11: Admin Interface Development — Done Criteria and Implementation Plan | 2025-04-30 13:53:18 |
 | `docs\development\day12_plan.md` | Day 12: Content Analysis Foundation — Plan, Criteria, and Implementation Map | 2025-05-01 06:13:37 |
@@ -63,7 +65,7 @@
 | `docs\development\day18_plan.md` |  | 2025-05-02 11:34:01 |
 | `docs\development\day19_plan.md` |  | 2025-05-04 09:24:56 |
 | `docs\development\day20_plan.md` |  | 2025-05-04 10:22:05 |
-| `docs\development\day21_plan.md` |  | 2025-05-02 08:42:47 |
+| `docs\development\day21_plan.md` |  | 2025-05-05 16:44:40 |
 | `docs\development\day22_plan.md` |  | 2025-05-02 08:42:45 |
 | `docs\development\day23_plan.md` |  | 2025-05-02 08:42:50 |
 | `docs\development\day24_plan.md` | AeroLearn AI – Day 24 Plan | 2025-05-02 08:42:51 |
@@ -81,9 +83,9 @@
 | `docs\development\tdd_workflow_guidelines.md` | AeroLearn AI: Test-Driven Development (TDD) Working Instructions | 2025-05-03 09:44:37 |
 | `docs\development\test_coverage_notes_day18.md` | Day 18: Test Strategy & Coverage Notes | 2025-05-02 11:32:47 |
 | `docs\development\user_management_plan.md` | Task 11.2: User Management Implementation Plan (Completed) | 2025-04-29 16:14:33 |
-| `docs\doc_index.md` | Documentation Index | 2025-05-04 10:20:43 |
-| `docs\generated\README.md` | Documentation Generation Process | 2025-05-04 10:19:10 |
-| `docs\generated\index.md` | AeroLearn AI Generated Documentation Site | 2025-05-04 10:19:10 |
+| `docs\doc_index.md` | Documentation Index | 2025-05-05 16:14:15 |
+| `docs\generated\README.md` | Documentation Generation Process | 2025-05-05 16:14:11 |
+| `docs\generated\index.md` | AeroLearn AI Generated Documentation Site | 2025-05-05 16:14:11 |
 | `docs\index.md` | AeroLearn AI Documentation — Index | 2025-04-27 06:14:40 |
 | `docs\integration_framework.md` | AeroLearn AI Integration Framework | 2025-04-26 10:59:12 |
 | `docs\reports\security_review_report.md` | <! | 2025-05-01 16:02:29 |

@@ -132,60 +132,62 @@ class ComponentStatus:
     
     def __init__(
         self,
-        component_id: str = "",
-        state: Optional[ComponentState] = None,
+        component_id: str,
+        state: ComponentState,
         timestamp: Optional[datetime] = None,
+        metrics: Optional[Dict[str, Any]] = None,
         details: Optional[Dict[str, Any]] = None
     ):
         """
         Initialize a component status object.
         
         Args:
-            component_id: ID of the component (optional for testing)
-            state: Current state of the component (optional for testing)
+            component_id: ID of the component
+            state: Current state of the component
             timestamp: Time the status was recorded (defaults to now)
-            details: Detailed status information
+            metrics: Performance metrics and measurements
+            details: Additional detailed status information
         """
         self.component_id = component_id
         self.state = state
-        self.timestamp = timestamp or datetime.now()
+        self.timestamp = timestamp or datetime.utcnow()
+        self.metrics = metrics or {}
         self.details = details or {}
-        self.statuses = {}  # For tracking multiple component statuses
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
-        if not self.component_id:
-            return {'statuses': {k: v for k, v in self.statuses.items()}}
-        
         return {
             'component_id': self.component_id,
-            'state': self.state.name if self.state else None,
+            'state': self.state.name,
             'timestamp': self.timestamp.isoformat(),
+            'metrics': self.metrics,
             'details': self.details
         }
     
-    def set_status(self, component: str, status: Any) -> None:
+    def is_healthy(self) -> bool:
         """
-        Set status for a component in the tracking dictionary.
+        Check if the component is in a healthy state.
         
-        Args:
-            component: Component identifier
-            status: Status value to set
+        Returns:
+            True if component is in a healthy state, False otherwise
         """
-        self.statuses[component] = status
+        # Consider ERROR states as unhealthy
+        return not (self.state.name.startswith('ERROR') or 
+                   self.state.name == 'STOPPED' or 
+                   self.state.name == 'FAILED')
     
-    def get_status(self, component: str, default: Any = "unknown") -> Any:
+    def get_metric(self, name: str, default: Any = None) -> Any:
         """
-        Get status for a component from the tracking dictionary.
+        Get a specific metric value.
         
         Args:
-            component: Component identifier
-            default: Default value if component not found
+            name: Name of the metric
+            default: Default value if metric not found
             
         Returns:
-            The component's status or default if not found
+            The metric value or default if not found
         """
-        return self.statuses.get(component, default)
+        return self.metrics.get(name, default)
 
 
 class StatusHistoryEntry:
