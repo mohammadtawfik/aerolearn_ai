@@ -111,6 +111,10 @@ class ComponentRegistry:
 
 ```python
 class ServiceHealthDashboard:
+    def __init__(self, registry: ComponentRegistry = None):
+        """Initialize dashboard with optional registry injection for dependency management"""
+        pass
+        
     def update_component_status(self, component_id: str, state: ComponentState, 
                                metrics: Dict = None) -> bool:
         """Update a component's health status"""
@@ -131,6 +135,14 @@ class ServiceHealthDashboard:
     def get_component_history(self, component_id: str, 
                              time_range: Tuple[datetime, datetime] = None) -> List[StatusRecord]:
         """Get historical status records for a component"""
+        pass
+        
+    def supports_cascading_status(self) -> bool:
+        """Returns True if dashboard implements protocol-mandated cascading status changes"""
+        pass
+        
+    def clear(self) -> None:
+        """Reset all dashboard state for testing isolation"""
         pass
 ```
 
@@ -172,6 +184,52 @@ To be considered dashboard-compliant, implementations must:
 3. Expose health check endpoints
 4. Provide accurate dependency information
 5. Include proper error handling for status reporting failures
+6. Accept registry injection via constructor
+7. Implement and expose the `supports_cascading_status()` API
+
+## Registry Injection
+
+The `ServiceHealthDashboard` MUST accept a `registry` instance as an explicit argument on construction to enable dependency injection and protocol-compliant graph/status management:
+
+```python
+# Proper initialization with registry injection
+dashboard = ServiceHealthDashboard(registry=component_registry)
+```
+
+## Cascading Status Support
+
+Dashboard implementations MUST provide a public API to determine if they support cascading status changes:
+
+```python
+if dashboard.supports_cascading_status():
+    # Dashboard implements protocol-mandated cascading status changes
+    # (status of dependents tracks dependency state)
+else:
+    # Dashboard does not implement cascading status
+```
+
+This method must be protocol-stable for tests and integrations.
+
+## Dashboard Test Reset (`clear()` method)
+
+### Test-Driven Development Support
+
+As of Day 22 TDD cycle, the canonical `ServiceHealthDashboard` implementation **MUST provide a `clear()` method**. This method resets all dashboard-internal state, component histories, metric/state caches, callbacks, watchers, and (if present) registry or dependency graphs.  
+**Adapters or orchestrators should invoke this for test isolation and repeated harness execution.**
+
+```python
+dashboard = ServiceHealthDashboard()
+dashboard.clear()  # All dashboard state reset; registration collisions and state pollution eliminated for TDD.
+```
+
+- Cyclic clear recursion between dashboard and adapter/tracker is not permitted.  
+- `clear()` only resets *dashboard* state; adapters/status trackers are responsible for their own reset sequences.
+
+### Alert Callback Semantics Update
+
+Alerts are triggered on both `DEGRADED` and `FAILED` state transitions for any component. Dashboard implementations must fire all registered alert callbacks whenever a transition enters either state, never firing repeatedly for unchanged states.
+
+- Confirmed by automated unit testing (see `/tests/unit/core/monitoring/test_service_health_dashboard.py`).
 
 ---
 _This spec is a living document. All monitoring-related PRs must update this as protocol changes._

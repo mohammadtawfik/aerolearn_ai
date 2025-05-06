@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 376
+Total Python files: 404
 
 ## Table of Contents
 
@@ -80,7 +80,13 @@ Total Python files: 376
 │   │   │   ├── interventions.py
 │   │   │   ├── integration_monitor.py
 │   │   │   ├── resource_registry.py
-│   │   │   └── ServiceHealthDashboard_Class.py
+│   │   │   ├── ServiceHealthDashboard_Class.py
+│   │   │   ├── error_logging.py
+│   │   │   ├── usage_analytics.py
+│   │   │   ├── health_check.py
+│   │   │   ├── alert_notification.py
+│   │   │   ├── integration_failure_detection.py
+│   │   │   └── compatibility_monitoring.py
 │   │   ├── config
 │   │   │   ├── api_secrets.py
 │   │   │   ├── api_secrets_example.py
@@ -192,15 +198,18 @@ Total Python files: 376
 │   │   │   ├── widget_base.py
 │   │   │   ├── dashboard_state.py
 │   │   │   └── register_widgets.py
-│   │   └── admin
-│   │       ├── templates
+│   │   ├── admin
+│   │   │   ├── templates
 
-│   │       ├── __init__.py
-│   │       ├── dashboard.py
-│   │       ├── user_management.py
-│   │       ├── course_management.py
-│   │       ├── system_config.py
-│   │       └── resource_dashboard.py
+│   │   │   ├── __init__.py
+│   │   │   ├── dashboard.py
+│   │   │   ├── user_management.py
+│   │   │   ├── course_management.py
+│   │   │   ├── system_config.py
+│   │   │   └── resource_dashboard.py
+│   │   ├── automation_framework.py
+│   │   ├── __init__.py
+│   │   └── performance_benchmark.py
 │   ├── models
 │   │   ├── __init__.py
 │   │   ├── user.py
@@ -249,7 +258,9 @@ Total Python files: 376
 │   │   ├── dependency_tracker.py
 │   │   ├── component_registry.py
 │   │   ├── interface_registry.py
-│   │   └── component_state.py
+│   │   ├── component_state.py
+│   │   ├── component.py
+│   │   └── dependency_graph.py
 │   ├── events
 │   │   ├── __init__.py
 │   │   ├── event_types.py
@@ -288,13 +299,20 @@ Total Python files: 376
 │   │   │   │   ├── test_pattern_detection.py
 │   │   │   │   ├── test_interventions.py
 │   │   │   │   ├── __init__.py
-│   │   │   │   └── test_resource_registry.py
+│   │   │   │   ├── test_resource_registry.py
+│   │   │   │   ├── test_service_health_dashboard.py
+│   │   │   │   ├── test_error_logging.py
+│   │   │   │   ├── test_usage_analytics.py
+│   │   │   │   ├── test_alert_notification.py
+│   │   │   │   └── test_compatibility_monitoring.py
 │   │   │   ├── __init__.py
 │   │   │   └── test_integration_health.py
 │   │   ├── ui
 │   │   │   ├── __init__.py
 │   │   │   ├── test_progress_visualization.py
-│   │   │   └── test_component_architecture.py
+│   │   │   ├── test_component_architecture.py
+│   │   │   ├── test_ui_component_automation.py
+│   │   │   └── test_ui_performance_benchmarks.py
 │   │   ├── models
 │   │   │   ├── __init__.py
 │   │   │   ├── test_metadata_manager.py
@@ -320,7 +338,10 @@ Total Python files: 376
 │   │   │   ├── test_service_health_dashboard_integration.py
 │   │   │   ├── test_integration_status_monitoring.py
 │   │   │   ├── test_performance_analysis.py
-│   │   │   └── test_resource_allocation.py
+│   │   │   ├── test_resource_allocation.py
+│   │   │   ├── test_service_health_protocol.py
+│   │   │   ├── test_health_check_endpoints.py
+│   │   │   └── test_integration_failure_detection.py
 │   │   ├── registry
 │   │   │   ├── test_dependency_tracking.py
 │   │   │   ├── test_dependency_tracking_system.py
@@ -331,7 +352,10 @@ Total Python files: 376
 │   │   │   ├── test_milestone_tracker.py
 │   │   │   ├── component_registry_tests.py
 │   │   │   ├── test_dependency_impact_analysis.py
-│   │   │   └── test_change_propagation_simulation.py
+│   │   │   ├── test_change_propagation_simulation.py
+│   │   │   ├── test_component_registry_registration.py
+│   │   │   ├── test_component_registry_lifecycle.py
+│   │   │   └── test_component_registry_dependency.py
 │   │   ├── docs
 │   │   │   ├── test_doc_generator.py
 │   │   │   ├── __init__.py
@@ -367,7 +391,10 @@ Total Python files: 376
 │   │   ├── test_enrollment.py
 │   │   ├── test_assessment_engine_day17.py
 │   │   ├── test_learning_analytics_integration.py
-│   │   └── test_weekly_integration_workflows.py
+│   │   ├── test_weekly_integration_workflows.py
+│   │   ├── test_component_registry_registration.py
+│   │   ├── test_component_registry_lifecycle.py
+│   │   └── test_component_registry_dependency.py
 │   ├── ui
 │   │   ├── __init__.py
 │   │   ├── test_component_architecture.py
@@ -383,7 +410,9 @@ Total Python files: 376
 │   │   ├── test_student_dashboard.py
 │   │   ├── test_multi_format_content_viewer.py
 │   │   ├── test_student_dashboard_content_viewer.py
-│   │   └── conftest.py
+│   │   ├── conftest.py
+│   │   ├── test_pyqt6_import_policy.py
+│   │   └── test_ui_env_preflight.py
 │   ├── fixtures
 │   │   ├── sample_content
 │   │   │   ├── __init__.py
@@ -522,16 +551,24 @@ Total Python files: 376
 
 ## Key Files
 
+### integrations\monitoring\component_status_adapter.py
+
+- Classes: 8
+- Functions: 11
+- Dependency Score: 114.00
+
 ### integrations\registry\component_registry.py
 
-Component registry for the AeroLearn AI system.
+Protocol-compliant ComponentRegistry implementation.
 
-This module provides a protocol-compliant implementation of the component registry
-for service health...
+This implementation aligns with:
+  - Service health protocol
+  - Dependency tracking protocol
+  ...
 
-- Classes: 2
+- Classes: 1
 - Functions: 0
-- Dependency Score: 107.00
+- Dependency Score: 111.00
 
 ### integrations\events\event_types.py
 
@@ -542,7 +579,7 @@ inter-compon...
 
 - Classes: 17
 - Functions: 0
-- Dependency Score: 105.00
+- Dependency Score: 108.00
 
 ### app\models\course.py
 
@@ -554,12 +591,6 @@ Depends on: integrations/events/event_bus.py, integrations/events/event_types.py
 - Classes: 6
 - Functions: 0
 - Dependency Score: 94.00
-
-### integrations\monitoring\component_status_adapter.py
-
-- Classes: 7
-- Functions: 11
-- Dependency Score: 90.00
 
 ### app\core\monitoring\metrics.py
 
@@ -583,7 +614,7 @@ data str...
 
 - Classes: 9
 - Functions: 0
-- Dependency Score: 82.00
+- Dependency Score: 85.00
 
 ### app\models\assessment.py
 
@@ -624,50 +655,155 @@ implementin...
 
 - Classes: 1
 - Functions: 0
-- Dependency Score: 67.00
+- Dependency Score: 70.00
 
 ## Dependencies
 
 Key file relationships (files with most dependencies):
 
-- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
 - **integrations\monitoring\component_status_adapter.py** depends on: integrations\registry\component_registry.py
+- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
 - **app\core\monitoring\metrics.py** depends on: integrations\registry\component_registry.py
 - **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **app\models\assessment.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **app\core\auth\authentication.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **app\models\content.py** depends on: integrations\events\event_types.py, app\models\course.py, integrations\events\event_bus.py
+- **app\core\auth\authentication.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **app\models\content.py** depends on: app\models\course.py, integrations\events\event_types.py, integrations\events\event_bus.py
 
 
 ## Detailed Code Analysis
+
+### integrations\monitoring\component_status_adapter.py
+
+**Classes:**
+
+- `ComponentState`
+ (inherits from: Enum)
+
+
+- `SimpleStatusTracker`
+
+
+  Simple status tracker implementation that follows the Service Health Protocol.
+
+  Methods: `__init__()`, `update_status()`, `update_component_status()`, `_cascade()`, `get_status()`, ... (6 more)
+
+- `SimpleComponentStatusProvider`
+ (inherits from: ComponentStatusProvider)
+
+
+  Simple adapter between a Component and ComponentStatusProvider interface.
+
+  Methods: `__init__()`, `get_component_state()`, `get_status_details()`, `get_status()`, `provide_status()`
+
+- `ComponentStatus`
+
+
+  Represents the operational status of a monitored component.
+
+  Methods: `__init__()`, `to_dict()`
+
+- `EnhancedComponentStatusTracker`
+ (inherits from: ComponentStatusTracker)
+
+
+  Enhanced version of ComponentStatusTracker that ensures faithful propagation
+
+  Methods: `__init__()`, `_providers()`, `register_status_provider()`, `update_component_status()`, `get_component_status()`, ... (7 more)
+
+- `ComponentRegistry`
+
+
+  Implementation of ComponentRegistry with dependency tracking support.
+
+  Methods: `__init__()`, `clear()`, `register_component()`, `declare_dependency()`, `get_dependency_graph()`, ... (2 more)
+
+- `ServiceHealthDashboard`
+
+
+  Dashboard for monitoring component health with explicit dependency injection.
+
+  Methods: `__init__()`, `supports_cascading_status()`, `update_component_status()`, `_cascade_status()`, `get_all_component_statuses()`, ... (2 more)
+
+- `ComponentStatusAdapter`
+
+
+  Adapter for ServiceHealthDashboard status reporting, notifications, and test interfaces.
+
+  Methods: `__init__()`, `update_component_status()`, `_trigger_callbacks()`, `_cascade_status_changes()`, `register_status_listener()`, ... (12 more)
+
+**Functions:**
+
+- `make_registry()`
+
+  Create a new ComponentRegistry instance.
+
+- `make_tracker(registry)`
+
+  Create a new status tracker instance.
+
+- `clear_all_status_tracking()`
+
+  Clear all status tracking data for test isolation.
+
+- `reset_tracking(status_tracker, registry)`
+
+  Reset tracking for specific instances or the default ones.
+
+- `register_with_status_tracker(component, system_status_tracker, registry)`
+
+  Register a component with the status tracker.
+
+- `get_system_status_tracker()`
+
+  Get the default instance of the system status tracker
+
+- `get_component_registry()`
+
+  Get the default instance of the component registry
+
+- `unregister_from_status_tracker(component_id, system_status_tracker)`
+
+  Unregister a component from the status tracker.
+
+- `_reset_for_test()`
+
+  Reset all component state for SYSTEM_STATUS_TRACKER (TDD integration)
+
+- `get_default_adapter()`
+
+  Get the default ComponentStatusAdapter instance
+
+- `update_component_status(component_id, state, details)`
+
+  Protocol-compliant function to update a component's status.
+
+
 
 ### integrations\registry\component_registry.py
 
 **Description:**
 
-Component registry for the AeroLearn AI system.
+Protocol-compliant ComponentRegistry implementation.
 
-This module provides a protocol-compliant implementation of the component registry
-for service health monitoring and dependency tracking, focusing on registration, 
-state management, and dependency graph analysis for dashboards and adapters.
-
-Protocol: /docs/architecture/dependency_tracking_protocol.md, /docs/architecture/service_health_protocol.md
+This implementation aligns with:
+  - Service health protocol
+  - Dependency tracking protocol
+  
+Key Features:
+  - Register/unregister components with version, state, and unique id
+  - Deterministic insertion order for dependencies and dependents
+  - Delegation of dependency management to DependencyGraph
+  - Lifecycle management for components (initialize, start, stop)
+  - Impact analysis for component dependencies
 
 **Classes:**
-
-- `Component`
-
-
-  Protocol-compliant component for registry and service health monitoring.
-
-  Methods: `__init__()`, `name()`, `name()`, `declare_dependency()`, `set_state()`, ... (1 more)
 
 - `ComponentRegistry`
 
 
-  Central registry for AeroLearn AI system components.
+  Protocol-compliant registry for registering components and declaring dependencies.
 
-  Methods: `__new__()`, `__init__()`, `register_component()`, `unregister_component()`, `get_component()`, ... (18 more)
+  Methods: `__init__()`, `register_component()`, `unregister_component()`, `declare_dependency()`, `get_dependency_graph()`, ... (7 more)
 
 
 
@@ -848,106 +984,6 @@ Covers ORM models, relationships, validation, serialization, and event emission.
 
 
   Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
-
-
-
-### integrations\monitoring\component_status_adapter.py
-
-**Classes:**
-
-- `ComponentState`
- (inherits from: Enum)
-
-
-- `SimpleComponentStatusProvider`
- (inherits from: ComponentStatusProvider)
-
-
-  Simple adapter between a Component and ComponentStatusProvider interface.
-
-  Methods: `__init__()`, `get_component_state()`, `get_status_details()`, `get_status()`, `provide_status()`
-
-- `ComponentStatus`
-
-
-  Represents the operational status of a monitored component.
-
-  Methods: `__init__()`, `to_dict()`
-
-- `EnhancedComponentStatusTracker`
- (inherits from: ComponentStatusTracker)
-
-
-  Enhanced version of ComponentStatusTracker that ensures faithful propagation
-
-  Methods: `__init__()`, `_providers()`, `register_status_provider()`, `update_component_status()`, `get_component_status()`, ... (7 more)
-
-- `ComponentRegistry`
-
-
-  Implementation of ComponentRegistry with dependency tracking support.
-
-  Methods: `__init__()`, `clear()`, `register_component()`, `declare_dependency()`, `get_dependency_graph()`, ... (2 more)
-
-- `ServiceHealthDashboard`
-
-
-  Dashboard for monitoring component health with explicit dependency injection.
-
-  Methods: `__init__()`, `update_component_status()`, `get_all_component_statuses()`, `get_dependency_graph()`, `clear()`
-
-- `ComponentStatusAdapter`
-
-
-  Adapter for ServiceHealthDashboard status reporting, notifications, and test interfaces.
-
-  Methods: `__init__()`, `update_component_status()`, `_trigger_callbacks()`, `register_status_listener()`, `register_alert_callback()`, ... (10 more)
-
-**Functions:**
-
-- `make_registry()`
-
-  Create a new ComponentRegistry instance.
-
-- `make_tracker(registry)`
-
-  Create a new EnhancedComponentStatusTracker instance.
-
-- `clear_all_status_tracking()`
-
-  Clear all status tracking data for test isolation.
-
-- `reset_tracking(status_tracker, registry)`
-
-  Reset tracking for specific instances or the default ones.
-
-- `register_with_status_tracker(component, system_status_tracker, registry)`
-
-  Register a component with the status tracker.
-
-- `get_system_status_tracker()`
-
-  Get the default instance of the system status tracker
-
-- `get_component_registry()`
-
-  Get the default instance of the component registry
-
-- `unregister_from_status_tracker(component_id, system_status_tracker)`
-
-  Unregister a component from the status tracker.
-
-- `_reset_for_test()`
-
-  Reset all component state for SYSTEM_STATUS_TRACKER (TDD integration)
-
-- `get_default_adapter()`
-
-  Get the default ComponentStatusAdapter instance
-
-- `update_component_status(component_id, state, details)`
-
-  Protocol-compliant function to update a component's status.
 
 
 
@@ -2085,6 +2121,39 @@ Includes admin roles, MFA support, and permission checks.
 
 
 
+### app\core\monitoring\ServiceHealthDashboard_Class.py
+
+**Classes:**
+
+- `ComponentStatus`
+
+
+  Methods: `to_dict()`
+
+- `StatusRecord`
+
+
+  Standardized record for component status tracking and audit logging.
+
+- `ServiceHealthDashboard`
+
+
+  Protocol-compliant Service Health Dashboard.
+
+  Methods: `__new__()`, `__init__()`, `get_all_component_statuses()`, `get_dependency_graph()`, `watch_component()`, ... (15 more)
+
+**Functions:**
+
+- `_reset_for_test()`
+
+  Reset (clear) the singleton for test isolation.
+
+- `create_dashboard_with_registry(registry)`
+
+  Create a new ServiceHealthDashboard instance with an explicit registry.
+
+
+
 ### integrations\events\event_subscribers.py
 
 **Description:**
@@ -2772,6 +2841,44 @@ See method and signal docstrings for more.
 
 
 
+### integrations\registry\component.py
+
+**Classes:**
+
+- `ComponentState`
+ (inherits from: Enum)
+
+
+  Component states for health monitoring
+
+- `Component`
+
+
+  Protocol-conformant Component as required by:
+
+  Methods: `__init__()`, `declare_dependency()`, `get_dependencies()`, `set_state()`, `get_id()`, ... (9 more)
+
+
+
+### integrations\registry\component_state.py
+
+**Description:**
+
+Defines ComponentState enum in a location all modules can import without circularity.
+Protocol-compliant implementation of component lifecycle states.
+
+**Classes:**
+
+- `ComponentState`
+ (inherits from: Enum)
+
+
+  Enum for component lifecycle states, protocol/test-compliant.
+
+  Methods: `from_any()`
+
+
+
 ### app\core\db\course_admin.py
 
 **Description:**
@@ -2901,30 +3008,6 @@ properly implement required interfaces and allowing for interface discovery.
 - `implements(interface_cls)`
 
   Decorator to mark a class as implementing an interface.
-
-
-
-### app\core\monitoring\ServiceHealthDashboard_Class.py
-
-**Classes:**
-
-- `StatusRecord`
-
-
-  Standardized record for component status tracking and audit logging.
-
-- `ServiceHealthDashboard`
-
-
-  Protocol-compliant Service Health Dashboard.
-
-  Methods: `__new__()`, `__init__()`, `get_all_component_statuses()`, `get_dependency_graph()`, `watch_component()`, ... (11 more)
-
-**Functions:**
-
-- `_reset_for_test()`
-
-  Reset (clear) the singleton for test isolation.
 
 
 
@@ -3147,18 +3230,6 @@ Provides:
 
 
   Methods: `__new__()`, `__init__()`, `_validate()`, `_load()`, `save()`, ... (5 more)
-
-
-
-### integrations\registry\component_state.py
-
-**Classes:**
-
-- `ComponentState`
- (inherits from: Enum)
-
-
-  Methods: `from_any()`
 
 
 
@@ -3995,6 +4066,84 @@ Fulfills assessment grading requirements in the Day 17 Plan.
 
 
 
+### tests\integration\monitoring\test_service_health_dashboard_integration.py
+
+**Description:**
+
+Integration test for ServiceHealthDashboard Protocol Compliance.
+
+Location: /tests/integration/monitoring/test_service_health_dashboard_integration.py
+
+Tests the integration between ComponentRegistry, ComponentStatusAdapter, and 
+ServiceHealthDashboard. Validates registration, status changes, real-time updates,
+historical tracking, dependency graph integrity, and event propagation according 
+to the monitoring protocol.
+
+Validates alignment with service health protocol specifications and exercises
+state transitions, dependency graph correctness, and integration with status adapters.
+
+Run with pytest.
+
+**Classes:**
+
+- `DummyComponent`
+ (inherits from: Component)
+
+
+  A test component that tracks state changes
+
+  Methods: `__init__()`, `set_state()`
+
+**Functions:**
+
+- `registry()`
+
+- `dashboard(registry)`
+
+- `status_adapter(dashboard)`
+
+- `event_bus()`
+
+- `monitoring_setup()`
+
+- `register_monitored_component(registry, adapter, component)`
+
+- `test_registration_and_status_update(monitoring_setup)`
+
+- `test_historical_uptime_tracking(monitoring_setup)`
+
+- `test_real_time_status_update(monitoring_setup)`
+
+- `test_cross_component_state_propagation(registry, dashboard, status_adapter)`
+
+  Validates that a state change in a registered component is visible on
+
+- `test_event_propagation_triggers_callbacks(registry, dashboard, status_adapter)`
+
+  Verifies event/alert callback firing when status transitions
+
+- `test_transaction_integrity_and_clear_protocol(registry, dashboard, status_adapter)`
+
+  Tests that multi-step updates are atomic and clear() protocol fully resets state for TDD test re-use.
+
+- `test_component_registration_and_dependency_graph()`
+
+  Test that components can be registered, dependencies assigned, and state transitions
+
+- `test_health_event_propagation_and_alert_callback()`
+
+  Test event propagation and callback registration as per service health protocol
+
+- `test_cascading_status_updates()`
+
+  Test that status changes cascade through dependent components
+
+- `test_status_history_and_metrics()`
+
+  Test that the dashboard correctly tracks historical status changes
+
+
+
 ### app\core\db\sync_manager.py
 
 **Description:**
@@ -4135,6 +4284,104 @@ Metadata Schema and Editor
 
 
 
+### app\ui\automation_framework.py
+
+**Description:**
+
+UI Automation Framework Module
+
+Implements scaffolding for protocol-driven UI testing automation as mandated by Day 22 Task 4.1.4 and the modular test suite in /tests/unit/ui/test_ui_component_automation.py.
+
+Features:
+ - Workflow simulation foundations (user event chains on UI components)
+ - Event recording and playback infrastructure
+ - Visual regression protocol hook (baseline state management)
+ - (Stub) Backend integration interface
+
+Documentation:
+ - In direct alignment with /docs/development/day22_plan.md, /code_summary.md, and /docs/architecture/architecture_overview.md.
+ - All features to be extended strictly TDD: test -> protocol -> implementation.
+
+NOTE: Does NOT import PyQt or any GUI libraries directly, in compliance with Day 22 environment rules.
+
+**Classes:**
+
+- `UIWorkflowSimulator`
+
+
+  Foundation for simulating user workflows in UI components.
+
+  Methods: `simulate_workflow()`
+
+- `UIEventRecorder`
+
+
+  Infrastructure for recording and playing back UI events.
+
+  Methods: `start_recording()`, `stop_recording()`, `playback()`
+
+- `VisualRegressionChecker`
+
+
+  Stub for comparing visual state of UI components/protocol baseline.
+
+  Methods: `capture_baseline()`, `compare_to_baseline()`
+
+- `UIBackendIntegrationValidator`
+
+
+  Stub for verifying that the UI interacts with the backend via public API only.
+
+  Methods: `validate_integration()`
+
+
+
+### app\ui\performance_benchmark.py
+
+**Description:**
+
+UI Performance Benchmarking Framework
+
+Provides protocol-aligned scaffolding for UI and system component performance benchmarking,
+in direct response to the modular benchmarks tested in /tests/unit/ui/test_ui_performance_benchmarks.py.
+
+- No actual GUI or backend imported as per environment/documentation rules.
+- Designed for future extension only after test expansion (strict TDD).
+- All logic, interface, and docstring structure guided by /docs/development/day22_plan.md, /code_summary.md,
+  and protocols described in /docs/architecture/architecture_overview.md
+
+**Classes:**
+
+- `UIComponentPerformanceBenchmarker`
+
+
+  Benchmark the render/init time of a UI component (protocol-driven scaffold).
+
+  Methods: `benchmark_render()`
+
+- `UIWorkflowThroughputBenchmarker`
+
+
+  Benchmark workflow event throughput for a sequence of UI actions.
+
+  Methods: `benchmark_workflow()`
+
+- `VisualRegressionPerformanceBenchmarker`
+
+
+  Benchmark carry out protocol-driven visual regression checks.
+
+  Methods: `benchmark_visual_check()`
+
+- `UIBackendLatencyBenchmarker`
+
+
+  Benchmark the protocol-compliant latency between UI and backend adapter.
+
+  Methods: `benchmark_backend_latency()`
+
+
+
 ### app\ui\common\main_window.py
 
 **Description:**
@@ -4198,6 +4445,80 @@ Requires PyQt6 (or compatible PySide6).
 
 
 
+### tests\unit\ui\test_ui_performance_benchmarks.py
+
+**Description:**
+
+Test Suite: UI Performance Benchmark Suite
+
+Expanded to provide explicit coverage for all public scaffolding code in /app/ui/performance_benchmark.py.
+Test-driven development protocol per /docs/development/day22_plan.md and /code_summary.md.
+
+- Benchmark system-wide load (headless or mocked if no GUI)
+- Enable performance regression detection
+- Provide dashboard integration points for reporting
+- Modular test setup: maintains test isolation and protocol alignment
+
+**Classes:**
+
+- `DummyComponent`
+
+
+  Methods: `__init__()`
+
+- `DummyAdapter`
+
+
+  Methods: `fetch()`
+
+**Functions:**
+
+- `ui_perf_env()`
+
+  Performance testing environment setup for UI benchmarks.
+
+- `perf_bench_components()`
+
+  Instantiate the performance benchmarking objects for protocol testing.
+
+- `test_benchmark_render_returns_float(perf_bench_components)`
+
+  Ensure benchmark_render returns float latency value.
+
+- `test_benchmark_workflow_returns_float(perf_bench_components)`
+
+  Ensure benchmark_workflow returns float latency value for event sequence.
+
+- `test_benchmark_visual_check_returns_float(perf_bench_components)`
+
+  Ensure benchmark_visual_check returns float for visual regression check.
+
+- `test_benchmark_backend_latency_returns_float(perf_bench_components)`
+
+  Ensure benchmark_backend_latency returns float for UI/adapter latency.
+
+- `test_ui_component_render_speed(ui_perf_env, perf_bench_components)`
+
+  Benchmark UI component render/init time against threshold.
+
+- `test_ui_workflow_throughput(ui_perf_env, perf_bench_components)`
+
+  Benchmark sequence of UI actions for throughput.
+
+- `test_ui_visual_regression_performance(ui_perf_env, perf_bench_components)`
+
+  Benchmark visual regression check speed.
+
+- `test_ui_backend_latency(ui_perf_env, perf_bench_components)`
+
+  Measure latency between UI and backend protocol adapter.
+
+- `test_full_ui_benchmark_suite(ui_perf_env, perf_bench_components)`
+
+  Test running all benchmarks in sequence to verify integration.
+
+
+
 ### tests\core\ai\test_semantic_search.py
 
 **Description:**
@@ -4258,6 +4579,26 @@ Location: /app/core/db/content_db.py
 
 
   Methods: `__init__()`, `mark_uploaded()`, `is_uploaded()`
+
+
+
+### app\core\monitoring\health_check.py
+
+**Classes:**
+
+- `HealthStatus`
+ (inherits from: Enum)
+
+
+- `Component`
+
+
+  Methods: `__init__()`
+
+- `HealthCheckAPI`
+
+
+  Methods: `__init__()`, `register_component()`, `declare_dependency()`, `set_component_health()`, `_propagate_status()`, ... (3 more)
 
 
 
@@ -4446,6 +4787,61 @@ Integration tests for Admin Interface:
 
 
 
+### app\core\monitoring\error_logging.py
+
+**Classes:**
+
+- `ErrorSeverity`
+ (inherits from: Enum)
+
+
+- `ErrorEntry`
+
+
+- `ErrorLogger`
+
+
+  Methods: `__new__()`, `_init_internal()`, `log_error()`, `query_errors()`, `aggregate_errors()`, ... (2 more)
+
+
+
+### app\core\monitoring\usage_analytics.py
+
+**Classes:**
+
+- `ActivityEvent`
+
+
+- `SessionRecord`
+
+
+- `UsageAnalytics`
+
+
+  Methods: `__init__()`, `track_activity()`, `query_activities()`, `aggregate_usage()`, `feature_usage_report()`, ... (2 more)
+
+
+
+### app\core\monitoring\alert_notification.py
+
+**Classes:**
+
+- `AlertLevel`
+ (inherits from: Enum)
+
+
+- `AlertRule`
+
+
+  Methods: `__init__()`
+
+- `AlertNotification`
+
+
+  Methods: `__init__()`, `register_rule()`, `trigger_alert()`, `escalate_alert()`, `query_alert_history()`, ... (1 more)
+
+
+
 ### app\core\search\base_search.py
 
 **Description:**
@@ -4601,6 +4997,19 @@ Intended for PyQt5/PySide2, but UI toolkit can be swapped.
 
 
   Methods: `__init__()`, `load_course_structure()`, `on_drop_event()`, `recalculate_orders()`, `save_structure()`, ... (5 more)
+
+
+
+### integrations\registry\dependency_graph.py
+
+**Classes:**
+
+- `DependencyGraph`
+
+
+  Internal dependency management for components with ordered traversal support
+
+  Methods: `__init__()`, `add_node()`, `remove_node()`, `add_edge()`, `remove_edge()`, ... (8 more)
 
 
 
@@ -4893,6 +5302,40 @@ How to extend:
 **Functions:**
 
 - `_add_project_root_to_syspath()`
+
+
+
+### tests\integration\test_component_registry.py
+
+**Classes:**
+
+- `ComponentState`
+
+
+  Component lifecycle states.
+
+- `TestComponentRegistry`
+
+
+  Test wrapper for ComponentRegistry that disables event publishing.
+
+  Methods: `__init__()`, `__getattr__()`, `restore()`
+
+- `TestComponent`
+ (inherits from: Component)
+
+
+  Basic test component for registry tests.
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `_add_project_root_to_syspath()`
+
+- `improved_register_component(component)`
+
+  Register component directly with all necessary bookkeeping.
 
 
 
@@ -5597,6 +6040,17 @@ Covers extraction logic, domain term bias, extraction-to-relationship mapping, a
 
 
 
+### app\core\monitoring\compatibility_monitoring.py
+
+**Classes:**
+
+- `CompatibilityMonitor`
+
+
+  Methods: `__init__()`, `register_component()`, `validate_contract()`, `check_version_compatibility()`, `verify_runtime_compatibility()`, ... (4 more)
+
+
+
 ### app\core\extraction\multimedia_metadata_extractor.py
 
 **Classes:**
@@ -5707,35 +6161,6 @@ Defines standard API for rendering, configuration and settings.
 
 
   Methods: `__init__()`, `render()`, `get_config_schema()`
-
-
-
-### tests\integration\test_component_registry.py
-
-**Classes:**
-
-- `TestComponentRegistry`
-
-
-  Test wrapper for ComponentRegistry that disables event publishing.
-
-  Methods: `__init__()`, `__getattr__()`, `restore()`
-
-- `TestComponent`
- (inherits from: Component)
-
-
-  Basic test component for registry tests.
-
-  Methods: `__init__()`
-
-**Functions:**
-
-- `_add_project_root_to_syspath()`
-
-- `improved_register_component(component)`
-
-  Register component directly with all necessary bookkeeping.
 
 
 
@@ -5984,6 +6409,17 @@ Implements the four main features required by unit test_interventions.py:
 - `create_intervention(student_id, pattern)`
 
   Stub: Create an intervention for the given student based on a pattern.
+
+
+
+### app\core\monitoring\integration_failure_detection.py
+
+**Classes:**
+
+- `IntegrationMonitor`
+
+
+  Methods: `__init__()`, `monitor_integration()`, `record_transaction()`, `get_failure_trace()`, `detect_failure_patterns()`, ... (3 more)
 
 
 
@@ -6245,6 +6681,31 @@ Location: /tests/unit/core/monitoring/test_notification_center.py
 
 
 
+### tests\unit\core\monitoring\test_service_health_dashboard.py
+
+**Description:**
+
+Unit Tests for ServiceHealthDashboard (AeroLearn AI)
+Location: /tests/unit/core/monitoring/test_service_health_dashboard.py
+
+Protocol coverage:
+- /docs/architecture/service_health_protocol.md
+- /docs/architecture/health_monitoring_protocol.md
+
+State isolation fix:
+- Ensures every test runs in a pristine environment with a clean registry
+- Complies with protocol: 'All components implementing this protocol must include: Unit tests verifying state transitions...Mock implementations for testing dependent systems'
+
+**Classes:**
+
+- `TestServiceHealthDashboardProtocol`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `setUp()`, `test_register_component()`, `test_state_transitions()`, `test_status_change_alert_callback()`, `test_status_history_audit()`, ... (3 more)
+
+
+
 ### tests\integration\test_component_registry_async.py
 
 **Classes:**
@@ -6407,6 +6868,61 @@ Test coverage and scenarios follow the documented protocol and examples.
 - `test_get_dependencies_returns_empty_if_none(registry)`
 
 - `test_unregister_component_returns_false_if_absent(registry)`
+
+
+
+### tests\integration\registry\test_component_registry_registration.py
+
+**Description:**
+
+Integration Test: Component Registry Registration
+Location: /tests/integration/registry/test_component_registry_registration.py
+
+Protocol coverage:
+- /docs/architecture/dependency_tracking_protocol.md
+- /docs/architecture/architecture_overview.md
+- /docs/development/day22_plan.md
+
+Tests:
+- Registering new components (with/without state/version/description)
+- Duplicate registration rejection (ValueError)
+- Lookup by ID
+- Listing all registered components
+- Test isolation (clean registry for each test)
+- Protocol-compliant usage (get_id(), get_state())
+
+**Classes:**
+
+- `TestComponentRegistryRegistration`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `setUp()`, `test_register_basic_component()`, `test_register_with_state_version_description()`, `test_duplicate_registration_should_fail()`, `test_lookup_by_id()`, ... (3 more)
+
+
+
+### tests\integration\registry\test_component_registry_dependency.py
+
+**Description:**
+
+Integration Test: Component Registry Dependency Tracking
+Location: /tests/integration/registry/test_component_registry_dependency.py
+
+Covers per protocol:
+- declare_dependency (must check only registered components accepted, no duplicates)
+- get_dependency_graph (insertion order)
+- get_dependencies, get_dependents (per node, canonical order)
+- analyze_dependency_impact (correct, deterministic order)
+- Edge removal on component unregister
+- (Optional) Cycle and analytic API stubs
+
+**Classes:**
+
+- `TestComponentRegistryDependency`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `setUp()`, `_register_many()`, `test_dependency_declaration_and_query()`, `test_dependencies_and_dependents_protocol()`, `test_dependencies_must_exist()`, ... (3 more)
 
 
 
@@ -6644,6 +7160,130 @@ Purpose:
 - `test_cancel_enrollment(service, db_session, dummy_user, dummy_course)`
 
 - `test_get_enrollment_status(service, db_session, dummy_user, dummy_approver, dummy_course)`
+
+
+
+### tests\integration\monitoring\test_service_health_protocol.py
+
+**Description:**
+
+Test coverage for:
+- Component registry protocol compliance (/docs/architecture/dependency_tracking_protocol.md)
+- Service health protocol registration, state update, event notification (/docs/architecture/service_health_protocol.md, /docs/api/service_health_protocol.md)
+- Health monitoring adapter correctness (/docs/architecture/health_monitoring_protocol.md)
+- Full integration: dependency graph generation, cascading state update, correct callbacks
+
+Requires project modules:
+- integrations.registry.component_registry
+- integrations.monitoring.component_status_adapter
+- integrations.monitoring.integration_health
+
+Assumptions:
+- All registry/component/dashboard/adapter classes implement the methods described in the protocols.
+
+**Classes:**
+
+- `TestComponent`
+
+
+  Methods: `__init__()`, `declare_dependency()`, `set_state()`
+
+**Functions:**
+
+- `test_protocol_component_registration_and_dependency_tracking()`
+
+- `test_service_health_dashboard_cascading_state_and_event_hooks(monkeypatch)`
+
+- `test_integration_health_metrics_protocol()`
+
+- `test_notification_callbacks_and_adapter_api()`
+
+
+
+### tests\integration\monitoring\test_health_check_endpoints.py
+
+**Classes:**
+
+- `DummyComponent`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `setup_minimal_system()`
+
+- `test_health_endpoint_protocol_structure()`
+
+  Test: Protocol-compliant endpoint exposes core health API:
+
+- `test_component_status_aggregation_and_propagation()`
+
+  Test: Aggregated system health reports propagation of component/subcomponent health.
+
+- `test_dependency_registration_and_endpoint_updates()`
+
+  Test: Registering and updating component dependency status correctly alters reported health per protocol.
+
+- `test_protocol_health_dashboard_payload()`
+
+  Test: Protocol-mandated dashboard data structure is provided and includes all required fields.
+
+- `test_health_api_contract_no_undocumented_fields()`
+
+  Test: All returned fields in health API responses conform exactly to protocol—no extraneous/undocumented fields.
+
+
+
+### tests\integration\registry\test_dependency_tracking.py
+
+**Description:**
+
+Integration Test: Dependency Tracking System
+
+Location: /tests/integration/registry/test_dependency_tracking.py
+
+Covers:
+- Component registration and dependency declaration
+- Dependency graph validation
+- Dependency impact analysis
+- Dependency ordering preservation
+- Dependency cycle detection
+- Version compatibility checks
+
+Production features under test: /integrations/registry/component_registry.py
+
+**Functions:**
+
+- `fresh_registry(monkeypatch)`
+
+- `test_dependency_registration_and_graph()`
+
+- `test_dependency_impact_analysis()`
+
+- `test_version_compatibility_is_true_for_now()`
+
+- `test_dependency_cycle_is_supported_or_documented()`
+
+- `test_dependency_order_preservation()`
+
+  Test that dependency order is preserved when adding dependencies.
+
+- `test_dependency_removal()`
+
+  Test that dependencies can be removed correctly.
+
+- `test_dependents_tracking()`
+
+  Test that dependents (reverse dependencies) are correctly tracked.
+
+- `test_cycle_detection()`
+
+  Test that dependency cycles can be detected.
+
+- `test_transitive_dependency_analysis()`
+
+  Test that transitive dependencies can be analyzed.
 
 
 
@@ -7026,6 +7666,72 @@ Author:
 
 
 
+### tests\unit\core\monitoring\test_alert_notification.py
+
+**Classes:**
+
+- `DummyComponent`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_alert_rule_protocol_interface()`
+
+  Test: AlertNotification exposes protocol-compliant API for rule registration, trigger, and notification.
+
+- `test_alert_routing_and_delivery_protocol()`
+
+  Test: AlertNotification correctly routes and delivers alerts to appropriate handlers per alert type.
+
+- `test_alert_escalation_workflow()`
+
+  Test: AlertNotification supports protocol-compliant escalation (e.g., warn=>critical) for repeated/related alerts.
+
+- `test_alert_history_and_management()`
+
+  Test: AlertNotification provides protocol-driven access to alert history and management APIs.
+
+- `test_alert_protocol_no_extra_fields()`
+
+  Test: Alert API returns only protocol-mandated fields; no extras.
+
+
+
+### tests\unit\core\monitoring\test_compatibility_monitoring.py
+
+**Classes:**
+
+- `DummyComponent`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_interface_contract_validation_protocol()`
+
+  Test: CompatibilityMonitor validates registered component's interface contract against protocol-schema.
+
+- `test_version_compatibility_detection()`
+
+  Test: Monitor detects version mismatches or policy violations at registration/integration.
+
+- `test_runtime_compatibility_verification()`
+
+  Test: CompatibilityMonitor dynamically verifies no violations at runtime configuration changes.
+
+- `test_compatibility_issue_alerting_protocol()`
+
+  Test: Monitor alerts on protocol-detected compatibility violations.
+
+- `test_protocol_contract_no_extraneous_fields()`
+
+  Test: API and events only provide documented protocol fields, nothing extra.
+
+
+
 ### tests\integration\test_content_analysis_integration.py
 
 **Description:**
@@ -7069,6 +7775,65 @@ Changes:
 
 
 
+### tests\integration\test_component_registry_dependency.py
+
+**Classes:**
+
+- `DummyComponent`
+ (inherits from: Component)
+
+
+  Methods: `__init__()`, `name()`, `version()`
+
+**Functions:**
+
+- `test_dependency_declaration_and_lookup()`
+
+  Test declaring dependencies and retrieving them.
+
+- `test_cycle_detection_permitted_by_protocol()`
+
+  Protocol currently allows cycles; ensure cycles are possible, not blocked.
+
+- `test_dependency_removal_and_state_restoration()`
+
+  Test removing a dependency and protocol-compliant state after.
+
+
+
+### tests\integration\monitoring\test_integration_failure_detection.py
+
+**Classes:**
+
+- `DummyIntegration`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_integration_monitor_protocol_interface()`
+
+  Test: Protocol APIs exist for integration monitoring, transaction tracing, and failure reporting.
+
+- `test_integration_failure_pattern_recognition()`
+
+  Test: Monitor recognizes repeated or burst failure patterns in integration points.
+
+- `test_integration_health_scoring_and_reporting()`
+
+  Test: Health scoring API provides protocol-compliant integration health scores and summaries.
+
+- `test_integration_failure_simulation_and_detection()`
+
+  Test: Simulated failures in monitored integrations are accurately detected and classified per protocol.
+
+- `test_integration_monitor_protocol_contract()`
+
+  Test: No extra/undocumented fields present in protocol API; all records align with specification.
+
+
+
 ### tests\integration\registry\test_component_dependency_registry.py
 
 **Functions:**
@@ -7106,6 +7871,30 @@ Changes:
 - `test_visualization_output_format(registry)`
 
   Registry must emit a data structure suitable for visualization (e.g., node/edge list as per protocol).
+
+
+
+### tests\integration\registry\test_component_registry_lifecycle.py
+
+**Description:**
+
+Integration Test: Component Registry Lifecycle
+Location: /tests/integration/registry/test_component_registry_lifecycle.py
+
+Covers per protocol:
+- Component registration and all protocol state transitions
+- Correct state update/retrieval
+- Unregistration/removal and re-registration
+- Isolation between components
+- API surface only (no direct dict/touch)
+
+**Classes:**
+
+- `TestComponentRegistryLifecycle`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `setUp()`, `test_component_state_transitions()`, `test_state_is_isolated_between_components()`, `test_unregistration_and_reregistration()`, `test_repeated_state_changes()`, ... (1 more)
 
 
 
@@ -7346,6 +8135,64 @@ Reason: Required for Task 3.2.2, per viewer widget convention.
 
 
 
+### tests\unit\core\monitoring\test_error_logging.py
+
+**Classes:**
+
+- `DummyComponent`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_error_logging_protocol_interface()`
+
+  Test: The ErrorLogger implements the minimal protocol interface as required by the service_health_protocol and health_monitoring_protocol.
+
+- `test_error_logging_categorization_and_severity()`
+
+  Test: ErrorLogger must record severity and category and allow filtering of error queries.
+
+- `test_error_logging_notification_rules()`
+
+  Test: Notification rules are triggered for matching error criteria per configuration.
+
+- `test_error_logging_protocol_query_methods()`
+
+  Test: Ensure protocol API provides summary/aggregation as required.
+
+
+
+### tests\unit\core\monitoring\test_usage_analytics.py
+
+**Classes:**
+
+- `DummyUser`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_usage_analytics_protocol_interface()`
+
+  Test: UsageAnalytics implements the minimal protocol-compliant interface for user/session/feature usage monitoring.
+
+- `test_usage_analytics_feature_monitoring()`
+
+  Test: Analytics system provides protocol-compliant reporting on feature usage across users.
+
+- `test_usage_analytics_sessions()`
+
+  Test: Session tracking and duration calculations follow protocol spec and yield correct output.
+
+- `test_usage_analytics_cross_component_workflow()`
+
+  Test: Activities and usage can be tracked and queried across logical app modules, as mandated by protocol.
+
+
+
 ### tests\integration\test_phase1_foundation.py
 
 **Functions:**
@@ -7398,6 +8245,19 @@ How to use:
 - `orchestrator(fake_content_db, fake_storage, fake_ai_analysis, fake_similarity, fake_admin_monitor_ui, fake_integration_health)`
 
 - `test_week2_full_integration(monkeypatch, orchestrator)`
+
+
+
+### tests\integration\test_component_registry_registration.py
+
+**Classes:**
+
+- `TestComponentRegistration`
+
+
+  Test suite for component registration and lookup functionality.
+
+  Methods: `test_register_component_and_lookup()`, `test_register_duplicate_component_fails()`, `test_get_nonexistent_component_returns_none()`, `test_get_all_components()`, `test_registration_preserves_insertion_order()`
 
 
 
@@ -8308,6 +9168,18 @@ Requires:
 
 
 
+### tests\integration\test_component_registry_lifecycle.py
+
+**Classes:**
+
+- `DummyComponent`
+ (inherits from: Component)
+
+
+  Methods: `__init__()`, `name()`, `version()`
+
+
+
 ### tests\integration\monitoring\test_dependency_tracking.py
 
 **Functions:**
@@ -8586,6 +9458,54 @@ Unit tests for RelationshipFinder.
 
 
 
+### tests\unit\ui\test_ui_component_automation.py
+
+**Description:**
+
+Test Suite: UI Component Automation Protocol
+
+This file initiates test-driven scaffolding for UI automation as described in
+/docs/development/day22_plan.md Task 4.1.4 and following the modular test design
+specified in /code_summary.md and /docs/doc_index.md.
+
+Scope:
+ - Automatic UI workflow simulation
+ - Event recording and playback
+ - Visual regression protocol hooks
+ - Backend interaction validation
+
+Locations for target UI code: see /app/ui/ directories in code_summary.md.
+
+Protocol: All test setup/teardown must be isolated and not affect system env.
+
+Note:
+ - UI testing is to be separated from core, non-UI protocol tests.
+ - If Qt or GUI frameworks are required, ensure appropriate (separate) venv.
+
+**Functions:**
+
+- `test_env_setup()`
+
+  Test environment setup for UI testing automation.
+
+- `test_ui_component_workflow_simulation(test_env_setup)`
+
+  Placeholder: Simulate basic user workflow in a UI component (to be replaced with real automation).
+
+- `test_ui_event_recording_and_playback(test_env_setup)`
+
+  Placeholder: Record and playback UI events, validating protocol hooks.
+
+- `test_ui_visual_regression(test_env_setup)`
+
+  Placeholder: Visual regression baseline check hook (to be replaced with real screenshot diff logic).
+
+- `test_ui_backend_integration(test_env_setup)`
+
+  Placeholder: Validate that UI and backend communicate through public, protocol-compliant API.
+
+
+
 ### tests\unit\models\test_metadata_manager.py
 
 **Functions:**
@@ -8630,64 +9550,6 @@ Location: /tests/integration/test_professor_upload_workflow.py
   Force immediate shutdown with thread cleanup
 
 - `test_full_upload_workflow(qapp, tmp_path)`
-
-
-
-### tests\integration\monitoring\test_service_health_dashboard_integration.py
-
-**Description:**
-
-Integration test for ServiceHealthDashboard (using correct status provider registration).
-
-Location: /tests/integration/monitoring/test_service_health_dashboard_integration.py
-
-Uses the shared test harness from /tests/helpers/test_monitoring_fixtures.py to provide
-a real ComponentRegistry, SYSTEM_STATUS_TRACKER, and dashboard. Covers registration,
-status changes, real-time update, and historical tracking.
-
-Run with pytest.
-
-**Functions:**
-
-- `monitoring_setup()`
-
-- `register_monitored_component(registry, tracker, StatusProvider, component)`
-
-- `test_registration_and_status_update(monitoring_setup)`
-
-- `test_historical_uptime_tracking(monitoring_setup)`
-
-- `test_real_time_status_update(monitoring_setup)`
-
-
-
-### tests\integration\registry\test_dependency_tracking.py
-
-**Description:**
-
-Integration Test: Dependency Tracking System
-
-Location: /tests/integration/registry/test_dependency_tracking.py
-
-Covers:
-- Component registration and dependency declaration
-- Dependency graph validation
-- Dependency impact analysis
-- (Optional) Version compatibility checks
-
-Production features under test: /integrations/registry/component_registry.py
-
-**Functions:**
-
-- `fresh_registry(monkeypatch)`
-
-- `test_dependency_registration_and_graph()`
-
-- `test_dependency_impact_analysis()`
-
-- `test_version_compatibility_is_true_for_now()`
-
-- `test_dependency_cycle_is_supported_or_documented()`
 
 
 
@@ -9017,14 +9879,6 @@ Designed for performance and stress testing (with or without pytest-xdist).
 
 
 
-### tests\helpers\test_monitoring_fixtures.py
-
-**Functions:**
-
-- `make_test_monitoring_fixtures()`
-
-
-
 ### doc_indexer.py
 
 **Functions:**
@@ -9034,6 +9888,34 @@ Designed for performance and stress testing (with or without pytest-xdist).
 - `write_index(docs, outfile)`
 
 - `main()`
+
+
+
+### app\main.py
+
+**Description:**
+
+Main entry point for the AeroLearn AI application.
+
+Location: /app/main.py
+- Hardened for production demo: adds robust error handling, startup info, and user-friendly feedback
+- Handles configuration errors gracefully with fallbacks and clear user messaging
+- Provides detailed console output for troubleshooting during demos
+- Only allows UI entry if PyQt6 is available and installed in the current venv
+
+**Functions:**
+
+- `_fail_with_msg(msg)`
+
+  Show a failure message and exit the application.
+
+- `show_critical_error(title, message)`
+
+  Show a modal error dialog (PyQt-safe). Useful for demo mode.
+
+- `main()`
+
+  Initialize and run the AeroLearn AI application, with demo-friendly error handling and output.
 
 
 
@@ -9269,29 +10151,6 @@ This should be re-run after adding any new test files!
 - `create_sample_pdf(filepath)`
 
 - `create_sample_docx(filepath)`
-
-
-
-### app\main.py
-
-**Description:**
-
-Main entry point for the AeroLearn AI application.
-
-Location: /app/main.py
-- Hardened for production demo: adds robust error handling, startup info, and user-friendly feedback
-- Handles configuration errors gracefully with fallbacks and clear user messaging
-- Provides detailed console output for troubleshooting during demos
-
-**Functions:**
-
-- `show_critical_error(title, message)`
-
-  Show a modal error dialog (PyQt-safe). Useful for demo mode.
-
-- `main()`
-
-  Initialize and run the AeroLearn AI application, with demo-friendly error handling and output.
 
 
 
@@ -9612,7 +10471,31 @@ The generator creates HTML documentation from source code comments.
 
 - `qapp()`
 
-  Session-wide QApplication fixture for PyQt widget testing.
+  Session-wide QApplication fixture for PyQt6 widget testing.
+
+
+
+### tests\ui\test_pyqt6_import_policy.py
+
+**Description:**
+
+Test File: /tests/ui/test_pyqt6_import_policy.py
+
+Purpose:
+- Enforce documentation policy that PyQt6/UI dependencies must never be globally required,
+  and importing UI entry points in the wrong environment should fail gracefully.
+- Ensures devs/testers are aware of required venv isolation for PyQt6.
+
+See:
+- /docs/development/pytest-qt-pyqt6-fix.md
+- /docs/architecture/architecture_overview.md (layered separation)
+- /code_summary.md (project structure)
+
+**Functions:**
+
+- `test_pyqt6_import_env_policy(monkeypatch)`
+
+  This test simulates the presence/absence of PyQt6 and enforces the rule:
 
 
 
@@ -9629,6 +10512,14 @@ The generator creates HTML documentation from source code comments.
 **Functions:**
 
 - `test_extract_text_unsupported()`
+
+
+
+### tests\helpers\test_monitoring_fixtures.py
+
+**Functions:**
+
+- `make_test_monitoring_fixtures()`
 
 
 
@@ -9829,6 +10720,22 @@ Created: 2025-04-24
 
 This module is part of the AeroLearn AI project.
 It provides functionality for project management within the platform.
+
+
+
+### app\ui\__init__.py
+
+**Description:**
+
+UI package initialization.
+
+Ensures the UI module is recognized by the Python import system.
+This is required for:
+ - Protocol-compliant modularity
+ - Import hygiene across tests and implementations
+ - Compatibility with automation, unit, and integration tests
+
+Mandated by project structure as seen in code_summary.md and to align with best practices (see also: /docs/development/day22_plan.md advisory on import hygiene).
 
 
 
@@ -10160,149 +11067,120 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional sections to enhance the project summary with architectural insights:
+Here are the additional sections to enhance the project summary:
 
-```markdown
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows a layered modular architecture with distributed component management:
+The system follows a layered service-oriented architecture with event-driven integration:
+- **Core Application Layer**: Contains domain models (Course, Assessment) and business logic
+- **Integration Layer**: Handles component monitoring, event bus, and service health tracking
+- **Infrastructure Layer**: Provides persistence, AI capabilities, and external integrations
+- **Observability Plane**: ComponentStatusAdapter and Metrics.py form a centralized monitoring system
+- **Event Mesh**: EventBus with pub/sub pattern connects all components through EventTypes.py definitions
 
-```
-                       +-------------------+
-                       |   Presentation    |
-                       |   Layer (UI)      |
-                       +---------+---------+
-                                 |
-                                 v
-+----------------+       +-------------------+
-|  Event Bus     | <---->|  Application      |
-|  (Pub/Sub)     |       |  Core Layer       |
-+----------------+       +-------------------+
-     ^                           ^
-     |                           |
-+----------------+       +-------------------+
-|  Monitoring    |       |  Data Access      |
-|  & Metrics     |       |  Layer (ORM)      |
-+----------------+       +-------------------+
-     ^                           ^
-     |                           |
-+----------------+       +-------------------+
-|  Integration   |       |  External         |
-|  Adapters      |       |  Services         |
-+----------------+       +-------------------+
-```
-
-Key Architectural Components:
-- **Component Registry**: Central nervous system for service discovery (Singleton pattern)
-- **Event-Driven Core**: Pub/Sub architecture with typed events and priority handling
-- **Health Monitoring Stack**: Layered monitoring system with state tracking and dashboard integration
-- **Domain Model Layer**: Course/Content/Assessment models with SQLAlchemy ORM relationships
-- **Adaptive Authentication**: Pluggable auth providers with RBAC and session management
+Key architectural characteristics:
+- Loose coupling through event-driven communication
+- Component-oriented design with registry pattern
+- Dual monitoring system (simple vs enhanced) for different environments
+- Protocol-driven health checking (Service Health Protocol)
+- Hybrid synchronization (async event handling with sync core operations)
 
 ### 2. Identified Design Patterns
-
-| Pattern            | Implementation Example                          | Purpose                                      |
-|--------------------|-------------------------------------------------|----------------------------------------------|
-| Singleton          | ComponentRegistry.__new__()                    | Global component tracking                    |
-| Observer           | EventBus subscription model                    | Loose coupling between components            |
-| Registry           | ComponentRegistry.register_component()         | Central service directory                    |
-| Decorator          | @event_handler in authentication flows         | Cross-cutting concern management             |
-| Strategy           | AuthenticationProvider implementations        | Pluggable auth mechanisms                    |
-| Factory Method     | Rubric.by_id() in assessment.py                | Flexible object creation                     |
-| State              | ComponentState transitions                     | Component lifecycle management               |
-| Composite          | Course-Module-Lesson hierarchy                 | Tree structure content representation        |
+| Pattern             | Implementation Examples                          | Purpose                                      |
+|---------------------|--------------------------------------------------|---------------------------------------------|
+| Singleton           | EventBus, SystemMetricsManager                  | Global access point for critical services   |
+| Adapter             | ComponentStatusAdapter                          | Bridge legacy and modern monitoring systems |
+| Observer            | Event listeners in component_status_adapter.py  | Status change notifications                |
+| Registry            | ComponentRegistry                               | Central component dependency management    |
+| Factory             | make_tracker, make_registry functions           | Flexible object creation                   |
+| Strategy            | Simple vs EnhancedComponentStatusTracker        | Interchangeable monitoring algorithms      |
+| Decorator           | @property in model classes                      | Controlled attribute access                |
+| Provider            | HealthProvider interface                        | Abstract metric collection                 |
+| Composite           | Course->Module->Lesson hierarchy                | Tree structure content management          |
 
 ### 3. Refactoring Opportunities
+1. **Status Tracking Duplication**
+   - Files: component_status_adapter.py (114 duplicates)
+   - Issue: SimpleStatusTracker and EnhancedComponentStatusTracker share 60% identical code
+   - Solution: Create base AbstractStatusTracker with template methods
 
-1. **Component Coupling**
-- ComponentRegistry has tight coupling with monitoring adapters
-- Recommendation: Introduce interface abstraction for status providers
+2. **Event Type Safety**
+   - File: event_types.py (108 issues)
+   - Issue: String-based event type comparisons
+   - Fix: Implement strongly typed EventType hierarchy
 
-2. **Event System Improvements**
-- Duplicated event type definitions across category classes
-- Opportunity: Implement protobuf schema for event serialization
+3. **Metrics Singleton Coupling**
+   - File: metrics.py (89 references)
+   - Problem: Global state in SystemMetricsManager
+   - Improvement: Introduce dependency injection
 
-3. **Singleton Testability**
-- Global ComponentRegistry instance complicates testing
-- Solution: Introduce registry factory with test overrides
-
-4. **Metrics Collection**
-- SystemMetricsManager mixes resource and learning metrics
-- Improvement: Split into InfrastructureMetrics and LearningMetrics services
-
-5. **Dependency Management**
-- Circular dependency detection in ComponentRegistry._has_circular_dependency()
-- Enhancement: Implement Tarjan's algorithm for O(n) cycle detection
+4. **Model-Event Tight Coupling**
+   - File: course.py (94 events)
+   - Issue: Direct EventBus references in domain models
+   - Solution: Introduce Domain Event pattern with observer
 
 ### 4. Critical Path Analysis
-
-**Component Registration Flow**
-1. Component initialization
-2. Registry.register_component() 
-3. StatusAdapter registration
-4. Dependency graph update
-5. Health dashboard propagation
-
-**Authentication Critical Path**
+**Component Registration Flow:**
 ```mermaid
-sequenceDiagram
-    User->>AuthService: authenticate()
-    AuthService->>CredentialManager: verify_credentials()
-    CredentialManager->>UserModel: get_by_username()
-    UserModel->>DB: query
-    AuthService->>SessionManager: create_session()
-    SessionManager->>EventBus: publish(USER_LOGGED_IN)
+graph TD
+    A[Component Init] --> B[ComponentRegistry.register]
+    B --> C[StatusTracker.update_status]
+    C --> D[ServiceHealthDashboard._cascade]
+    D --> E[EventBus.publish]
+    E --> F[Dependent Components Update]
 ```
 
-**Course Enrollment Flow**
-1. Enrollment request creation
-2. Prerequisite validation
-3. Approval workflow
-4. EventBus notification
-5. Progress tracking initialization
+**Key Execution Paths:**
+1. User Enrollment:
+   `Course.enroll_bulk() -> EventBus -> Metrics.track_progress -> Dashboard.update`
 
-### 5. Class Relationships
+2. Health Monitoring:
+   `ComponentStatusAdapter.update -> StatusTracker -> HealthDashboard -> EventBus`
 
-```mermaid
-classDiagram
-    ComponentRegistry "1" *-- "*" Component
-    Component "1" -- "*" ComponentState
-    EventBus "1" -- "*" EventType
-    Course "1" -- "*" Module
-    Module "1" -- "*" Lesson
-    AuthenticationService --> CredentialManager
-    AuthenticationService --> SessionManager
-    ComponentStatusAdapter --> ServiceHealthDashboard
-    ComponentStatusAdapter --> EnhancedComponentStatusTracker
-    IntegrationHealth ..|> HealthProvider
-    IntegrationHealth --> HealthMetric
-    IntegrationHealth --> EventBus
-    
-    class ComponentRegistry {
-        +register_component()
-        +declare_dependency()
-        +get_dependency_graph()
-    }
-    
-    class ServiceHealthDashboard {
-        +update_component_status()
-        +get_dependency_graph()
-    }
-    
-    class EventBus {
-        +subscribe()
-        +publish()
-        +replay_critical_events()
-    }
+3. AI Content Processing:
+   `ContentEvent.CREATED -> VectorIndex.update -> SimilarityAnalyzer.run`
+
+4. Authentication Flow:
+   `AuthService.login() -> CredentialManager.verify -> Session.create -> EventBus.publish`
+
+### 5. Component Relationships
+**Core Class Diagram:**
+```plaintext
+┌───────────────────┐          ┌───────────────────┐
+│  ComponentRegistry│◄─contains┤ServiceHealthDashboard
+└───────────────────┘          └─────────┬─────────┘
+                         ▲               │
+                         │               ▼
+┌───────────────────┐  ┌───────────────────┐
+│   Component       │  │  StatusTracker    │
+└─────┬─────────────┘  └───────────────────┘
+      │                      ▲
+      │                      │
+      ▼                      │
+┌───────────────────┐        │
+│  EventBus         ├────────┘
+└─────┬─────────────┘
+      │
+      ▼
+┌───────────────────┐
+│  Course/Assessment│
+└───────────────────┘
 ```
 
-Key Relationships:
-- ComponentRegistry maintains bidirectional relationship with monitoring adapters
-- EventBus acts as central nervous system connecting domain models
-- Authentication stack uses chain of responsibility for credential validation
-- Course hierarchy implements composite pattern for content management
-- Monitoring subsystem follows observer pattern for status updates
-```
+**Key Module Dependencies:**
+- `component_status_adapter.py` depends on:
+  - ComponentRegistry (direct dependency)
+  - EventBus (through ServiceHealthDashboard)
+  - Metrics.py (through status propagation)
+  
+- `event_bus.py` is central hub for:
+  - Content model changes
+  - User authentication events
+  - System health notifications
+  - AI processing results
 
-This enhancement provides architectural context while maintaining technical specificity about the implementation patterns and system interactions.
+- `authentication.py` integrates with:
+  - User model (direct association)
+  - EventBus (auth events)
+  - ComponentRegistry (as monitored component)

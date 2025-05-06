@@ -13,6 +13,148 @@ class ComponentState(Enum):
     HEALTHY = "healthy"
     FAILED = "failed"
 
+# --- SimpleStatusTracker for protocol compliance and test imports ---
+class SimpleStatusTracker:
+    """
+    Simple status tracker implementation that follows the Service Health Protocol.
+    Used for test environments and as a lightweight alternative to EnhancedComponentStatusTracker.
+    
+    Implements the core status tracking functionality required by the protocol:
+    - Component status updates
+    - Status cascading based on dependency graph
+    - Status retrieval
+    """
+    def __init__(self, registry=None):
+        """
+        Initialize with an optional registry instance.
+        
+        Args:
+            registry: Optional ComponentRegistry instance
+        """
+        # Try to import ComponentRegistry, fall back to local implementation if not available
+        try:
+            from integrations.registry.component_registry import ComponentRegistry
+            self._registry = registry or ComponentRegistry()
+        except ImportError:
+            self._registry = registry or ComponentRegistry()
+        
+        self._statuses = {}  # component_id -> (state, details)
+        self.dashboard = None  # For protocol compliance
+    
+    def update_status(self, component_name, state, details=None):
+        """
+        Update a component's status.
+        
+        Args:
+            component_name: The name/ID of the component
+            state: The new state of the component
+            details: Optional details about the component's status
+        """
+        self._statuses[component_name] = (state, details)
+        self._cascade(component_name, state)
+        return True
+    
+    def update_component_status(self, component_id, state=None, details=None):
+        """
+        Protocol-compliant method to update a component's status.
+        
+        Args:
+            component_id: The ID of the component to update
+            state: The new state of the component
+            details: Optional details about the component's status
+            
+        Returns:
+            True if the update was successful, False otherwise
+        """
+        return self.update_status(component_id, state, details)
+    
+    def _cascade(self, component_name, state):
+        """
+        Cascade status changes to dependent components.
+        
+        Args:
+            component_name: The name/ID of the component that changed
+            state: The new state of the component
+        """
+        dep_graph = self._registry.get_dependency_graph()
+        for dep, deps in dep_graph.items():
+            if component_name in deps:
+                self.update_status(dep, state, {'cascaded': component_name})
+    
+    def get_status(self, component_name):
+        """
+        Get a component's status.
+        
+        Args:
+            component_name: The name/ID of the component
+            
+        Returns:
+            Tuple of (state, details) or ("UNKNOWN", None) if not found
+        """
+        return self._statuses.get(component_name, (ComponentState.UNKNOWN, None))
+    
+    def get_component_status(self, component_id):
+        """
+        Protocol-compliant method to get a component's status.
+        
+        Args:
+            component_id: The ID of the component
+            
+        Returns:
+            ComponentStatus object or None if not found
+        """
+        state, details = self.get_status(component_id)
+        if state == ComponentState.UNKNOWN and not details:
+            return None
+        return ComponentStatus(component_id, state, details)
+    
+    def get_all_component_statuses(self):
+        """
+        Get all component statuses.
+        
+        Returns:
+            Dictionary mapping component IDs to (state, details) tuples
+        """
+        return dict(self._statuses)
+    
+    @property
+    def registry(self):
+        """Get the registry instance"""
+        return self._registry
+    
+    def register_status_provider(self, component_id, provider):
+        """
+        Register a status provider for a component.
+        In SimpleStatusTracker, this just initializes the component's status.
+        
+        Args:
+            component_id: The ID of the component
+            provider: The status provider object
+        """
+        # Get initial status from provider
+        if hasattr(provider, 'provide_status'):
+            status = provider.provide_status()
+            self.update_status(component_id, status.state, status.details)
+        elif hasattr(provider, 'get_component_state'):
+            state = provider.get_component_state()
+            details = provider.get_status_details() if hasattr(provider, 'get_status_details') else None
+            self.update_status(component_id, state, details)
+    
+    def unregister_status_provider(self, component_id):
+        """
+        Unregister a status provider for a component.
+        In SimpleStatusTracker, this just removes the component's status.
+        
+        Args:
+            component_id: The ID of the component
+        """
+        if component_id in self._statuses:
+            del self._statuses[component_id]
+    
+    def clear(self):
+        """Clear all status data"""
+        self._statuses.clear()
+
 # Robust import with fallback for testing environments
 try:
     from integrations.registry.component_registry import Component
@@ -119,6 +261,8 @@ class EnhancedComponentStatusTracker(ComponentStatusTracker):
     Designed for explicit dependency injection to ensure test isolation.
     
     Provides methods for test isolation and proper component unregistration.
+    
+    Implements the Service Health Protocol by exposing _registry attribute.
     """
     
     def __init__(self, registry=None):
@@ -350,12 +494,15 @@ def make_registry():
 
 def make_tracker(registry=None):
     """
-    Create a new EnhancedComponentStatusTracker instance.
+    Create a new status tracker instance.
     
     Args:
         registry: Optional ComponentRegistry instance to use for dependency tracking
+        
+    Returns:
+        SimpleStatusTracker instance for lightweight usage or testing
     """
-    return EnhancedComponentStatusTracker(registry)
+    return SimpleStatusTracker(registry)
 
 # --- Default instances for backwards compatibility ---
 COMPONENT_REGISTRY_SINGLETON = make_registry()
@@ -471,10 +618,16 @@ def get_component_registry():
     """Get the default instance of the component registry"""
     return COMPONENT_REGISTRY_SINGLETON
 
+# Export classes for direct import
+SimpleStatusTracker = SimpleStatusTracker
+
 # Add a new class for dashboard functionality
 class ServiceHealthDashboard:
     """
     Dashboard for monitoring component health with explicit dependency injection.
+    Implements the Service Health Protocol as documented in /docs/architecture/service_health_protocol.md
+    
+    Always uses a status tracker, never directly a registry.
     """
     def __init__(self, status_tracker=None, registry=None):
         """
@@ -484,41 +637,105 @@ class ServiceHealthDashboard:
             status_tracker: The status tracker to use, or None to create a new one
             registry: The registry to use, or None to create a new one
         """
-        self.status_tracker = status_tracker or make_tracker()
-        self.registry = registry or make_registry()
+        # Always ensure we have a proper status tracker
+        if status_tracker is None:
+            # Create a new tracker with the registry
+            self.status_tracker = make_tracker(registry or make_registry())
+        elif hasattr(status_tracker, 'update_component_status'):
+            # Use the provided tracker
+            self.status_tracker = status_tracker
+        else:
+            raise ValueError("status_tracker must implement update_component_status method")
+            
+        # Get registry from tracker if possible, otherwise use provided registry
+        self.registry = getattr(self.status_tracker, '_registry', None) or registry or make_registry()
         
         # Connect tracker to registry if not already connected
-        if self.status_tracker._registry is None:
+        if not hasattr(self.status_tracker, '_registry') or self.status_tracker._registry is None:
             self.status_tracker._registry = self.registry
+            
+        # Protocol: ensure status_tracker exposes _registry
+        if not hasattr(self.status_tracker, '_registry'):
+            raise AttributeError("Status Tracker must have a _registry attribute.")
+            
+        # Initialize statuses dict for protocol compliance
+        self._statuses = {}
+            
+    def supports_cascading_status(self):
+        """
+        Check if this dashboard supports cascading status changes.
+        
+        Returns:
+            True if cascading is supported, False otherwise
+        """
+        return True
             
     def update_component_status(self, component_id, state=None, details=None):
         """
         Update a component's status in the dashboard.
         
         Protocol: Uses 'state' parameter as per service health protocol.
+        Always propagates updates to the status tracker.
         
         Args:
             component_id: The ID of the component to update
             state: The new state of the component
             details: Optional details about the component's status
+            
+        Returns:
+            True if the update was successful, False otherwise
         """
+        # Store status in internal dict for protocol compliance
+        self._statuses[component_id] = (state, details)
+        
+        # Cascade status changes if supported
+        if self.supports_cascading_status():
+            self._cascade_status(component_id, state, details)
+            
+        # Protocol: must call tracker update as well
         return self.status_tracker.update_component_status(component_id, state=state, details=details)
+        
+    def _cascade_status(self, component_id, state, details=None):
+        """
+        Cascade status changes to dependent components.
+        
+        Args:
+            component_id: The ID of the component that changed
+            state: The new state of the component
+            details: Optional details about the component's status
+        """
+        dep_graph = self.get_dependency_graph()
+        for dep, deps in dep_graph.items():
+            if component_id in deps:
+                cascade_details = dict(details or {})
+                cascade_details['cascaded'] = component_id
+                # Update both internal status and tracker
+                self._statuses[dep] = (state, cascade_details)
+                self.status_tracker.update_component_status(dep, state, cascade_details)
     
     def get_all_component_statuses(self):
-        """Get all current component statuses"""
-        return self.status_tracker.get_all_component_statuses()
+        """
+        Get all current component statuses.
+        
+        Returns:
+            Dictionary mapping component IDs to (state, details) tuples
+        """
+        # Return internal statuses dict for protocol compliance
+        return dict(self._statuses)
     
     def get_dependency_graph(self):
         """Get the dependency graph from the registry"""
-        return self.registry.get_dependency_graph()
+        return self.status_tracker._registry.get_dependency_graph()
     
     def clear(self):
         """Clear all status tracking data"""
+        self._statuses.clear()
         self.status_tracker.clear()
         self.registry.clear()
 
 # Export classes and factory functions for direct use
 ComponentRegistry = ComponentRegistry
+SimpleStatusTracker = SimpleStatusTracker
 
 def unregister_from_status_tracker(component_id, system_status_tracker=None):
     """
@@ -581,6 +798,10 @@ class ComponentStatusAdapter:
             # First initialization - create everything
             self.registry = registry or COMPONENT_REGISTRY_SINGLETON
             self.status_tracker = status_tracker or make_tracker(self.registry)
+            
+            # Ensure status_tracker has _registry attribute
+            if not hasattr(self.status_tracker, '_registry') or self.status_tracker._registry is None:
+                self.status_tracker._registry = self.registry
             
             # If dashboard is provided, use it; otherwise create one with our registry and tracker
             if dashboard:
@@ -650,7 +871,11 @@ class ComponentStatusAdapter:
             state: The new state of the component
             details: Optional details/metrics about the component's status
         """
-        # Trigger legacy listeners for this component
+        # Trigger global listeners for all components
+        for callback in self.legacy_listeners.get('global', set()):
+            callback(component_id, state, details)
+            
+        # Trigger component-specific listeners
         for callback in self.legacy_listeners.get(component_id, set()):
             callback(component_id, state, details)
             
@@ -666,7 +891,7 @@ class ComponentStatusAdapter:
         if state_name in ("DEGRADED", "FAILED", "DOWN"):
             if last_state != state_name:
                 for callback in self.alert_callbacks:
-                    callback(component_id, state)
+                    callback(component_id, state, details)  # Pass details for protocol compliance
                     
         # Update last known state
         self._last_component_states[component_id] = state_name
@@ -674,10 +899,46 @@ class ComponentStatusAdapter:
         # Trigger component watchers
         for callback in self._component_watchers.get(component_id, set()):
             callback(component_id, state, details)
-
-    def register_status_listener(self, component_id, callback):
+            
+        # Cascade status changes if supported by dashboard
+        if self.dashboard and hasattr(self.dashboard, 'supports_cascading_status') and self.dashboard.supports_cascading_status():
+            self._cascade_status_changes(component_id, state, details)
+            
+    def _cascade_status_changes(self, component_id, state, details=None):
         """
-        Register a callback to be called whenever a component's status changes.
+        Cascade status changes to dependent components based on dependency graph.
+        
+        Args:
+            component_id: The ID of the component that changed
+            state: The new state of the component
+            details: Optional details/metrics about the component's status
+        """
+        # Get dependency graph from registry
+        dep_graph = self.registry.get_dependency_graph()
+        
+        # Find components that depend on this component
+        for dep, deps in dep_graph.items():
+            if component_id in deps:
+                # Update dependent component with cascaded status
+                cascade_details = dict(details or {})
+                cascade_details['cascaded'] = component_id  # Use 'cascaded' key for protocol compliance
+                self.update_component_status(dep, state, cascade_details)
+
+    def register_status_listener(self, callback):
+        """
+        Register a callback to be called whenever any component's status changes.
+        Protocol-compliant interface: callback(component_id, new_state, details) on every state change.
+        
+        Args:
+            callback: Function to call when any component's status changes
+        """
+        if 'global' not in self.legacy_listeners:
+            self.legacy_listeners['global'] = set()
+        self.legacy_listeners['global'].add(callback)
+        
+    def register_component_listener(self, component_id, callback):
+        """
+        Register a callback to be called whenever a specific component's status changes.
         Legacy interface: callback(component_id, new_state, metrics) on every state change.
         
         Args:
@@ -692,6 +953,7 @@ class ComponentStatusAdapter:
         """
         Register a callback to be called when a component enters a degraded or failed state.
         Only triggers on transitions to these states, not on every update.
+        Protocol-compliant interface: callback(component_id, state, details) on state transitions.
         
         Args:
             callback: Function to call when a component enters a degraded or failed state
@@ -878,7 +1140,15 @@ class ComponentStatusAdapter:
 # Initialize SYSTEM_STATUS_TRACKER with a default adapter
 # This ensures we have a ComponentStatusAdapter as the singleton, not just a tracker
 if SYSTEM_STATUS_TRACKER is None:
-    SYSTEM_STATUS_TRACKER = ComponentStatusAdapter(registry=COMPONENT_REGISTRY_SINGLETON)
+    # Create a tracker with the registry
+    tracker = make_tracker(COMPONENT_REGISTRY_SINGLETON)
+    # Ensure tracker has _registry attribute
+    if not hasattr(tracker, '_registry'):
+        tracker._registry = COMPONENT_REGISTRY_SINGLETON
+    # Create dashboard with tracker and registry
+    dashboard = ServiceHealthDashboard(tracker, COMPONENT_REGISTRY_SINGLETON)
+    # Create adapter with dashboard
+    SYSTEM_STATUS_TRACKER = ComponentStatusAdapter(dashboard=dashboard, registry=COMPONENT_REGISTRY_SINGLETON, status_tracker=tracker)
 
 # For backwards compatibility and explicit test access
 MOCK_SYSTEM_STATUS_TRACKER = SYSTEM_STATUS_TRACKER

@@ -5,11 +5,32 @@ Location: /app/main.py
 - Hardened for production demo: adds robust error handling, startup info, and user-friendly feedback
 - Handles configuration errors gracefully with fallbacks and clear user messaging
 - Provides detailed console output for troubleshooting during demos
+- Only allows UI entry if PyQt6 is available and installed in the current venv
 """
 
 import sys
 import os
-from PyQt6.QtWidgets import QApplication, QMessageBox
+
+def _fail_with_msg(msg):
+    """Show a failure message and exit the application."""
+    print(msg, file=sys.stderr)
+    sys.exit(1)
+
+# Enforce UI-only venv for main.py
+if not os.environ.get("AEROLEARN_UI_VENV") == "1":
+    _fail_with_msg(
+        "ERROR: AeroLearn UI can only be run in a UI-enabled environment.\n"
+        "Please activate a venv with PyQt6 installed and set the environment variable AEROLEARN_UI_VENV=1.\n"
+        "See /README.md and /docs/development/pytest-qt-pyqt6-fix.md for instructions."
+    )
+
+try:
+    from PyQt6.QtWidgets import QApplication, QMessageBox
+except ImportError:
+    _fail_with_msg(
+        "ERROR: PyQt6 is not installed in this environment. "
+        "Please follow /README.md (PyQt6 UI policy) and /docs/development/pytest-qt-pyqt6-fix.md"
+    )
 
 from app.ui.common.main_window import MainWindow
 from app.core.auth.authentication import AuthenticationService

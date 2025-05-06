@@ -34,6 +34,8 @@ class HealthMetricType(Enum):
     THROUGHPUT = auto()
     RESOURCE_USAGE = auto()
     AVAILABILITY = auto()
+    SERVICE = auto()  # Added as per protocol
+    PERFORMANCE = auto()  # Added as per protocol
     CUSTOM = auto()
 
 
@@ -42,10 +44,10 @@ class HealthMetric:
     
     def __init__(
         self, 
+        component_id: str,
         name: str, 
         value: float, 
         metric_type: HealthMetricType,
-        component_id: str,
         timestamp: Optional[datetime] = None,
         threshold_warning: Optional[float] = None,
         threshold_critical: Optional[float] = None,
@@ -55,19 +57,19 @@ class HealthMetric:
         Initialize a new health metric.
         
         Args:
+            component_id: ID of the component this metric belongs to
             name: Name of the metric
             value: Measured value
             metric_type: Type of the metric
-            component_id: ID of the component this metric belongs to
             timestamp: When the metric was recorded (defaults to now)
             threshold_warning: Warning threshold value
             threshold_critical: Critical threshold value
             metadata: Additional metric metadata
         """
+        self.component_id = component_id
         self.name = name
         self.value = value
         self.metric_type = metric_type
-        self.component_id = component_id
         self.timestamp = timestamp or datetime.now()
         self.threshold_warning = threshold_warning
         self.threshold_critical = threshold_critical
@@ -241,10 +243,10 @@ class IntegrationHealth(Component):
                 except Exception as e:
                     # If a provider fails, create an error metric
                     error_metric = HealthMetric(
+                        component_id=c_id,
                         name="health_collection_error",
                         value=1.0,
                         metric_type=HealthMetricType.ERROR_RATE,
-                        component_id=c_id,
                         metadata={"error": str(e)}
                     )
                     results[c_id] = [error_metric]
@@ -313,10 +315,10 @@ class IntegrationHealth(Component):
                     # Create a default metric if none available
                     if not triggering_metric:
                         triggering_metric = HealthMetric(
+                            component_id=component_id,
                             name="status_change",
                             value=1.0,
                             metric_type=HealthMetricType.CUSTOM,
-                            component_id=component_id,
                         )
                     
                     # Fire event
@@ -526,10 +528,10 @@ class IntegrationHealth(Component):
                        metadata: Optional[Dict[str, Any]] = None) -> HealthMetric:
             duration = time.time() - start_time
             return HealthMetric(
+                component_id=component_id,
                 name=name,
                 value=duration,
                 metric_type=HealthMetricType.RESPONSE_TIME,
-                component_id=component_id,
                 threshold_warning=threshold_warning,
                 threshold_critical=threshold_critical,
                 metadata=metadata

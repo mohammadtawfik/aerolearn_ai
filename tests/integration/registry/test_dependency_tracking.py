@@ -7,7 +7,9 @@ Covers:
 - Component registration and dependency declaration
 - Dependency graph validation
 - Dependency impact analysis
-- (Optional) Version compatibility checks
+- Dependency ordering preservation
+- Dependency cycle detection
+- Version compatibility checks
 
 Production features under test: /integrations/registry/component_registry.py
 """
@@ -99,3 +101,119 @@ def test_dependency_cycle_is_supported_or_documented():
     got_graph = registry.get_dependency_graph()
     assert "Y" in got_graph["X"]
     assert "X" in got_graph["Y"]
+
+def test_dependency_order_preservation():
+    """Test that dependency order is preserved when adding dependencies."""
+    registry = ComponentRegistry()
+    
+    # Register components
+    registry.register_component("A", version="1.0", description="Component A")
+    registry.register_component("B", version="1.0", description="Component B")
+    registry.register_component("C", version="1.0", description="Component C")
+    
+    # Add dependencies in specific order
+    registry.declare_dependency("A", "B")
+    registry.declare_dependency("A", "C")
+    
+    # Verify order is preserved
+    graph = registry.get_dependency_graph()
+    assert graph["A"] == ["B", "C"]
+
+def test_dependency_removal():
+    """Test that dependencies can be removed correctly."""
+    registry = ComponentRegistry()
+    
+    # Setup
+    registry.register_component("A", version="1.0")
+    registry.register_component("B", version="1.0")
+    registry.register_component("C", version="1.0")
+    
+    # Add and then remove dependencies
+    registry.declare_dependency("A", "B")
+    registry.declare_dependency("A", "C")
+    
+    # Remove one dependency
+    registry.remove_dependency("A", "B")
+    
+    # Check remaining dependencies
+    graph = registry.get_dependency_graph()
+    assert graph["A"] == ["C"]
+    
+    # Remove all dependencies
+    registry.remove_dependency("A", "C")
+    graph = registry.get_dependency_graph()
+    assert "A" in graph
+    assert not graph["A"]  # Empty list
+
+def test_dependents_tracking():
+    """Test that dependents (reverse dependencies) are correctly tracked."""
+    registry = ComponentRegistry()
+    
+    # Setup
+    registry.register_component("A", version="1.0")
+    registry.register_component("B", version="1.0")
+    registry.register_component("C", version="1.0")
+    
+    # B and C depend on A
+    registry.declare_dependency("B", "A")
+    registry.declare_dependency("C", "A")
+    
+    # Get dependents of A
+    dependents = registry.get_dependents("A")
+    assert set(dependents) == {"B", "C"}
+
+def test_cycle_detection():
+    """Test that dependency cycles can be detected."""
+    registry = ComponentRegistry()
+    
+    # Setup
+    registry.register_component("A", version="1.0")
+    registry.register_component("B", version="1.0")
+    registry.register_component("C", version="1.0")
+    
+    # Create a cycle: A -> B -> C -> A
+    registry.declare_dependency("A", "B")
+    registry.declare_dependency("B", "C")
+    registry.declare_dependency("C", "A")
+    
+    # Check for cycle
+    assert registry.has_dependency_cycle() is True
+    
+    # Simple cycle: A -> B -> A
+    registry = ComponentRegistry()
+    registry.register_component("A", version="1.0")
+    registry.register_component("B", version="1.0")
+    registry.declare_dependency("A", "B")
+    registry.declare_dependency("B", "A")
+    assert registry.has_dependency_cycle() is True
+    
+    # No cycle
+    registry = ComponentRegistry()
+    registry.register_component("A", version="1.0")
+    registry.register_component("B", version="1.0")
+    registry.register_component("C", version="1.0")
+    registry.declare_dependency("A", "B")
+    registry.declare_dependency("B", "C")
+    assert registry.has_dependency_cycle() is False
+
+def test_transitive_dependency_analysis():
+    """Test that transitive dependencies can be analyzed."""
+    registry = ComponentRegistry()
+    
+    # Setup a chain: A -> B -> C -> D
+    registry.register_component("A", version="1.0")
+    registry.register_component("B", version="1.0")
+    registry.register_component("C", version="1.0")
+    registry.register_component("D", version="1.0")
+    
+    registry.declare_dependency("A", "B")
+    registry.declare_dependency("B", "C")
+    registry.declare_dependency("C", "D")
+    
+    # Get all transitive dependencies of A
+    transitive_deps = registry.get_all_dependencies("A")
+    assert set(transitive_deps) == {"B", "C", "D"}
+    
+    # Get all transitive dependents of D
+    transitive_dependents = registry.get_all_dependents("D")
+    assert set(transitive_dependents) == {"A", "B", "C"}

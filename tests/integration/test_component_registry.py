@@ -31,7 +31,19 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 logging.basicConfig(level=logging.DEBUG)
 
 # Import components
-from integrations.registry.component_registry import ComponentRegistry, Component, ComponentState
+from integrations.registry.component_registry import ComponentRegistry, Component
+
+# Define ComponentState enum for testing if not available as import
+class ComponentState:
+    """Component lifecycle states."""
+    UNINITIALIZED = "UNINITIALIZED"
+    INITIALIZING = "INITIALIZING" 
+    INITIALIZED = "INITIALIZED"
+    STARTING = "STARTING"
+    RUNNING = "RUNNING"
+    STOPPING = "STOPPING"
+    STOPPED = "STOPPED"
+    ERROR = "ERROR"
 try:
     from integrations.events.event_bus import EventBus
     EVENT_BUS_AVAILABLE = True
@@ -215,7 +227,41 @@ def improved_register_component(component):
     
     return True
 
-# Test functions
+# Test functions for dependency tracking protocol compliance
+async def test_register_duplicate_component():
+    """Test that registering the same component twice fails."""
+    global registry
+    print("\n--- Testing duplicate component registration ---")
+    
+    try:
+        # Create a component
+        component = TestComponent("duplicate_test", "1.0.0")
+        
+        # Register the component first time
+        print("Registering component first time...")
+        first_result = improved_register_component(component)
+        
+        # Try to register the same component again
+        print("Attempting to register the same component again...")
+        # We need to use the registry's method directly to test the duplicate check
+        if hasattr(registry, 'register_component'):
+            second_result = registry.register_component(component)
+            print(f"Second registration result: {second_result}")
+            # Should return False for duplicate registration
+            result = second_result is False
+        else:
+            print("Registry doesn't have register_component method")
+            result = False
+        
+        print(f"Duplicate registration test: {result}")
+        return result
+        
+    except Exception as e:
+        print(f"Error in duplicate registration test: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 async def test_component_registration():
     """Test basic component registration and retrieval."""
     global registry
@@ -356,6 +402,139 @@ async def test_simple_dependency():
         traceback.print_exc()
         return False
 
+async def test_dependency_declaration_and_lookup():
+    """Test dependency declaration and retrieval according to protocol requirements."""
+    global registry
+    print("\n--- Testing dependency declaration and lookup ---")
+    
+    try:
+        # Create components
+        component_a = TestComponent("comp_a", "1.0.0")
+        component_b = TestComponent("comp_b", "1.0.0")
+        
+        # Register components
+        improved_register_component(component_a)
+        improved_register_component(component_b)
+        
+        # Declare dependency
+        print("Declaring dependency between components...")
+        if hasattr(registry, "declare_dependency"):
+            registry.declare_dependency(component_a.component_id, component_b.component_id)
+            print("Dependency declared successfully")
+        else:
+            print("Registry doesn't have declare_dependency method")
+            return False
+        
+        # Check dependency lookup
+        if hasattr(registry, "get_dependency_graph"):
+            graph = registry.get_dependency_graph()
+            if graph and hasattr(graph, "get_dependencies"):
+                deps = graph.get_dependencies(component_a.component_id)
+                result = component_b.component_id in deps
+                print(f"Dependency lookup result: {result}")
+                return result
+            else:
+                print("Dependency graph doesn't have get_dependencies method")
+                return False
+        else:
+            print("Registry doesn't have get_dependency_graph method")
+            return False
+            
+    except Exception as e:
+        print(f"Error in dependency declaration test: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+async def test_cycle_detection():
+    """Test cycle detection in dependency graph."""
+    global registry
+    print("\n--- Testing dependency cycle detection ---")
+    
+    try:
+        # Create components
+        component_a = TestComponent("cycle_a", "1.0.0")
+        component_b = TestComponent("cycle_b", "1.0.0")
+        
+        # Register components
+        improved_register_component(component_a)
+        improved_register_component(component_b)
+        
+        # Declare first dependency
+        if hasattr(registry, "declare_dependency"):
+            registry.declare_dependency(component_a.component_id, component_b.component_id)
+            print("First dependency declared successfully")
+            
+            # Try to create a cycle
+            print("Attempting to create dependency cycle...")
+            try:
+                registry.declare_dependency(component_b.component_id, component_a.component_id)
+                print("WARNING: Cycle was created without error")
+                return False
+            except Exception as e:
+                print(f"Cycle detection worked: {e}")
+                return True
+        else:
+            print("Registry doesn't have declare_dependency method")
+            return False
+            
+    except Exception as e:
+        print(f"Error in cycle detection test: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+async def test_dependency_removal():
+    """Test dependency removal functionality."""
+    global registry
+    print("\n--- Testing dependency removal ---")
+    
+    try:
+        # Create components
+        component_a = TestComponent("rem_a", "1.0.0")
+        component_b = TestComponent("rem_b", "1.0.0")
+        
+        # Register components
+        improved_register_component(component_a)
+        improved_register_component(component_b)
+        
+        # Declare dependency
+        if hasattr(registry, "declare_dependency"):
+            registry.declare_dependency(component_a.component_id, component_b.component_id)
+            print("Dependency declared successfully")
+        else:
+            print("Registry doesn't have declare_dependency method")
+            return False
+        
+        # Remove dependency
+        if hasattr(registry, "get_dependency_graph"):
+            graph = registry.get_dependency_graph()
+            if graph and hasattr(graph, "remove_dependency"):
+                graph.remove_dependency(component_a.component_id, component_b.component_id)
+                print("Dependency removed successfully")
+                
+                # Verify removal
+                if hasattr(graph, "get_dependencies"):
+                    deps = graph.get_dependencies(component_a.component_id)
+                    result = component_b.component_id not in deps
+                    print(f"Dependency removal verification: {result}")
+                    return result
+                else:
+                    print("Dependency graph doesn't have get_dependencies method")
+                    return False
+            else:
+                print("Dependency graph doesn't have remove_dependency method")
+                return False
+        else:
+            print("Registry doesn't have get_dependency_graph method")
+            return False
+            
+    except Exception as e:
+        print(f"Error in dependency removal test: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 async def test_bulk_lifecycle():
     """Test bulk component lifecycle operations."""
     global registry
@@ -403,6 +582,28 @@ async def test_bulk_lifecycle():
         traceback.print_exc()
         return False
 
+async def test_dependency_graph_retrieval():
+    """Test that the dependency graph can be retrieved from the registry."""
+    global registry
+    print("\n--- Testing dependency graph retrieval ---")
+    
+    try:
+        # Check if registry has the method
+        if hasattr(registry, 'get_dependency_graph'):
+            graph = registry.get_dependency_graph()
+            result = graph is not None
+            print(f"Dependency graph retrieved: {result}")
+            return result
+        else:
+            print("Registry doesn't have get_dependency_graph method")
+            return False
+            
+    except Exception as e:
+        print(f"Error in dependency graph retrieval test: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
 async def run_core_tests():
     """Run only the core tests that are likely to succeed."""
     print("Running core Component Registry tests that should work with your implementation...\n")
@@ -423,6 +624,11 @@ async def run_core_tests():
         
         # Simple dependency
         results["Simple Dependencies"] = await test_simple_dependency()
+        
+        # Dependency tracking protocol tests
+        results["Dependency Declaration and Lookup"] = await test_dependency_declaration_and_lookup()
+        results["Cycle Detection"] = await test_cycle_detection()
+        results["Dependency Removal"] = await test_dependency_removal()
         
         # Show summary
         print("\n" + "=" * 50)
