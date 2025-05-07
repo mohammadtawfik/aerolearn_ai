@@ -31,6 +31,7 @@ class MetricType(Enum):
     TIME_ON_TASK = "time_on_task"
     COMPLETION_RATE = "completion_rate"
     PERFORMANCE_TREND = "performance_trend"
+    COMPONENT_HEALTH = "component_health"
     CUSTOM = "custom"
 
 class AlertLevel(Enum):
@@ -39,7 +40,7 @@ class AlertLevel(Enum):
     CRITICAL = "critical"
 
 class Metric:
-    def __init__(self, name: str, type_: MetricType, value: Any, timestamp: float = None):
+    def __init__(self, name: str, type_: MetricType, value: Any, timestamp: float = None, component_id: str = None):
         if not isinstance(type_, MetricType):
             # Accept int (enum index) or string (enum member name)
             if isinstance(type_, int):
@@ -56,14 +57,18 @@ class Metric:
         self.type = type_
         self.value = value
         self.timestamp = timestamp if timestamp else time.time()
+        self.component_id = component_id
 
     def to_dict(self):
-        return dict(
+        result = dict(
             name=self.name,
             type=self.type.value if isinstance(self.type, MetricType) else self.type,
             value=self.value,
             timestamp=self.timestamp,
         )
+        if hasattr(self, 'component_id') and self.component_id is not None:
+            result['component_id'] = self.component_id
+        return result
 
 class MetricAlert:
     def __init__(self, metric_name: str, level: AlertLevel, threshold: Any, callback: Optional[Callable]=None):
@@ -74,28 +79,93 @@ class MetricAlert:
 
 class SystemMetricsManager:
     _instance = None
+    _lock = threading.Lock()
 
     def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+                cls._instance._init_internal()
+            return cls._instance
 
-    def __init__(self):
-        self._metrics: Dict[str, Metric] = {}  # key: metric name
+    def _init_internal(self):
+        self._metrics: Dict[str, Metric] = {}  # key: metric name or "COMPONENT_HEALTH::<id>"
         self._alerts: List[MetricAlert] = []
         self._lock = threading.Lock()
 
+    def __init__(self):
+        # This is now handled by _init_internal to avoid re-initialization
+        pass
+
+    def _metric_key(self, metric: Metric) -> str:
+        """Generate a consistent key for storing metrics, especially for component health metrics"""
+        if metric.type == MetricType.COMPONENT_HEALTH and hasattr(metric, 'component_id') and metric.component_id:
+            return f"COMPONENT_HEALTH::{metric.component_id}"
+        return metric.name
+
     def register_metric(self, metric: Metric):
+        metric_key = self._metric_key(metric)
         with self._lock:
-            self._metrics[metric.name] = metric
+            self._metrics[metric_key] = metric
             self._check_alerts(metric)
 
-    def report_metric(self, name: str, type_: MetricType, value: Any):
-        metric = Metric(name, type_, value)
+    def report_metric(self, name: str, type_: MetricType, value: Any, component_id=None):
+        metric = Metric(name, type_, value, component_id=component_id)
         self.register_metric(metric)
 
-    def get_metric(self, name: str) -> Optional[Metric]:
-        return self._metrics.get(name, None)
+    def on_status_update(self, component_id: str, status, extra: Optional[dict] = None):
+        """
+        Call this whenever a component status changes to publish/aggregate metric.
+        
+        :param component_id: Component identifier
+        :param status: Status value (can be enum or string)
+        :param extra: Optional additional data to include
+        """
+        # Convert status to string if it's an enum
+        if hasattr(status, 'name'):
+            status_str = status.name
+        else:
+            status_str = str(status)
+            
+        # Create a component health metric
+        metric = Metric(
+            name="status",
+            type_=MetricType.COMPONENT_HEALTH,
+            value=status_str,
+            component_id=component_id
+        )
+        self.register_metric(metric)
+
+    def get_metric(self, name: str, component_id=None) -> Optional[Metric]:
+        """
+        Retrieve a metric with flexible lookup options:
+        - If asked for "COMPONENT_HEALTH" and a component_id, return that status metric.
+        - If asked for a component id directly (e.g., get_metric('MetricsTarget')), return COMPONENT_HEALTH::<id> if present.
+        - Otherwise, return by the given key.
+        """
+        # First try direct lookup with component_id for COMPONENT_HEALTH metrics
+        if component_id is not None and (name == MetricType.COMPONENT_HEALTH or 
+                                         name == "component_health" or 
+                                         name == "COMPONENT_HEALTH"):
+            key = f"COMPONENT_HEALTH::{component_id}"
+            if key in self._metrics:
+                return self._metrics[key]
+        
+        # Try direct lookup by name
+        if name in self._metrics:
+            return self._metrics[name]
+            
+        # Try component health lookup using name as component_id
+        health_key = f"COMPONENT_HEALTH::{name}"
+        if health_key in self._metrics:
+            return self._metrics[health_key]
+            
+        # Fallback: try with component_id as suffix
+        if component_id is not None:
+            fallback = f"{name}::{component_id}"
+            return self._metrics.get(fallback, None)
+            
+        return None
 
     def get_all_metrics(self) -> Dict[str, Metric]:
         return dict(self._metrics)
@@ -441,11 +511,29 @@ class PerformanceAnalyzer:
         # For resource history snapshots
         self._resource_history = defaultdict(list)
         self._dashboard = None  # Reference to ServiceHealthDashboard
+        # Reference to metrics manager for health updates
+        self._metrics_manager = system_metrics
 
     def set_dashboard(self, dashboard: ServiceHealthDashboard):
         """Set reference to the health dashboard for component access"""
         self._dashboard = dashboard
+        
+        # Hook up status update notifications to metrics manager
+        if hasattr(dashboard, 'add_status_listener'):
+            dashboard.add_status_listener(self._on_component_status_change)
+            
         return self  # For method chaining
+        
+    def _on_component_status_change(self, component_id: str, status: Any, extra: dict = None):
+        """
+        Handle component status changes by updating metrics
+        
+        :param component_id: Component identifier
+        :param status: New status value
+        :param extra: Optional extra data
+        """
+        # Update metrics manager with new status
+        self._metrics_manager.on_status_update(component_id, status, extra)
 
     def benchmark_component(self, component_name: str, metric_name: str, value: Any) -> None:
         """

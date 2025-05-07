@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 404
+Total Python files: 424
 
 ## Table of Contents
 
@@ -86,7 +86,9 @@ Total Python files: 404
 │   │   │   ├── health_check.py
 │   │   │   ├── alert_notification.py
 │   │   │   ├── integration_failure_detection.py
-│   │   │   └── compatibility_monitoring.py
+│   │   │   ├── compatibility_monitoring.py
+│   │   │   ├── dashboard.py
+│   │   │   └── registry.py
 │   │   ├── config
 │   │   │   ├── api_secrets.py
 │   │   │   ├── api_secrets_example.py
@@ -271,7 +273,13 @@ Total Python files: 404
 │   │   ├── integration_health.py
 │   │   ├── component_status.py
 │   │   ├── transaction_logger.py
-│   │   └── component_status_adapter.py
+│   │   ├── component_status_adapter.py
+│   │   ├── health_status.py
+│   │   ├── health_provider.py
+│   │   ├── events.py
+│   │   ├── integration_health_manager.py
+│   │   ├── integration_monitor.py
+│   │   └── integration_point_registry.py
 │   ├── week2
 │   │   ├── orchestrator.py
 │   │   └── __init__.py
@@ -304,7 +312,13 @@ Total Python files: 404
 │   │   │   │   ├── test_error_logging.py
 │   │   │   │   ├── test_usage_analytics.py
 │   │   │   │   ├── test_alert_notification.py
-│   │   │   │   └── test_compatibility_monitoring.py
+│   │   │   │   ├── test_compatibility_monitoring.py
+│   │   │   │   ├── __modular_unit_tests.py
+│   │   │   │   ├── test_health_status.py
+│   │   │   │   ├── test_health_provider.py
+│   │   │   │   ├── test_events.py
+│   │   │   │   ├── test_integration_monitor.py
+│   │   │   │   └── test_integration_point_registry.py
 │   │   │   ├── __init__.py
 │   │   │   └── test_integration_health.py
 │   │   ├── ui
@@ -318,6 +332,11 @@ Total Python files: 404
 │   │   │   ├── test_metadata_manager.py
 │   │   │   ├── test_content_type_registry.py
 │   │   │   └── test_progress.py
+│   │   ├── monitoring
+│   │   │   ├── test_service_health_protocol.py
+│   │   │   ├── test_dependency_tracking_protocol.py
+│   │   │   ├── test_health_monitoring_protocol.py
+│   │   │   └── __init__.py
 │   │   ├── test_crypto.py
 │   │   ├── test_credential_manager.py
 │   │   ├── test_local_cache_and_sync.py
@@ -341,7 +360,9 @@ Total Python files: 404
 │   │   │   ├── test_resource_allocation.py
 │   │   │   ├── test_service_health_protocol.py
 │   │   │   ├── test_health_check_endpoints.py
-│   │   │   └── test_integration_failure_detection.py
+│   │   │   ├── test_integration_failure_detection.py
+│   │   │   ├── test_integration_health_manager.py
+│   │   │   └── test_monitoring_module_integration.py
 │   │   ├── registry
 │   │   │   ├── test_dependency_tracking.py
 │   │   │   ├── test_dependency_tracking_system.py
@@ -555,7 +576,7 @@ Total Python files: 404
 
 - Classes: 8
 - Functions: 11
-- Dependency Score: 114.00
+- Dependency Score: 127.00
 
 ### integrations\registry\component_registry.py
 
@@ -568,7 +589,7 @@ This implementation aligns with:
 
 - Classes: 1
 - Functions: 0
-- Dependency Score: 111.00
+- Dependency Score: 121.00
 
 ### integrations\events\event_types.py
 
@@ -581,17 +602,6 @@ inter-compon...
 - Functions: 0
 - Dependency Score: 108.00
 
-### app\models\course.py
-
-Course model for AeroLearn AI.
-
-Location: app/models/course.py
-Depends on: integrations/events/event_bus.py, integrations/events/event_types.py, app/m...
-
-- Classes: 6
-- Functions: 0
-- Dependency Score: 94.00
-
 ### app\core\monitoring\metrics.py
 
 System Metrics & Alert Manager — AeroLearn AI
@@ -603,7 +613,18 @@ Features:
 
 - Classes: 8
 - Functions: 11
-- Dependency Score: 89.00
+- Dependency Score: 99.00
+
+### app\models\course.py
+
+Course model for AeroLearn AI.
+
+Location: app/models/course.py
+Depends on: integrations/events/event_bus.py, integrations/events/event_types.py, app/m...
+
+- Classes: 6
+- Functions: 0
+- Dependency Score: 94.00
 
 ### integrations\monitoring\integration_health.py
 
@@ -661,13 +682,13 @@ implementin...
 
 Key file relationships (files with most dependencies):
 
-- **integrations\monitoring\component_status_adapter.py** depends on: integrations\registry\component_registry.py
-- **app\models\course.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
+- **integrations\monitoring\component_status_adapter.py** depends on: integrations\registry\component_registry.py, app\core\monitoring\metrics.py
 - **app\core\monitoring\metrics.py** depends on: integrations\registry\component_registry.py
+- **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
 - **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **app\models\assessment.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **app\core\auth\authentication.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **app\models\content.py** depends on: app\models\course.py, integrations\events\event_types.py, integrations\events\event_bus.py
+- **app\core\auth\authentication.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
+- **app\models\content.py** depends on: integrations\events\event_types.py, app\models\course.py, integrations\events\event_bus.py
 
 
 ## Detailed Code Analysis
@@ -683,9 +704,9 @@ Key file relationships (files with most dependencies):
 - `SimpleStatusTracker`
 
 
-  Simple status tracker implementation that follows the Service Health Protocol.
+  Minimalist status tracker implementation that follows the Service Health Protocol.
 
-  Methods: `__init__()`, `update_status()`, `update_component_status()`, `_cascade()`, `get_status()`, ... (6 more)
+  Methods: `__init__()`, `update_component_status()`, `get_status()`, `get_component_status()`, `get_all_component_statuses()`, ... (4 more)
 
 - `SimpleComponentStatusProvider`
  (inherits from: ComponentStatusProvider)
@@ -722,14 +743,14 @@ Key file relationships (files with most dependencies):
 
   Dashboard for monitoring component health with explicit dependency injection.
 
-  Methods: `__init__()`, `supports_cascading_status()`, `update_component_status()`, `_cascade_status()`, `get_all_component_statuses()`, ... (2 more)
+  Methods: `__init__()`, `supports_cascading_status()`, `register_status_callback()`, `_trigger_status_change()`, `update_component_status()`, ... (10 more)
 
 - `ComponentStatusAdapter`
 
 
   Adapter for ServiceHealthDashboard status reporting, notifications, and test interfaces.
 
-  Methods: `__init__()`, `update_component_status()`, `_trigger_callbacks()`, `_cascade_status_changes()`, `register_status_listener()`, ... (12 more)
+  Methods: `__init__()`, `update_component_status()`, `_trigger_callbacks()`, `get_all_dependents()`, `_cascade_status_changes()`, ... (13 more)
 
 **Functions:**
 
@@ -790,7 +811,7 @@ This implementation aligns with:
   - Dependency tracking protocol
   
 Key Features:
-  - Register/unregister components with version, state, and unique id
+  - Register/unregister components using component.component_id (per protocol)
   - Deterministic insertion order for dependencies and dependents
   - Delegation of dependency management to DependencyGraph
   - Lifecycle management for components (initialize, start, stop)
@@ -803,7 +824,7 @@ Key Features:
 
   Protocol-compliant registry for registering components and declaring dependencies.
 
-  Methods: `__init__()`, `register_component()`, `unregister_component()`, `declare_dependency()`, `get_dependency_graph()`, ... (7 more)
+  Methods: `__init__()`, `_extract_id()`, `register_component()`, `unregister_component()`, `declare_dependency()`, ... (8 more)
 
 
 
@@ -935,6 +956,115 @@ organizational clarity.
 
 
 
+### app\core\monitoring\metrics.py
+
+**Description:**
+
+System Metrics & Alert Manager — AeroLearn AI
+Save at: /app/core/monitoring/metrics.py
+
+Features:
+- Define metrics types and schema
+- Register/report metrics for components
+- Threshold-based alerting (with callback hooks)
+- Real-time status query API
+- Learning analytics and progress tracking metrics
+- Component health monitoring and status history
+
+**Classes:**
+
+- `MetricType`
+ (inherits from: Enum)
+
+
+- `AlertLevel`
+ (inherits from: Enum)
+
+
+- `Metric`
+
+
+  Methods: `__init__()`, `to_dict()`
+
+- `MetricAlert`
+
+
+  Methods: `__init__()`
+
+- `SystemMetricsManager`
+
+
+  Methods: `__new__()`, `_init_internal()`, `__init__()`, `_metric_key()`, `register_metric()`, ... (7 more)
+
+- `ProgressMetrics`
+
+
+  Records user progress per course and provides progress event interface.
+
+  Methods: `__init__()`, `record_progress()`, `get_progress()`, `reset()`
+
+- `AnalyticsEngine`
+
+
+  Minimal stub: Analytics system that queries progress from ProgressMetrics.
+
+  Methods: `__init__()`, `get_progress()`
+
+- `PerformanceAnalyzer`
+
+
+  Analyzes performance metrics for system components.
+
+  Methods: `__init__()`, `set_dashboard()`, `_on_component_status_change()`, `benchmark_component()`, `measure_transaction_flow()`, ... (5 more)
+
+**Functions:**
+
+- `track_learning_objective(user_id, objective_id, activities)`
+
+  Track the degree of achievement for a specific learning objective by user.
+
+- `monitor_time_on_task(user_id, activity_logs)`
+
+  Monitor total time on task for a user.
+
+- `calculate_completion_rate(user_id, module_ids, completion_logs)`
+
+  Calculate overall module completion rate for the user.
+
+- `analyze_performance_trends(user_id, performance_history)`
+
+  Analyze trends in student performance over time.
+
+- `assessment_performance_analytics(user_id, records)`
+
+  Summarize assessment performance for user: mean, min, max, count.
+
+- `engagement_score(user_id, interactions)`
+
+  Sum engagement points for a user by interaction type.
+
+- `competency_mapping(user_id, assessments)`
+
+  Return set of competency_id values achieved by user; achieved if score >= threshold.
+
+- `comparative_cohort_analytics(group1, group2)`
+
+  Compare two cohorts by average progress/engagement.
+
+- `save_analytics_result(student_id, data)`
+
+  Save analytics results for a student to in-memory storage.
+
+- `retrieve_analytics_result(student_id)`
+
+  Retrieve previously saved analytics results for a student.
+
+- `clear_analytics_storage()`
+
+  Clear all stored analytics results.
+
+
+
 ### app\models\course.py
 
 **Description:**
@@ -984,115 +1114,6 @@ Covers ORM models, relationships, validation, serialization, and event emission.
 
 
   Methods: `__init__()`, `id()`, `title()`, `description()`, `modules()`, ... (2 more)
-
-
-
-### app\core\monitoring\metrics.py
-
-**Description:**
-
-System Metrics & Alert Manager — AeroLearn AI
-Save at: /app/core/monitoring/metrics.py
-
-Features:
-- Define metrics types and schema
-- Register/report metrics for components
-- Threshold-based alerting (with callback hooks)
-- Real-time status query API
-- Learning analytics and progress tracking metrics
-- Component health monitoring and status history
-
-**Classes:**
-
-- `MetricType`
- (inherits from: Enum)
-
-
-- `AlertLevel`
- (inherits from: Enum)
-
-
-- `Metric`
-
-
-  Methods: `__init__()`, `to_dict()`
-
-- `MetricAlert`
-
-
-  Methods: `__init__()`
-
-- `SystemMetricsManager`
-
-
-  Methods: `__new__()`, `__init__()`, `register_metric()`, `report_metric()`, `get_metric()`, ... (4 more)
-
-- `ProgressMetrics`
-
-
-  Records user progress per course and provides progress event interface.
-
-  Methods: `__init__()`, `record_progress()`, `get_progress()`, `reset()`
-
-- `AnalyticsEngine`
-
-
-  Minimal stub: Analytics system that queries progress from ProgressMetrics.
-
-  Methods: `__init__()`, `get_progress()`
-
-- `PerformanceAnalyzer`
-
-
-  Analyzes performance metrics for system components.
-
-  Methods: `__init__()`, `set_dashboard()`, `benchmark_component()`, `measure_transaction_flow()`, `get_transaction_metrics()`, ... (4 more)
-
-**Functions:**
-
-- `track_learning_objective(user_id, objective_id, activities)`
-
-  Track the degree of achievement for a specific learning objective by user.
-
-- `monitor_time_on_task(user_id, activity_logs)`
-
-  Monitor total time on task for a user.
-
-- `calculate_completion_rate(user_id, module_ids, completion_logs)`
-
-  Calculate overall module completion rate for the user.
-
-- `analyze_performance_trends(user_id, performance_history)`
-
-  Analyze trends in student performance over time.
-
-- `assessment_performance_analytics(user_id, records)`
-
-  Summarize assessment performance for user: mean, min, max, count.
-
-- `engagement_score(user_id, interactions)`
-
-  Sum engagement points for a user by interaction type.
-
-- `competency_mapping(user_id, assessments)`
-
-  Return set of competency_id values achieved by user; achieved if score >= threshold.
-
-- `comparative_cohort_analytics(group1, group2)`
-
-  Compare two cohorts by average progress/engagement.
-
-- `save_analytics_result(student_id, data)`
-
-  Save analytics results for a student to in-memory storage.
-
-- `retrieve_analytics_result(student_id)`
-
-  Retrieve previously saved analytics results for a student.
-
-- `clear_analytics_storage()`
-
-  Clear all stored analytics results.
 
 
 
@@ -2841,6 +2862,40 @@ See method and signal docstrings for more.
 
 
 
+### integrations\monitoring\health_status.py
+
+**Classes:**
+
+- `HealthStatus`
+ (inherits from: Enum)
+
+
+  Protocol-compliant health status enum representing component states.
+
+  Methods: `__str__()`
+
+- `HealthMetricType`
+ (inherits from: Enum)
+
+
+  Protocol-compliant metric types for health monitoring.
+
+  Methods: `__str__()`
+
+- `HealthMetric`
+
+
+  Protocol-compliant health metric representation.
+
+  Methods: `__post_init__()`, `__str__()`
+
+- `StatusRecord`
+
+
+  Protocol model for a status record, per service_health_protocol.md
+
+
+
 ### integrations\registry\component.py
 
 **Classes:**
@@ -2856,7 +2911,55 @@ See method and signal docstrings for more.
 
   Protocol-conformant Component as required by:
 
-  Methods: `__init__()`, `declare_dependency()`, `get_dependencies()`, `set_state()`, `get_id()`, ... (9 more)
+  Methods: `__init__()`, `declare_dependency()`, `get_dependencies()`, `set_state()`, `component_id()`, ... (10 more)
+
+
+
+### tests\unit\core\monitoring\test_health_status.py
+
+**Description:**
+
+Unit tests for /integrations/monitoring/health_status.py
+
+Protocol References:
+- health_status entities must implement correct enum values and data field specs.
+- Must support all field combinations, string representation, and UTC compliance.
+
+Tests:
+- Creation and string representation of HealthStatus, HealthMetricType, and HealthMetric.
+- Protocol-mandated field names, metric types, and value storage.
+
+**Classes:**
+
+- `TestHealthStatusEntities`
+
+
+  Methods: `test_health_status_enum()`, `test_health_status_enum_values()`, `test_health_status_string_representation()`, `test_health_metric_type_enum()`, `test_health_metric_type_values()`, ... (7 more)
+
+- `TestHealthProviderContract`
+
+
+  Methods: `test_health_provider_abstract()`
+
+- `TestHealthEvents`
+
+
+  Methods: `test_health_event_exists()`, `test_event_listener_interface()`
+
+- `TestIntegrationHealthManager`
+
+
+  Methods: `test_integration_health_manager_exists()`
+
+- `TestIntegrationMonitor`
+
+
+  Methods: `test_integration_monitor_class()`
+
+- `TestIntegrationPointRegistry`
+
+
+  Methods: `test_integration_point_registry_class()`
 
 
 
@@ -3287,6 +3390,47 @@ Dependencies:
 
 
   Methods: `__init__()`, `_refresh_tree()`, `_filtered_courses()`, `_filtered_modules()`, `_filtered_lessons()`, ... (16 more)
+
+
+
+### tests\unit\core\monitoring\__modular_unit_tests.py
+
+**Description:**
+
+Covers: /integrations/monitoring/health_status.py
+Aligns with: Health states/entities, HealthMetricType, HealthMetric (as per protocol doc)
+
+**Classes:**
+
+- `TestHealthStatusEntities`
+
+
+  Methods: `test_health_status_enum()`, `test_health_metric_type_enum()`, `test_health_metric_dataclass()`
+
+- `TestHealthProviderContract`
+
+
+  Methods: `test_health_provider_abstract()`
+
+- `TestHealthEvents`
+
+
+  Methods: `test_health_event_exists()`, `test_event_listener_interface()`
+
+- `TestIntegrationHealthManager`
+
+
+  Methods: `test_integration_health_manager_exists()`
+
+- `TestIntegrationMonitor`
+
+
+  Methods: `test_integration_monitor_class()`
+
+- `TestIntegrationPointRegistry`
+
+
+  Methods: `test_integration_point_registry_class()`
 
 
 
@@ -3732,6 +3876,30 @@ Follows: TDD, file structure, and naming rules per /code_summary.md and day20_pl
   Base class for all UI components.
 
   Methods: `__init__()`, `version()`, `status()`, `on_init()`, `on_start()`, ... (7 more)
+
+
+
+### integrations\monitoring\integration_health_manager.py
+
+**Description:**
+
+Protocol-compliant implementation for IntegrationHealthManager
+Location: /integrations/monitoring/integration_health_manager.py
+Aligns with: /docs/architecture/health_monitoring_protocol.md, /docs/development/integration_health_modularization_plan.md
+
+**Classes:**
+
+- `IntegrationHealth`
+
+
+  Protocol/root class for orchestration required in TDD/protocol. To be fully realized in later steps.
+
+- `IntegrationHealthManager`
+
+
+  Protocol-compliant implementation for the main IntegrationHealth orchestration module.
+
+  Methods: `__init__()`, `register_component()`, `update_component_status()`, `get_component_status()`, `record_metric()`, ... (4 more)
 
 
 
@@ -4625,6 +4793,37 @@ Handles all business logic and orchestration for course enrollment workflow.
 
 
 
+### integrations\monitoring\events.py
+
+**Description:**
+
+Health monitoring events module — protocol entity and dispatcher per TDD and project modularization.
+See /docs/development/integration_health_modularization_plan.md.
+
+**Classes:**
+
+- `HealthEvent`
+
+
+  Entity representing a health/monitoring event.
+
+  Methods: `__init__()`, `__eq__()`
+
+- `HealthEventDispatcher`
+
+
+  Dispatcher that manages listener registration and event firing.
+
+  Methods: `__init__()`, `register_listener()`, `fire_event()`
+
+**Functions:**
+
+- `register_health_event_listener(listener)`
+
+  Module-level API required by protocol/test—registers listener callback with global dispatcher.
+
+
+
 ### tests\ui\test_component_architecture.py
 
 **Classes:**
@@ -4701,6 +4900,25 @@ Run:
 - `search_courses_by_tag_partial(session, partial)`
 
 - `main()`
+
+
+
+### integrations\monitoring\integration_monitor.py
+
+**Description:**
+
+IntegrationMonitor — Protocol-compliant integration monitoring (transaction/failure/statistics storage and analysis).
+
+Follows protocol from /docs/architecture/health_monitoring_protocol.md and modularization plan.
+
+**Classes:**
+
+- `IntegrationMonitor`
+
+
+  Monitor integration health, transactions, and failures.
+
+  Methods: `__init__()`, `monitor_integration()`, `record_transaction()`, `get_failure_trace()`, `detect_failure_patterns()`, ... (3 more)
 
 
 
@@ -4839,6 +5057,19 @@ Integration tests for Admin Interface:
 
 
   Methods: `__init__()`, `register_rule()`, `trigger_alert()`, `escalate_alert()`, `query_alert_history()`, ... (1 more)
+
+
+
+### app\core\monitoring\dashboard.py
+
+**Classes:**
+
+- `ServiceHealthDashboard`
+
+
+  Protocol-compliant implementation of ServiceHealthDashboard.
+
+  Methods: `__init__()`, `update_component_status()`, `status_for()`, `get_all_component_statuses()`, `register_status_listener()`, ... (5 more)
 
 
 
@@ -5530,6 +5761,19 @@ Fixes assertion to match 'percent' as float (not callable).
 
 
 
+### app\core\monitoring\registry.py
+
+**Classes:**
+
+- `MonitoringComponentRegistry`
+
+
+  Protocol-compliant monitoring registry for dashboards/integration tests.
+
+  Methods: `__init__()`, `register_component()`, `unregister_component()`, `update_component_status()`, `get_component_status()`, ... (3 more)
+
+
+
 ### app\core\extraction\structured_data_extractor.py
 
 **Classes:**
@@ -5670,6 +5914,27 @@ The dashboard provides:
 
 
   Methods: `__init__()`, `generate_key()`, `generate_salt()`, `encrypt()`, `decrypt()`
+
+
+
+### integrations\monitoring\integration_point_registry.py
+
+**Description:**
+
+IntegrationPointRegistry — In-memory registry for integration points.
+
+Fulfills:
+- Modularization as detailed in /docs/development/integration_health_modularization_plan.md
+- Test and protocol surface as exercised by /tests/unit/core/monitoring/test_integration_point_registry.py
+
+**Classes:**
+
+- `IntegrationPointRegistry`
+
+
+  Registry for integration points with ability to register, lookup and enumerate all points.
+
+  Methods: `__init__()`, `register()`, `lookup()`, `get_all()`, `get_all_keys()`
 
 
 
@@ -5884,6 +6149,59 @@ Assumes all core and model implementations are complete.
 - `test_cross_module_assessment_integration(test_user)`
 
 - `test_full_pipeline_student_progress_updates(test_user)`
+
+
+
+### tests\integration\monitoring\test_service_health_protocol.py
+
+**Description:**
+
+Test coverage for:
+- Component registry protocol compliance (/docs/architecture/dependency_tracking_protocol.md)
+- Service health protocol registration, state update, event notification (/docs/architecture/service_health_protocol.md, /docs/api/service_health_protocol.md)
+- Health monitoring adapter correctness (/docs/architecture/health_monitoring_protocol.md)
+- Full integration: dependency graph generation, cascading state update, correct callbacks
+
+Requires project modules:
+- integrations.registry.component_registry
+- integrations.monitoring.component_status_adapter
+- integrations.monitoring.integration_health
+
+Assumptions:
+- All registry/component/dashboard/adapter classes implement the methods described in the protocols.
+
+**Classes:**
+
+- `TestComponent`
+
+
+  Methods: `__init__()`, `declare_dependency()`, `set_state()`, `to_dict()`
+
+**Functions:**
+
+- `clear_test_state()`
+
+  Reset all tracking state between tests to ensure isolation
+
+- `test_protocol_component_registration_and_dependency_tracking()`
+
+  Test component registration and dependency declaration per protocol
+
+- `test_service_health_dashboard_cascading_state_and_event_hooks()`
+
+  Test cascading status updates and event notifications
+
+- `test_integration_health_metrics_protocol()`
+
+  Test health metrics conform to protocol specifications
+
+- `test_notification_callbacks_and_adapter_api()`
+
+  Test alert callbacks fire according to protocol
+
+- `test_status_history_and_recovery()`
+
+  Test status history tracking and recovery detection
 
 
 
@@ -6161,6 +6479,17 @@ Defines standard API for rendering, configuration and settings.
 
 
   Methods: `__init__()`, `render()`, `get_config_schema()`
+
+
+
+### integrations\monitoring\__init__.py
+
+**Description:**
+
+Minimal stub. Do NOT import submodules here during modular split/testing phase.
+All submodules should be referenced directly (e.g., from integrations.monitoring import health_status).
+This avoids Python circular import issues during TDD phase.
+When all modules are implemented and stable, public API symbols can be re-exposed here if desired.
 
 
 
@@ -6599,6 +6928,24 @@ This module can be used as both a library (for tests) and a CLI tool.
 
 
   Methods: `__init__()`, `load_doc_index()`, `find_protocol_docs()`, `find_api_docs()`, `extract_component_interfaces()`, ... (3 more)
+
+
+
+### integrations\monitoring\health_provider.py
+
+**Description:**
+
+Defines HealthProvider ABC for monitoring, as required by modularization and all monitoring protocol docs.
+
+**Classes:**
+
+- `HealthProvider`
+ (inherits from: ABC)
+
+
+  Abstract base class for protocol-driven health/monitoring providers.
+
+  Methods: `get_health_status()`, `register_listener()`
 
 
 
@@ -7160,43 +7507,6 @@ Purpose:
 - `test_cancel_enrollment(service, db_session, dummy_user, dummy_course)`
 
 - `test_get_enrollment_status(service, db_session, dummy_user, dummy_approver, dummy_course)`
-
-
-
-### tests\integration\monitoring\test_service_health_protocol.py
-
-**Description:**
-
-Test coverage for:
-- Component registry protocol compliance (/docs/architecture/dependency_tracking_protocol.md)
-- Service health protocol registration, state update, event notification (/docs/architecture/service_health_protocol.md, /docs/api/service_health_protocol.md)
-- Health monitoring adapter correctness (/docs/architecture/health_monitoring_protocol.md)
-- Full integration: dependency graph generation, cascading state update, correct callbacks
-
-Requires project modules:
-- integrations.registry.component_registry
-- integrations.monitoring.component_status_adapter
-- integrations.monitoring.integration_health
-
-Assumptions:
-- All registry/component/dashboard/adapter classes implement the methods described in the protocols.
-
-**Classes:**
-
-- `TestComponent`
-
-
-  Methods: `__init__()`, `declare_dependency()`, `set_state()`
-
-**Functions:**
-
-- `test_protocol_component_registration_and_dependency_tracking()`
-
-- `test_service_health_dashboard_cascading_state_and_event_hooks(monkeypatch)`
-
-- `test_integration_health_metrics_protocol()`
-
-- `test_notification_callbacks_and_adapter_api()`
 
 
 
@@ -8193,6 +8503,35 @@ Reason: Required for Task 3.2.2, per viewer widget convention.
 
 
 
+### tests\unit\monitoring\test_service_health_protocol.py
+
+**Classes:**
+
+- `DummyComponent`
+
+
+  Methods: `__init__()`
+
+**Functions:**
+
+- `test_service_registration_and_initial_status()`
+
+  Test that a registered service is assigned an initial status per protocol.
+
+- `test_illegal_status_transition()`
+
+  Test that illegal state transitions raise errors, e.g., going from DEGRADED to HEALTHY without passing through RECOVERING.
+
+- `test_status_propagation_across_dependencies()`
+
+  Test dependency-aware propagation: failure in one component should affect dependents.
+
+- `test_serializable_status_object()`
+
+  Protocol requires status objects to be serializable for API transport (current impl is tuple, next step: upgrade impl).
+
+
+
 ### tests\integration\test_phase1_foundation.py
 
 **Functions:**
@@ -8689,6 +9028,30 @@ of user/module progress tracking records.
 
 
 
+### tests\integration\monitoring\test_integration_health_manager.py
+
+**Classes:**
+
+- `TestIntegrationHealthManager`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `setUp()`, `test_update_and_get_status()`, `test_metric_tracking()`, `test_alert_callback()`
+
+
+
+### tests\integration\monitoring\test_monitoring_module_integration.py
+
+**Classes:**
+
+- `TestMonitoringIntegration`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `setUp()`, `test_register_and_status_update_flow()`, `test_status_listener_and_clear()`, `test_cascading_status_support()`
+
+
+
 ### tests\integration\registry\test_dependency_tracking_system.py
 
 **Description:**
@@ -9026,6 +9389,28 @@ Rationale: Moved out of /app/core/db/schema.py to break circular import (between
 - `test_resource_utilization_metrics(registry)`
 
 - `registry()`
+
+
+
+### tests\unit\core\monitoring\test_integration_monitor.py
+
+**Description:**
+
+Unit tests for /integrations/monitoring/integration_monitor.py
+
+Protocol References:
+- Must support transaction recording, failure traces, failure pattern detection, health scoring, and simulation.
+
+Tests:
+- Monitor integration registration, transaction record, retrieval, failure trace, and scoring.
+
+**Classes:**
+
+- `TestIntegrationMonitor`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `test_monitor_integration_registration()`, `test_transaction_record_and_retrieval()`, `test_health_score()`
 
 
 
@@ -9458,6 +9843,76 @@ Unit tests for RelationshipFinder.
 
 
 
+### tests\unit\core\monitoring\test_health_provider.py
+
+**Description:**
+
+Unit tests for /integrations/monitoring/health_provider.py
+
+Protocol References:
+- HealthProvider must be an ABC with required protocol methods.
+
+Tests:
+- HealthProvider cannot be instantiated directly.
+- All protocol-required abstractmethods exist and raise as expected.
+
+**Classes:**
+
+- `TestHealthProviderABC`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `test_abc_instantiation()`, `test_protocol_methods_exist()`
+
+
+
+### tests\unit\core\monitoring\test_events.py
+
+**Description:**
+
+Unit tests for /integrations/monitoring/events.py
+
+Protocol References:
+- Must support HealthEvent, correct event fields, event type enums, listener logic.
+
+Tests:
+- Event creation/use with mandated fields.
+- Listener registration, firing, and delivery match protocol.
+
+**Classes:**
+
+- `TestHealthEvent`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `test_event_fields()`, `test_listener_registration_and_firing()`
+
+
+
+### tests\unit\core\monitoring\test_integration_point_registry.py
+
+**Description:**
+
+Unit tests for /integrations/monitoring/integration_point_registry.py
+
+Protocol References:
+- IntegrationPointRegistry must register, store, and enumerate integration points.
+
+Tests:
+- Register integration point.
+- Query integration points by name/key.
+- Storage returns correct registered points.
+
+**Classes:**
+
+- `TestIntegrationPointRegistry`
+ (inherits from: unittest.TestCase)
+
+
+  Methods: `test_register_and_lookup()`, `test_storage_returns_all()`
+
+
+
 ### tests\unit\ui\test_ui_component_automation.py
 
 **Description:**
@@ -9798,6 +10253,28 @@ If your conversation module is elsewhere (e.g., core/conversation/), update the 
 - `test_error_on_invalid_user()`
 
   Test handling when starting a conversation with a nonexistent user.
+
+
+
+### tests\unit\monitoring\test_dependency_tracking_protocol.py
+
+**Functions:**
+
+- `test_register_and_query_dependencies()`
+
+  Test that dependencies are registered and graph is queryable per protocol.
+
+- `test_cascade_on_dependency_failure()`
+
+  Changing a dependency's status propagates as per dependency tracking protocol (integration with dashboard tested elsewhere).
+
+- `test_remove_dependency()`
+
+  Test that removing a component updates the dependency graph correctly.
+
+- `test_lifecycle_management()`
+
+  Lifecycle events - initialize, start, stop must be tracked and reflected in dependencies.
 
 
 
@@ -10207,6 +10684,20 @@ Requires: event bus to be started (`await EventBus().start()`).
 - `qt_app()`
 
 - `test_widget_creates_with_sample_data(qt_app)`
+
+
+
+### tests\unit\monitoring\test_health_monitoring_protocol.py
+
+**Functions:**
+
+- `test_monitoring_polling_interface_and_callback()`
+
+  Monitoring subsystem exposes a polling/callback interface for status changes per protocol.
+
+- `test_programmatic_testability_and_reset_hooks()`
+
+  Protocols require explicit test/reset hooks for isolation and functional validation.
 
 
 
@@ -10881,10 +11372,6 @@ This module is part of the AeroLearn AI project.
 
 
 
-### integrations\monitoring\__init__.py
-
-
-
 ### integrations\week2\__init__.py
 
 **Description:**
@@ -10917,6 +11404,10 @@ Purpose:
 
 
 ### tests\unit\core\monitoring\__init__.py
+
+
+
+### tests\unit\monitoring\__init__.py
 
 
 
@@ -11067,120 +11558,139 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional sections to enhance the project summary:
+Here's the architectural enhancement section to add to the summary:
 
+```markdown
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
-The system follows a layered service-oriented architecture with event-driven integration:
-- **Core Application Layer**: Contains domain models (Course, Assessment) and business logic
-- **Integration Layer**: Handles component monitoring, event bus, and service health tracking
-- **Infrastructure Layer**: Provides persistence, AI capabilities, and external integrations
-- **Observability Plane**: ComponentStatusAdapter and Metrics.py form a centralized monitoring system
-- **Event Mesh**: EventBus with pub/sub pattern connects all components through EventTypes.py definitions
 
-Key architectural characteristics:
-- Loose coupling through event-driven communication
-- Component-oriented design with registry pattern
-- Dual monitoring system (simple vs enhanced) for different environments
-- Protocol-driven health checking (Service Health Protocol)
-- Hybrid synchronization (async event handling with sync core operations)
+The system follows a layered modular architecture with clear separation of concerns:
+
+```
+                       +-------------------+
+                       |  User Interface   |
+                       +-------------------+
+                                  Δ
+                       +-------------------+
+                       |   Application     |
+                       |      Core         |
+                       +-------------------+
+                     Δ           Δ           Δ
++---------------------+  +----------------+  +-------------------+
+|  Integration Layer  |  | Monitoring &   |  |    Event Bus      |
+| (Component Registry,|  | Alerting       |  |  Subsystem        |
+| Dependency Tracking)|  | System         |  +-------------------+
++---------------------+  +----------------+           Δ
+                                  Δ                   |
+                       +-----------------------------+-+
+                       |       Domain Models          |
+                       | (Courses, Assessments, Users)|
+                       +-------------------------------+
+                                  Δ
+                       +-----------------------------+
+                       |       Data Persistence      |
+                       +-----------------------------+
+```
+
+Key Architectural Components:
+1. **Core Application Layer**: Handles business logic (app/core)
+2. **Integration Layer**: Component lifecycle management (integrations/registry)
+3. **Monitoring System**: Real-time health tracking (integrations/monitoring)
+4. **Event-Driven Architecture**: Pub/sub communication (integrations/events)
+5. **Domain Model Layer**: Data structure definitions (app/models)
+6. **Auth/AuthZ Subsystem**: Role-based access control (app/core/auth)
 
 ### 2. Identified Design Patterns
-| Pattern             | Implementation Examples                          | Purpose                                      |
-|---------------------|--------------------------------------------------|---------------------------------------------|
-| Singleton           | EventBus, SystemMetricsManager                  | Global access point for critical services   |
-| Adapter             | ComponentStatusAdapter                          | Bridge legacy and modern monitoring systems |
-| Observer            | Event listeners in component_status_adapter.py  | Status change notifications                |
-| Registry            | ComponentRegistry                               | Central component dependency management    |
-| Factory             | make_tracker, make_registry functions           | Flexible object creation                   |
-| Strategy            | Simple vs EnhancedComponentStatusTracker        | Interchangeable monitoring algorithms      |
-| Decorator           | @property in model classes                      | Controlled attribute access                |
-| Provider            | HealthProvider interface                        | Abstract metric collection                 |
-| Composite           | Course->Module->Lesson hierarchy                | Tree structure content management          |
+
+| Pattern              | Implementation Examples                              | Purpose                                      |
+|----------------------|-----------------------------------------------------|----------------------------------------------|
+| Adapter              | ComponentStatusAdapter, SimpleComponentStatusProvider | Bridge component statuses to monitoring system |
+| Singleton            | SystemMetricsManager, EventBus                     | Global resource access                        |
+| Observer             | EventBus subscribers, Status listeners             | Decoupled component communication            |
+| Registry             | ComponentRegistry                                   | Central component management                  |
+| Strategy             | SimpleStatusTracker vs EnhancedComponentStatusTracker | Interchangeable monitoring algorithms        |
+| Factory              | make_tracker, make_registry functions              | Object creation abstraction                   |
+| Decorator            | @property in ServiceHealthDashboard                | Extended functionality without modification  |
+| State                | ComponentState enum transitions                    | Manage component lifecycle states            |
 
 ### 3. Refactoring Opportunities
-1. **Status Tracking Duplication**
-   - Files: component_status_adapter.py (114 duplicates)
-   - Issue: SimpleStatusTracker and EnhancedComponentStatusTracker share 60% identical code
-   - Solution: Create base AbstractStatusTracker with template methods
 
-2. **Event Type Safety**
-   - File: event_types.py (108 issues)
-   - Issue: String-based event type comparisons
-   - Fix: Implement strongly typed EventType hierarchy
+1. **Component Status Management**
+- Current: Tight coupling between ComponentStatusAdapter and ServiceHealthDashboard
+- Improvement: Introduce Mediator pattern for status propagation
 
-3. **Metrics Singleton Coupling**
-   - File: metrics.py (89 references)
-   - Problem: Global state in SystemMetricsManager
-   - Improvement: Introduce dependency injection
+2. **Event System Optimization**
+- Current: Mixed sync/async handling in EventBus
+- Improvement: Implement dedicated async event channels
 
-4. **Model-Event Tight Coupling**
-   - File: course.py (94 events)
-   - Issue: Direct EventBus references in domain models
-   - Solution: Introduce Domain Event pattern with observer
+3. **Metrics Collection**
+- Current: Direct calls to SystemMetricsManager
+- Improvement: Add Metrics Collector abstraction layer
+
+4. **Dependency Management**
+- Current: Manual dependency declaration in ComponentRegistry
+- Improvement: Implement automatic dependency inference
+
+5. **State Transition Handling**
+- Current: Hardcoded state validation in SimpleStatusTracker
+- Improvement: Configurable state transition rules engine
 
 ### 4. Critical Path Analysis
-**Component Registration Flow:**
+
+1. **Component Registration Flow**
+```
+User Action → ComponentRegistry.register_component() 
+  → ComponentStatusAdapter.register_status_provider()
+    → EnhancedComponentStatusTracker.update_all_statuses()
+      → ServiceHealthDashboard._trigger_status_change()
+        → EventBus.publish(SYSTEM_COMPONENT_REGISTERED)
+```
+
+2. **Health Monitoring Pipeline**
+```
+ComponentStatusProvider → ComponentStatusAdapter 
+  → EnhancedComponentStatusTracker 
+    → SystemMetricsManager.on_status_update()
+      → Metrics aggregation → Alert evaluation
+```
+
+3. **Course Enrollment Workflow**
+```
+EnrollmentRequest → Course.approve_enrollment() 
+  → EventBus.publish(ENROLLMENT_APPROVED)
+    → MonitoringSystem.update_component_status()
+      → MetricsManager.record_engagement_metric()
+```
+
+### 5. Class Relationships
+
 ```mermaid
 graph TD
-    A[Component Init] --> B[ComponentRegistry.register]
-    B --> C[StatusTracker.update_status]
-    C --> D[ServiceHealthDashboard._cascade]
-    D --> E[EventBus.publish]
-    E --> F[Dependent Components Update]
+    CR[ComponentRegistry] -->|registers| CST[ComponentStatusTracker]
+    CST -->|updates| SHD[ServiceHealthDashboard]
+    SHD -->|notifies| EB[EventBus]
+    EB -->|triggers| CSA[ComponentStatusAdapter]
+    CSA -->|manages| CM[Course Model]
+    CM -->|emits events| EB
+    EB -->|updates| MM[SystemMetricsManager]
+    MM -->|alerts| SHD
+    
+    classDef core fill:#9f9,stroke:#333;
+    classDef integration fill:#f9f,stroke:#333;
+    classDef monitoring fill:#f99,stroke:#333;
+    
+    class CR,EB integration;
+    class CST,SHD,CSA,MM monitoring;
+    class CM core;
 ```
 
-**Key Execution Paths:**
-1. User Enrollment:
-   `Course.enroll_bulk() -> EventBus -> Metrics.track_progress -> Dashboard.update`
-
-2. Health Monitoring:
-   `ComponentStatusAdapter.update -> StatusTracker -> HealthDashboard -> EventBus`
-
-3. AI Content Processing:
-   `ContentEvent.CREATED -> VectorIndex.update -> SimilarityAnalyzer.run`
-
-4. Authentication Flow:
-   `AuthService.login() -> CredentialManager.verify -> Session.create -> EventBus.publish`
-
-### 5. Component Relationships
-**Core Class Diagram:**
-```plaintext
-┌───────────────────┐          ┌───────────────────┐
-│  ComponentRegistry│◄─contains┤ServiceHealthDashboard
-└───────────────────┘          └─────────┬─────────┘
-                         ▲               │
-                         │               ▼
-┌───────────────────┐  ┌───────────────────┐
-│   Component       │  │  StatusTracker    │
-└─────┬─────────────┘  └───────────────────┘
-      │                      ▲
-      │                      │
-      ▼                      │
-┌───────────────────┐        │
-│  EventBus         ├────────┘
-└─────┬─────────────┘
-      │
-      ▼
-┌───────────────────┐
-│  Course/Assessment│
-└───────────────────┘
+Key Module Interactions:
+- `component_registry.py` ↔ `component_status_adapter.py`: Bi-directional status updates
+- `event_bus.py` ↔ `metrics.py`: Event-driven metrics collection
+- `authentication.py` ↔ `component_registry.py`: AuthZ component registration
+- `course.py` ↔ `event_types.py`: Domain event definitions
+- `integration_health.py` ↔ `metrics.py`: Health metric correlation
 ```
 
-**Key Module Dependencies:**
-- `component_status_adapter.py` depends on:
-  - ComponentRegistry (direct dependency)
-  - EventBus (through ServiceHealthDashboard)
-  - Metrics.py (through status propagation)
-  
-- `event_bus.py` is central hub for:
-  - Content model changes
-  - User authentication events
-  - System health notifications
-  - AI processing results
-
-- `authentication.py` integrates with:
-  - User model (direct association)
-  - EventBus (auth events)
-  - ComponentRegistry (as monitored component)
+This addition provides architectural context without duplicating existing file structure information, focusing on system-wide patterns and relationships.

@@ -19,12 +19,12 @@ class Component:
     Provides unique identification, state management, and dependency tracking
     for registration, health monitoring, and analytics.
     """
-    def __init__(self, component_id, description=None, version=None, state=ComponentState.UNKNOWN):
+    def __init__(self, component_id, description=None, version=None, state=ComponentState.UNKNOWN, component_type=None):
         self._component_id = component_id
         self._description = description
         self._state = state
         self._version = version
-        self._component_type = None
+        self._component_type = component_type
         self._dependencies = set()
         self._metadata = {}
         self._name = component_id  # Default name to component_id
@@ -44,6 +44,14 @@ class Component:
         self._state = state
         if details:
             self._metadata.update(details)
+        
+    @property
+    def component_id(self):
+        """
+        Public protocol attribute for component identity.
+        Required by all registry, monitoring, and protocol code.
+        """
+        return self._component_id
         
     def get_id(self):
         """

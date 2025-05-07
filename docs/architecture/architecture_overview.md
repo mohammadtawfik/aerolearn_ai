@@ -96,7 +96,7 @@ flowchart TD
 
 | Subsystem                  | Core Modules / Directories                           | Responsibilities                                                                      |
 |----------------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------|
-| **Integration Framework**  | `integrations/` (events, interfaces, monitoring, registry) | Event bus, type-safe events, interfaces, monitoring, registry/dependency management    |
+| **Integration Framework**  | `integrations/` (events, interfaces, monitoring, registry) | Event bus, type-safe events, interfaces, modular monitoring system, registry/dependency management    |
 | **Registry & Dependencies**| `integrations/registry/` (component, component_state, dependency_graph, component_registry) | Component identity, dependency tracking, lifecycle management, graph operations |
 | **Authentication & Authz** | `app/core/auth/`                                    | Credential management, authentication, session, permissions, RBAC                     |
 | **Database & Models**      | `app/core/db/`, `app/models/`                       | ORM schema, client, migrations, content/user/assessment/course models                 |
@@ -144,8 +144,15 @@ flowchart TD
 
 - All health and monitoring mechanisms now comply with `/docs/architecture/service_health_protocol.md` and `/docs/architecture/health_monitoring_protocol.md`.
 - Centralized status and health reporting for all major system components use standardized protocols.
-- Key implementations:
-  - `/integrations/monitoring/integration_health.py`: Cross-component health tracking
+- **All protocol-mandated monitoring splits are COMPLETE, TDD-tested, and protocol-compliant in `/integrations/monitoring/`:**
+  - `health_status.py` – HealthStatus, HealthMetricType, HealthMetric
+  - `health_provider.py` – HealthProvider (ABC)
+  - `events.py` – HealthEvent, HealthEventDispatcher, and `register_health_event_listener`
+  - `integration_monitor.py` – IntegrationMonitor
+  - `integration_point_registry.py` – IntegrationPointRegistry
+  - `integration_health.py` – Cross-component health tracking
+  - `integration_health_manager.py` – IntegrationHealth orchestration
+- Additional implementations:
   - `/app/core/monitoring/metrics.py`: Core metrics collection and reporting
 
 ## Registry & Dependency Management
@@ -194,14 +201,14 @@ Refer to `/integrations/registry` for implementation details.
 | Protocol                           | Documented in                                            | Implemented in                                |
 |-------------------------------------|----------------------------------------------------------|-----------------------------------------------|
 | Service Health Protocol             | `/docs/architecture/service_health_protocol.md`          | `/app/core/monitoring/metrics.py`, `/integrations/monitoring/integration_health.py` |
-| Health Monitoring Protocol          | `/docs/architecture/health_monitoring_protocol.md`       | `/app/core/monitoring`, `/integrations/monitoring` |
+| Health Monitoring Protocol          | `/docs/architecture/health_monitoring_protocol.md`       | `/integrations/monitoring/` (fully modularized: health_status.py, health_provider.py, events.py, integration_monitor.py, etc.) |
 | Dependency Tracking Protocol        | `/docs/architecture/dependency_tracking_protocol.md`     | `/integrations/registry/component_registry.py` |
 
 ## Testing and Verification
 
 All Day 22 delivered components, services, and protocols are supported with comprehensive automated tests:
 
-- **Health Monitoring Tests**: Verify protocol compliance for all monitoring interfaces
+- **Health Monitoring Tests**: Verify protocol compliance for all monitoring interfaces through TDD-driven modular test suites
 - **Dependency Tracking Tests**: Ensure proper dependency relationship management
 - **Integration Tests**: Validate cross-component interactions and state management
 - **Protocol Compliance Tests**: Confirm adherence to documented protocol specifications

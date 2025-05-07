@@ -3,6 +3,15 @@
 from enum import Enum
 from datetime import datetime
 from integrations.monitoring.component_status import ComponentStatusProvider, ComponentStatusTracker
+from app.core.monitoring.metrics import SystemMetricsManager, MetricType
+try:
+    from app.core.monitoring.metrics import AlertLevel
+except ImportError:
+    # Define AlertLevel if not available
+    class AlertLevel(Enum):
+        INFO = "info"
+        WARNING = "warning"
+        CRITICAL = "critical"
 
 # --- ComponentState as used everywhere ---
 class ComponentState(Enum):
@@ -12,17 +21,26 @@ class ComponentState(Enum):
     DOWN = "down"
     HEALTHY = "healthy"
     FAILED = "failed"
+    IMPAIRED = "impaired"  # Added for cascading status to dependents
+    RECOVERING = "recovering"  # Added for protocol compliance
+
+# Legal state transitions according to Service Health Protocol
+LEGAL_TRANSITIONS = {
+    'UNKNOWN': {'HEALTHY', 'RUNNING', 'DEGRADED', 'DOWN', 'FAILED'},  # Can transition to any state from UNKNOWN
+    'HEALTHY': {'DEGRADED', 'FAILED'},
+    'RUNNING': {'DEGRADED', 'FAILED', 'DOWN'},
+    'DEGRADED': {'FAILED', 'RECOVERING'},  # Cannot go directly to HEALTHY
+    'DOWN': {'RECOVERING'},
+    'FAILED': {'RECOVERING'},
+    'RECOVERING': {'HEALTHY', 'FAILED'},  # Can recover or fail again
+    'IMPAIRED': {'HEALTHY', 'RUNNING', 'DEGRADED', 'FAILED', 'DOWN', 'RECOVERING'}  # Special case for cascaded status
+}
 
 # --- SimpleStatusTracker for protocol compliance and test imports ---
 class SimpleStatusTracker:
     """
-    Simple status tracker implementation that follows the Service Health Protocol.
-    Used for test environments and as a lightweight alternative to EnhancedComponentStatusTracker.
-    
-    Implements the core status tracking functionality required by the protocol:
-    - Component status updates
-    - Status cascading based on dependency graph
-    - Status retrieval
+    Minimalist status tracker implementation that follows the Service Health Protocol.
+    Only implements the core requirements: transition validation and status storage.
     """
     def __init__(self, registry=None):
         """
@@ -31,32 +49,13 @@ class SimpleStatusTracker:
         Args:
             registry: Optional ComponentRegistry instance
         """
-        # Try to import ComponentRegistry, fall back to local implementation if not available
-        try:
-            from integrations.registry.component_registry import ComponentRegistry
-            self._registry = registry or ComponentRegistry()
-        except ImportError:
-            self._registry = registry or ComponentRegistry()
-        
+        self._registry = registry
         self._statuses = {}  # component_id -> (state, details)
-        self.dashboard = None  # For protocol compliance
-    
-    def update_status(self, component_name, state, details=None):
-        """
-        Update a component's status.
-        
-        Args:
-            component_name: The name/ID of the component
-            state: The new state of the component
-            details: Optional details about the component's status
-        """
-        self._statuses[component_name] = (state, details)
-        self._cascade(component_name, state)
-        return True
     
     def update_component_status(self, component_id, state=None, details=None):
         """
         Protocol-compliant method to update a component's status.
+        Validates state transitions according to the Service Health Protocol.
         
         Args:
             component_id: The ID of the component to update
@@ -66,32 +65,30 @@ class SimpleStatusTracker:
         Returns:
             True if the update was successful, False otherwise
         """
-        return self.update_status(component_id, state, details)
+        prev_status = self.get_status(component_id)
+        prev_state = prev_status[0] if prev_status else None
+
+        # Validate state transition if both states are not None
+        if prev_state is not None and state is not None:
+            allowed = LEGAL_TRANSITIONS.get(prev_state.name, set())
+            if state.name not in allowed:
+                raise ValueError(f"Illegal protocol transition: {prev_state.name} → {state.name}")
+
+        # Always assign new status: create or overwrite
+        self._statuses[component_id] = (state, details)
+        return True
     
-    def _cascade(self, component_name, state):
-        """
-        Cascade status changes to dependent components.
-        
-        Args:
-            component_name: The name/ID of the component that changed
-            state: The new state of the component
-        """
-        dep_graph = self._registry.get_dependency_graph()
-        for dep, deps in dep_graph.items():
-            if component_name in deps:
-                self.update_status(dep, state, {'cascaded': component_name})
-    
-    def get_status(self, component_name):
+    def get_status(self, component_id):
         """
         Get a component's status.
         
         Args:
-            component_name: The name/ID of the component
+            component_id: The ID of the component
             
         Returns:
-            Tuple of (state, details) or ("UNKNOWN", None) if not found
+            Tuple of (state, details) or (ComponentState.UNKNOWN, None) if not found
         """
-        return self._statuses.get(component_name, (ComponentState.UNKNOWN, None))
+        return self._statuses.get(component_id, (ComponentState.UNKNOWN, None))
     
     def get_component_status(self, component_id):
         """
@@ -134,16 +131,16 @@ class SimpleStatusTracker:
         # Get initial status from provider
         if hasattr(provider, 'provide_status'):
             status = provider.provide_status()
-            self.update_status(component_id, status.state, status.details)
+            self.update_component_status(component_id, status.state, status.details)
         elif hasattr(provider, 'get_component_state'):
             state = provider.get_component_state()
             details = provider.get_status_details() if hasattr(provider, 'get_status_details') else None
-            self.update_status(component_id, state, details)
+            self.update_component_status(component_id, state, details)
     
     def unregister_status_provider(self, component_id):
         """
         Unregister a status provider for a component.
-        In SimpleStatusTracker, this just removes the component's status.
+        Simply removes the component's status.
         
         Args:
             component_id: The ID of the component
@@ -231,6 +228,8 @@ class ComponentStatus:
     """
     Represents the operational status of a monitored component.
     Guarantees that error_message is never None.
+    Protocol-compliant status container for status callbacks.
+    Exposes .state for compatibility with all test and monitoring code.
     """
     def __init__(self, component_id, state=ComponentState.UNKNOWN, details=None, timestamp=None, error_message=None):
         self.component_id = component_id
@@ -497,10 +496,10 @@ def make_tracker(registry=None):
     Create a new status tracker instance.
     
     Args:
-        registry: Optional ComponentRegistry instance to use for dependency tracking
+        registry: Optional ComponentRegistry instance to use
         
     Returns:
-        SimpleStatusTracker instance for lightweight usage or testing
+        SimpleStatusTracker instance
     """
     return SimpleStatusTracker(registry)
 
@@ -627,25 +626,67 @@ class ServiceHealthDashboard:
     Dashboard for monitoring component health with explicit dependency injection.
     Implements the Service Health Protocol as documented in /docs/architecture/service_health_protocol.md
     
-    Always uses a status tracker, never directly a registry.
+    Protocol-compliant and backward-compatible constructor:
+    - ServiceHealthDashboard(registry)                    # preferred protocol/documented usage
+    - ServiceHealthDashboard(status_tracker, registry)    # legacy/support usage where a custom tracker is needed
+    - ServiceHealthDashboard()                            # fallback, uses fresh singleton registry & tracker
+
+    Per /docs/architecture/health_monitoring_protocol.md and tests/unit/monitoring/test_health_monitoring_protocol.py
+    
+    Protocol-compliant: supports register_status_callback + reset_for_test
     """
-    def __init__(self, status_tracker=None, registry=None):
+    def __init__(self, *args, **kwargs):
         """
-        Initialize with explicit tracker and registry instances.
-        
+        Initialize with flexible argument patterns for protocol and legacy compatibility.
+
         Args:
-            status_tracker: The status tracker to use, or None to create a new one
-            registry: The registry to use, or None to create a new one
+            *args: Flexible:
+                1 positional: registry or tracker (disambiguated by interface/type)
+                2 positional: (status_tracker, registry)
+            **kwargs: Accepts explicit 'registry' or 'status_tracker' if passed as keywords.
+
+        Use cases:
+            - ServiceHealthDashboard(registry=reg)
+            - ServiceHealthDashboard(registry)
+            - ServiceHealthDashboard(status_tracker=tracker, registry=reg)
+            - ServiceHealthDashboard(tracker, reg)
+            - ServiceHealthDashboard()  # full default (for test/legacy)
         """
-        # Always ensure we have a proper status tracker
-        if status_tracker is None:
-            # Create a new tracker with the registry
-            self.status_tracker = make_tracker(registry or make_registry())
-        elif hasattr(status_tracker, 'update_component_status'):
-            # Use the provided tracker
+        registry = kwargs.get("registry", None)
+        status_tracker = kwargs.get("status_tracker", None)
+
+        # Positional argument handling for protocol and legacy compatibility
+        if len(args) == 1 and not (registry or status_tracker):
+            arg = args[0]
+            # Is it a ComponentRegistry (protocol registry)?
+            if hasattr(arg, "register_component") and hasattr(arg, "declare_dependency"):
+                registry = arg
+                status_tracker = None
+            # Or is it a status_tracker?
+            elif hasattr(arg, "update_component_status"):
+                status_tracker = arg
+                registry = None
+            else:
+                raise ValueError(
+                    "Single argument to ServiceHealthDashboard must be a ComponentRegistry or a status tracker implementing update_component_status"
+                )
+        elif len(args) == 2:
+            status_tracker, registry = args
+        elif len(args) > 2:
+            raise ValueError("ServiceHealthDashboard accepts at most two positional arguments")
+        # kwargs already parsed above
+
+        # Now, instantiate as required by protocol:
+        if status_tracker is not None:
+            # Validate tracker protocol
+            if not hasattr(status_tracker, "update_component_status"):
+                raise ValueError("status_tracker must implement update_component_status method")
             self.status_tracker = status_tracker
+        elif registry is not None:
+            self.status_tracker = make_tracker(registry)
         else:
-            raise ValueError("status_tracker must implement update_component_status method")
+            # Full fallback
+            self.status_tracker = make_tracker(make_registry())
             
         # Get registry from tracker if possible, otherwise use provided registry
         self.registry = getattr(self.status_tracker, '_registry', None) or registry or make_registry()
@@ -660,6 +701,18 @@ class ServiceHealthDashboard:
             
         # Initialize statuses dict for protocol compliance
         self._statuses = {}
+        
+        # Initialize dependency cache for faster lookups
+        self._dependency_cache = {}
+        
+        # Track processed components to prevent cascading cycles
+        self._cascade_processed = set()
+        
+        # Maintain status callbacks for protocol/test support
+        self._status_callbacks = []
+        
+        # Track last known state of each component for callback deduplication
+        self._status_state = {}
             
     def supports_cascading_status(self):
         """
@@ -670,12 +723,49 @@ class ServiceHealthDashboard:
         """
         return True
             
+    def register_status_callback(self, callback):
+        """
+        Register a callback to be called on any component status change.
+        Protocol/test alignment: callback will be called as (component_id, new_status)
+        
+        Args:
+            callback: Function to call when any component's status changes
+        """
+        self._status_callbacks.append(callback)
+        
+    def _trigger_status_change(self, component_id, new_status):
+        """
+        Internal: Call all registered status callbacks when a component's status changes.
+        Protocol-compliant: always calls all callbacks on every status update.
+        Ensures callbacks receive a ComponentStatus object for TDD/test protocol compliance.
+        """
+        # Store the new state for this component
+        if isinstance(new_status, ComponentStatus):
+            self._status_state[component_id] = new_status.state
+        else:
+            self._status_state[component_id] = new_status
+            
+        # Call all registered callbacks with component_id and ComponentStatus
+        for cb in self._status_callbacks:
+            try:
+                # Always wrap state in ComponentStatus for protocol compliance
+                if isinstance(new_status, ComponentStatus):
+                    # Use existing ComponentStatus object
+                    cb(component_id, new_status)
+                else:
+                    # Create a new ComponentStatus wrapper
+                    cb(component_id, ComponentStatus(component_id, new_status))
+            except Exception as e:
+                # Don't let callback errors affect status updates
+                print(f"Error in status callback: {e}")
+            
     def update_component_status(self, component_id, state=None, details=None):
         """
         Update a component's status in the dashboard.
         
         Protocol: Uses 'state' parameter as per service health protocol.
         Always propagates updates to the status tracker.
+        Always triggers all registered status callbacks.
         
         Args:
             component_id: The ID of the component to update
@@ -688,12 +778,31 @@ class ServiceHealthDashboard:
         # Store status in internal dict for protocol compliance
         self._statuses[component_id] = (state, details)
         
+        # Protocol: must call tracker update as well
+        result = self.status_tracker.update_component_status(component_id, state=state, details=details)
+        
+        # After updating tracker, ensure our statuses are in sync with tracker's statuses
+        if result and hasattr(self.status_tracker, 'get_component_status'):
+            # Get the latest status from tracker to ensure consistency
+            updated_status = self.status_tracker.get_component_status(component_id)
+            if updated_status:
+                # Update our internal status with the tracker's version
+                self._statuses[component_id] = (updated_status.state, updated_status.details)
+                # Trigger status callbacks with the component_id and new status
+                self._trigger_status_change(component_id, updated_status)
+        else:
+            # Even if we couldn't get updated status from tracker, still trigger callbacks
+            # Protocol compliance: always call callbacks on every update
+            self._trigger_status_change(component_id, state)
+        
+        # Reset cascade processing set for each new update
+        self._cascade_processed = set()
+        
         # Cascade status changes if supported
         if self.supports_cascading_status():
             self._cascade_status(component_id, state, details)
-            
-        # Protocol: must call tracker update as well
-        return self.status_tracker.update_component_status(component_id, state=state, details=details)
+        
+        return result
         
     def _cascade_status(self, component_id, state, details=None):
         """
@@ -704,14 +813,122 @@ class ServiceHealthDashboard:
             state: The new state of the component
             details: Optional details about the component's status
         """
-        dep_graph = self.get_dependency_graph()
-        for dep, deps in dep_graph.items():
-            if component_id in deps:
-                cascade_details = dict(details or {})
-                cascade_details['cascaded'] = component_id
-                # Update both internal status and tracker
-                self._statuses[dep] = (state, cascade_details)
-                self.status_tracker.update_component_status(dep, state, cascade_details)
+        # Prevent infinite recursion in cyclic dependencies
+        if component_id in self._cascade_processed:
+            return
+        self._cascade_processed.add(component_id)
+        
+        # Normalize state for comparison
+        if isinstance(state, ComponentState):
+            state_name = state.name
+        elif isinstance(state, str):
+            state_name = state.upper()
+        else:
+            state_name = str(state).upper()
+            
+        # Per protocol: only propagate if in a bad state
+        if state_name not in ("DEGRADED", "DOWN", "FAILED", "CRITICAL", "IMPAIRED"):
+            return
+            
+        # Get all direct dependents of this component
+        dependents = self.get_dependents(component_id)
+        
+        # If no dependents, nothing to cascade
+        if not dependents:
+            return
+            
+        # Determine cascade state based on original state
+        cascade_state = self._determine_cascade_state(state)
+        
+        for dep_id in dependents:
+            # Get current state of dependent
+            current_state = None
+            if dep_id in self._statuses:
+                current_state = self._statuses[dep_id][0]
+            
+            # Only update if dependent is in a better state than what we'd cascade to
+            # This prevents "healing" components that are already in a worse state
+            if current_state is not None:
+                current_state_name = current_state.name if isinstance(current_state, ComponentState) else str(current_state).upper()
+                cascade_state_name = cascade_state.name if isinstance(cascade_state, ComponentState) else str(cascade_state).upper()
+                
+                # Skip if current state is already worse than what we'd cascade
+                if self._is_state_worse_than(current_state_name, cascade_state_name):
+                    continue
+            
+            # Create cascade details with proper protocol fields
+            cascade_details = dict(details or {})
+            cascade_details['cascaded'] = component_id
+            cascade_details['reason'] = f"Depends on {component_id} which is {state_name}"
+            
+            # Update both internal status and tracker
+            self._statuses[dep_id] = (cascade_state, cascade_details)
+            self.status_tracker.update_component_status(dep_id, cascade_state, cascade_details)
+            
+            # Recursively cascade to this dependent's dependents
+            self._cascade_status(dep_id, cascade_state, cascade_details)
+            
+    def _is_state_worse_than(self, state1, state2):
+        """
+        Determine if state1 is worse than state2.
+        
+        Args:
+            state1: First state to compare
+            state2: Second state to compare
+            
+        Returns:
+            True if state1 is worse than state2, False otherwise
+        """
+        # Define severity order (worst to best)
+        severity_order = ["FAILED", "DOWN", "CRITICAL", "IMPAIRED", "DEGRADED", "RECOVERING", "RUNNING", "HEALTHY", "UNKNOWN"]
+        
+        # Get indices in severity order
+        try:
+            idx1 = severity_order.index(state1)
+            idx2 = severity_order.index(state2)
+            # Lower index means worse state
+            return idx1 < idx2
+        except ValueError:
+            # If state not in list, assume it's better than known bad states
+            return False
+            
+    def _determine_cascade_state(self, state):
+        """
+        Determine the appropriate state to cascade to dependent components.
+        
+        Args:
+            state: The state of the component that changed
+            
+        Returns:
+            The state to cascade to dependent components
+        """
+        # Normalize state to string for comparison
+        if isinstance(state, ComponentState):
+            state_name = state.name
+        elif isinstance(state, str):
+            state_name = state.upper()
+        else:
+            state_name = str(state).upper()
+            
+        # Use IMPAIRED for dependent components when source is DOWN/FAILED/CRITICAL
+        if state_name in ("DOWN", "FAILED", "CRITICAL"):
+            # Check if we should use a different state for dependents
+            if hasattr(ComponentState, "IMPAIRED"):
+                return ComponentState.IMPAIRED
+            elif hasattr(ComponentState, "DEGRADED"):
+                return ComponentState.DEGRADED
+            else:
+                # Fall back to string value for older systems
+                return "IMPAIRED"
+        elif state_name == "DEGRADED":
+            # For DEGRADED, cascade as DEGRADED
+            if hasattr(ComponentState, "DEGRADED"):
+                return ComponentState.DEGRADED
+            else:
+                return "DEGRADED"
+        else:
+            # For non-critical states, use the original state
+            return state
     
     def get_all_component_statuses(self):
         """
@@ -720,18 +937,121 @@ class ServiceHealthDashboard:
         Returns:
             Dictionary mapping component IDs to (state, details) tuples
         """
+        # Always sync with status tracker to ensure we have the latest data
+        if hasattr(self.status_tracker, 'get_all_component_statuses'):
+            # Get fresh data from tracker
+            tracker_statuses = self.status_tracker.get_all_component_statuses()
+            # Update our internal statuses to stay in sync
+            self._statuses.update(tracker_statuses)
+            
+        # Ensure all components in registry have a status
+        for component_id in self.registry.components:
+            if component_id not in self._statuses:
+                # Get component from registry
+                component = self.registry.get_component(component_id)
+                if component and hasattr(component, 'state'):
+                    # Use component's state if available
+                    self._statuses[component_id] = (component.state, getattr(component, 'metadata', {}))
+                else:
+                    # Default to UNKNOWN state
+                    self._statuses[component_id] = (ComponentState.UNKNOWN, {})
+        
         # Return internal statuses dict for protocol compliance
         return dict(self._statuses)
     
     def get_dependency_graph(self):
         """Get the dependency graph from the registry"""
         return self.status_tracker._registry.get_dependency_graph()
+        
+    def get_dependents(self, component_id):
+        """
+        Get all components that directly depend on the given component.
+        Uses caching for better performance.
+        
+        Args:
+            component_id: The ID of the component to get dependents for
+            
+        Returns:
+            List of component IDs that depend on this component
+        """
+        # Check cache first
+        if component_id in self._dependency_cache:
+            return self._dependency_cache[component_id]
+            
+        # Get dependency graph from registry
+        dep_graph = self.get_dependency_graph()
+        
+        # Find direct dependents
+        dependents = []
+        for dep, deps in dep_graph.items():
+            if component_id in deps:
+                dependents.append(dep)
+                
+        # Cache result for future lookups
+        self._dependency_cache[component_id] = dependents
+        
+        return dependents
+        
+    def get_all_dependents(self, component_id, visited=None):
+        """
+        Get all components that depend on this component, recursively.
+        
+        Args:
+            component_id: The ID of the component to get dependents for
+            visited: Set of already visited components to prevent cycles
+            
+        Returns:
+            Set of component IDs that depend on this component
+        """
+        if visited is None:
+            visited = set()
+            
+        # Skip if we've already visited this component
+        if component_id in visited:
+            return set()
+            
+        # Add this component to visited set
+        visited.add(component_id)
+        
+        # Get direct dependents
+        direct_dependents = set(self.get_dependents(component_id))
+        
+        # Find indirect dependents recursively
+        all_dependents = set(direct_dependents)
+        for dep_id in direct_dependents:
+            if dep_id not in visited:
+                indirect_deps = self.get_all_dependents(dep_id, visited)
+                all_dependents.update(indirect_deps)
+                
+        return all_dependents
     
     def clear(self):
         """Clear all status tracking data"""
         self._statuses.clear()
+        self._dependency_cache.clear()
+        self._status_callbacks = []
+        self._status_state.clear()
         self.status_tracker.clear()
         self.registry.clear()
+        
+    def reset_for_test(self):
+        """
+        TDD/test API: clears all state for a clean-slate test run.
+        Protocol-compliant method required by health monitoring protocol.
+        """
+        self.clear()
+        
+    def update_component_status(self, component_id, new_state, details):
+        # Delegate - protocol check is in tracker
+        result = self.status_tracker.update_component_status(component_id, new_state, details)
+        
+        # Protocol compliance: always trigger callbacks on every update
+        # This ensures tests can monitor status changes
+        # Wrap state in ComponentStatus for protocol compliance
+        status_obj = ComponentStatus(component_id, new_state, details)
+        self._trigger_status_change(component_id, status_obj)
+        
+        return result
 
 # Export classes and factory functions for direct use
 ComponentRegistry = ComponentRegistry
@@ -770,6 +1090,9 @@ class ComponentStatusAdapter:
             dashboard: ServiceHealthDashboard instance or None to create a new one
             registry: ComponentRegistry instance or None to use the default
             status_tracker: EnhancedComponentStatusTracker instance or None to use the default
+            
+        Note: When creating a new dashboard, follows protocol-compliant constructor
+        by passing registry first, then status_tracker.
         """
         global SYSTEM_STATUS_TRACKER
         
@@ -807,7 +1130,8 @@ class ComponentStatusAdapter:
             if dashboard:
                 self.dashboard = dashboard
             else:
-                self.dashboard = ServiceHealthDashboard(self.status_tracker, self.registry)
+                # Create dashboard with protocol-compliant constructor (registry first)
+                self.dashboard = ServiceHealthDashboard(self.registry, self.status_tracker)
                 
             self.legacy_listeners = {}    # {component_id: set(callback)}
             self.alert_callbacks = set()
@@ -819,20 +1143,26 @@ class ComponentStatusAdapter:
             # Set global SYSTEM_STATUS_TRACKER
             SYSTEM_STATUS_TRACKER = self
 
-    def update_component_status(self, component_id, state=None, details=None):
+    def update_component_status(self, component_id, state=None, details=None, skip_cascade=False, force=False):
         """
         Update a component's status and trigger any registered callbacks.
         If state is None, gets the current state from the registry component.
         
         Protocol: Uses 'state' parameter as per service health protocol.
+        Ensures callbacks receive a ComponentStatus object for TDD/test protocol compliance.
         
         Args:
             component_id: The ID of the component to update
             state: The new state of the component, or None to use component's current state
             details: Optional details/metrics about the component's status
+            skip_cascade: If True, don't cascade status changes to dependent components
+            force: If True, bypass transition validation (for testing or initialization)
         
         Returns:
             True if the update was successful, False otherwise
+            
+        Raises:
+            ValueError: If the transition from current state to new state is not allowed by protocol
         """
         # If no state provided, get it from the component in registry
         if state is None:
@@ -844,14 +1174,53 @@ class ComponentStatusAdapter:
             else:
                 # Component not found in registry
                 return False
+        
+        # Ensure details is a dictionary
+        if details is None:
+            details = {}
+        elif not isinstance(details, dict):
+            details = {'value': details}
+        
+        # Validate state transition according to protocol if not forcing
+        if not force:
+            # Get current component status
+            current_status = self.get_component_status(component_id)
+            
+            # If component has a current status, validate the transition
+            if current_status:
+                current_state = current_status.state
                 
+                # Convert states to string names for comparison
+                if isinstance(current_state, ComponentState):
+                    current_state_name = current_state.name
+                elif isinstance(current_state, str):
+                    current_state_name = current_state.upper()
+                else:
+                    current_state_name = str(current_state).upper()
+                
+                if isinstance(state, ComponentState):
+                    new_state_name = state.name
+                elif isinstance(state, str):
+                    new_state_name = state.upper()
+                else:
+                    new_state_name = str(state).upper()
+                
+                # Skip validation if states are the same
+                if current_state_name != new_state_name:
+                    # Check if transition is allowed
+                    allowed_transitions = LEGAL_TRANSITIONS.get(current_state_name, set())
+                    if new_state_name not in allowed_transitions:
+                        raise ValueError(
+                            f"Illegal state transition for component '{component_id}': "
+                            f"{current_state_name} → {new_state_name}. "
+                            f"Allowed transitions from {current_state_name} are: {allowed_transitions}"
+                        )
+        
         # Update the status in the tracker
         result = self.status_tracker.update_component_status(component_id, state, details=details)
         
         # If successful, trigger any registered callbacks
         if result:
-            self._trigger_callbacks(component_id, state, details)
-            
             # Always inform dashboard of current status for live/real-time sync
             if self.dashboard:
                 self.dashboard.update_component_status(component_id, state, details=details)
@@ -859,27 +1228,32 @@ class ComponentStatusAdapter:
             # Add to component history for protocol/test compatibility
             status = ComponentStatus(component_id, state, details, timestamp=datetime.now())
             self._component_history.setdefault(component_id, []).append(status)
+            
+            # Create a ComponentStatus object for callbacks
+            status_obj = ComponentStatus(component_id, state, details, timestamp=datetime.now())
+            
+            # Trigger callbacks after updating status but before cascading
+            # This ensures the component's own status is updated before dependents
+            self._trigger_callbacks(component_id, status_obj, details)
         
         return result
 
-    def _trigger_callbacks(self, component_id, state, details=None):
+    def _trigger_callbacks(self, component_id, status, details=None):
         """
         Trigger all registered callbacks for a component.
         
         Args:
             component_id: The ID of the component that changed
-            state: The new state of the component
+            status: The new status of the component (ComponentStatus object)
             details: Optional details/metrics about the component's status
         """
-        # Trigger global listeners for all components
-        for callback in self.legacy_listeners.get('global', set()):
-            callback(component_id, state, details)
+        # Extract state from status object if it's a ComponentStatus
+        if isinstance(status, ComponentStatus):
+            state = status.state
+        else:
+            state = status
             
-        # Trigger component-specific listeners
-        for callback in self.legacy_listeners.get(component_id, set()):
-            callback(component_id, state, details)
-            
-        # Trigger alert callbacks if state is DEGRADED or FAILED
+        # Normalize state to string for comparison
         if isinstance(state, ComponentState):
             state_name = state.name
         elif isinstance(state, str):
@@ -887,42 +1261,242 @@ class ComponentStatusAdapter:
         else:
             state_name = str(state).upper()
             
+        # Get last known state for deduplication
         last_state = self._last_component_states.get(component_id)
-        if state_name in ("DEGRADED", "FAILED", "DOWN"):
+        
+        # Trigger global listeners for all components
+        for callback in self.legacy_listeners.get('global', set()):
+            # Pass ComponentStatus object for protocol compliance
+            if isinstance(status, ComponentStatus):
+                callback(component_id, status, details)
+            else:
+                # Create a ComponentStatus wrapper
+                callback(component_id, ComponentStatus(component_id, state, details), details)
+            
+        # Trigger component-specific listeners
+        for callback in self.legacy_listeners.get(component_id, set()):
+            # Pass ComponentStatus object for protocol compliance
+            if isinstance(status, ComponentStatus):
+                callback(component_id, status, details)
+            else:
+                # Create a ComponentStatus wrapper
+                callback(component_id, ComponentStatus(component_id, state, details), details)
+            
+        # Trigger alert callbacks if state is DEGRADED, FAILED, DOWN, or CRITICAL
+        # Only trigger if state has changed to avoid alert storms
+        if state_name in ("DEGRADED", "FAILED", "DOWN", "CRITICAL"):
             if last_state != state_name:
-                for callback in self.alert_callbacks:
-                    callback(component_id, state, details)  # Pass details for protocol compliance
+                # Try to get AlertLevel for protocol compliance
+                try:
+                    from app.core.monitoring.metrics import AlertLevel
+                    alert_level = AlertLevel.CRITICAL if state_name in ("FAILED", "DOWN", "CRITICAL") else AlertLevel.WARNING
+                    
+                    for callback in self.alert_callbacks:
+                        # Try both protocol signatures
+                        try:
+                            # New protocol: callback(component_id, alert_level, reason)
+                            reason = details.get('reason', '') if details else ''
+                            callback(component_id, alert_level, reason)
+                        except Exception:
+                            # Fall back to old protocol: callback(component_id, state, details)
+                            callback(component_id, state, details)
+                except ImportError:
+                    # Fall back if AlertLevel not available
+                    for callback in self.alert_callbacks:
+                        callback(component_id, state, details)
                     
         # Update last known state
         self._last_component_states[component_id] = state_name
         
         # Trigger component watchers
         for callback in self._component_watchers.get(component_id, set()):
-            callback(component_id, state, details)
+            # Pass ComponentStatus object for protocol compliance
+            if isinstance(status, ComponentStatus):
+                callback(component_id, status, details)
+            else:
+                # Create a ComponentStatus wrapper
+                callback(component_id, ComponentStatus(component_id, state, details), details)
+            
+        # Always update metrics
+        try:
+            metrics = SystemMetricsManager()
+            metrics.report_metric(
+                name=MetricType.COMPONENT_HEALTH.value,
+                type_=MetricType.COMPONENT_HEALTH,
+                value=state,
+                component_id=component_id
+            )
+        except Exception:
+            # Don't let metrics reporting failure affect component status updates
+            pass
             
         # Cascade status changes if supported by dashboard
         if self.dashboard and hasattr(self.dashboard, 'supports_cascading_status') and self.dashboard.supports_cascading_status():
+            # Use recursive cascading with cycle detection
             self._cascade_status_changes(component_id, state, details)
             
-    def _cascade_status_changes(self, component_id, state, details=None):
+    def get_all_dependents(self, component_id, visited=None):
         """
-        Cascade status changes to dependent components based on dependency graph.
+        Get all components that depend on this component, recursively.
+        
+        Args:
+            component_id: The ID of the component to get dependents for
+            visited: Set of already visited components to prevent cycles
+            
+        Returns:
+            Set of component IDs that depend on this component
+        """
+        if visited is None:
+            visited = set()
+            
+        # Skip if we've already visited this component
+        if component_id in visited:
+            return set()
+            
+        # Add this component to visited set
+        visited.add(component_id)
+        
+        # Get dependency graph from registry
+        dep_graph = self.registry.get_dependency_graph()
+        
+        # Find direct dependents
+        direct_dependents = set()
+        for dep, deps in dep_graph.items():
+            if component_id in deps:
+                direct_dependents.add(dep)
+                
+        # Find indirect dependents recursively
+        all_dependents = set(direct_dependents)
+        for dep_id in direct_dependents:
+            if dep_id not in visited:
+                indirect_deps = self.get_all_dependents(dep_id, visited)
+                all_dependents.update(indirect_deps)
+                
+        return all_dependents
+        
+    def _cascade_status_changes(self, component_id, state, details=None, visited=None):
+        """
+        Recursively cascade status changes to all dependent components based on dependency graph.
         
         Args:
             component_id: The ID of the component that changed
             state: The new state of the component
             details: Optional details/metrics about the component's status
+            visited: Set of already visited components to prevent cycles
         """
+        # Initialize visited set if not provided to prevent infinite recursion in cyclic dependencies
+        if visited is None:
+            visited = set()
+        
+        # Skip if we've already visited this component
+        if component_id in visited:
+            return
+            
+        # Add this component to visited set
+        visited.add(component_id)
+        
         # Get dependency graph from registry
         dep_graph = self.registry.get_dependency_graph()
         
+        # Normalize state to string for comparison
+        if isinstance(state, ComponentState):
+            state_name = state.name
+        elif isinstance(state, str):
+            state_name = state.upper()
+        else:
+            state_name = str(state).upper()
+        
         # Find components that depend on this component
+        dependents = []
         for dep, deps in dep_graph.items():
             if component_id in deps:
-                # Update dependent component with cascaded status
-                cascade_details = dict(details or {})
-                cascade_details['cascaded'] = component_id  # Use 'cascaded' key for protocol compliance
-                self.update_component_status(dep, state, cascade_details)
+                dependents.append(dep)
+                
+        for dep_id in dependents:
+            # Skip if we've already visited this dependent
+            if dep_id in visited:
+                continue
+                
+            # Create cascade details with proper protocol fields
+            cascade_details = dict(details or {})
+            cascade_details['cascaded'] = component_id  # Use 'cascaded' key for protocol compliance
+            cascade_details['reason'] = f"Depends on {component_id}={state}"
+            
+            # Determine cascade state based on original state
+            # Use IMPAIRED for dependent components when source is DOWN/FAILED/CRITICAL
+            if state_name in ("DOWN", "FAILED", "CRITICAL"):
+                # Check if we should use a different state for dependents
+                if hasattr(ComponentState, "IMPAIRED"):
+                    cascade_state = ComponentState.IMPAIRED
+                elif hasattr(ComponentState, "DEGRADED"):
+                    cascade_state = ComponentState.DEGRADED
+                else:
+                    # Fall back to string value for older systems
+                    cascade_state = "IMPAIRED"
+            else:
+                # For non-critical states, use HEALTHY or original state
+                if state_name == "HEALTHY":
+                    cascade_state = ComponentState.HEALTHY if hasattr(ComponentState, "HEALTHY") else "HEALTHY"
+                else:
+                    cascade_state = state
+            
+            # Update the dependent component status
+            # This will trigger callbacks for the dependent component
+            # Force the update to bypass transition validation for cascaded status changes
+            self.update_component_status(dep_id, cascade_state, cascade_details, force=True)
+            
+            # Guarantee listeners are always notified immediately after status update
+            # Trigger global listeners for all components
+            for callback in self.legacy_listeners.get('global', set()):
+                callback(dep_id, cascade_state, cascade_details)
+                
+            # Trigger component-specific listeners
+            for callback in self.legacy_listeners.get(dep_id, set()):
+                callback(dep_id, cascade_state, cascade_details)
+                
+            # Trigger alert callbacks if state is IMPAIRED, DEGRADED, FAILED, DOWN, or CRITICAL
+            if isinstance(cascade_state, ComponentState):
+                state_name = cascade_state.name
+            else:
+                state_name = str(cascade_state).upper()
+                
+            if state_name in ("IMPAIRED", "DEGRADED", "FAILED", "DOWN", "CRITICAL"):
+                try:
+                    from app.core.monitoring.metrics import AlertLevel
+                    alert_level = AlertLevel.CRITICAL if state_name in ("FAILED", "DOWN", "CRITICAL") else AlertLevel.WARNING
+                    
+                    for callback in self.alert_callbacks:
+                        try:
+                            # New protocol: callback(component_id, alert_level, reason)
+                            reason = cascade_details.get('reason', f"Cascaded from {component_id}={state}")
+                            callback(dep_id, alert_level, reason)
+                        except Exception:
+                            # Fall back to old protocol: callback(component_id, state, details)
+                            callback(dep_id, cascade_state, cascade_details)
+                except ImportError:
+                    # Fall back if AlertLevel not available
+                    for callback in self.alert_callbacks:
+                        callback(dep_id, cascade_state, cascade_details)
+            
+            # Trigger component watchers
+            for callback in self._component_watchers.get(dep_id, set()):
+                callback(dep_id, cascade_state, cascade_details)
+            
+            # Update metrics for the dependent component
+            try:
+                metrics = SystemMetricsManager()
+                metrics.report_metric(
+                    name=MetricType.COMPONENT_HEALTH.value,
+                    type_=MetricType.COMPONENT_HEALTH,
+                    value=cascade_state,
+                    component_id=dep_id
+                )
+            except Exception:
+                # Don't let metrics reporting failure affect component status updates
+                pass
+                
+            # Recursively cascade to this dependent's dependents
+            self._cascade_status_changes(dep_id, cascade_state, cascade_details, visited)
 
     def register_status_listener(self, callback):
         """
@@ -1093,6 +1667,10 @@ class ComponentStatusAdapter:
         provider = SimpleComponentStatusProvider(component)
         self.status_tracker.register_status_provider(component_id, provider)
         
+        # Initial status update is forced to bypass transition validation
+        if state is not None:
+            self.update_component_status(component_id, state, metadata, force=True)
+        
         return component
 
     def unregister_component(self, component_id):
@@ -1161,10 +1739,15 @@ def _reset_for_test():
     """
     Reset all component state for SYSTEM_STATUS_TRACKER (TDD integration)
     This function is called by test frameworks to ensure clean state between tests.
+    Protocol-compliant method required by health monitoring protocol.
     """
     global SYSTEM_STATUS_TRACKER
     if SYSTEM_STATUS_TRACKER:
-        SYSTEM_STATUS_TRACKER.clear()
+        # Use dashboard's reset_for_test if available
+        if SYSTEM_STATUS_TRACKER.dashboard and hasattr(SYSTEM_STATUS_TRACKER.dashboard, 'reset_for_test'):
+            SYSTEM_STATUS_TRACKER.dashboard.reset_for_test()
+        else:
+            SYSTEM_STATUS_TRACKER.clear()
     
     # Reset registry singleton
     global COMPONENT_REGISTRY_SINGLETON
