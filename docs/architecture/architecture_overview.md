@@ -144,6 +144,12 @@ flowchart TD
 - The operational dashboard reporting API endpoint (`/app/api/monitoring/endpoints.py`) is verified by TDD coverage in `/tests/unit/core/monitoring/test_dashboard_reporting.py`, ensuring conformance to protocol and privacy/security requirements.
 - All dashboard/reporting data surfaced in any UI or API is strictly protocol-driven, privacy-policy compliant, and is test-validated for every required field and prohibition.
 
+### Self-Healing Architecture
+
+- **ReliabilityManager** (`/app/core/monitoring/reliability.py`): Implements protocol-driven self-diagnosis capabilities used by the integration orchestrator for automated health checks and recovery prompting.
+- **RecoveryManager** (`/app/core/monitoring/recovery.py`): Provides protocol-compliant self-repair functionality that automatically updates component state, health metrics, registry entries, and integration point tracking.
+- **IntegrationPointRegistry Support**: The RecoveryManager automatically integrates with any present IntegrationPointRegistry adapter via the `notify_recovery_action` method, ensuring system-wide traceability for orchestration and dashboard views.
+
 ### Service Health & Monitoring Implementation
 
 - All health and monitoring mechanisms now comply with `/docs/architecture/service_health_protocol.md` and `/docs/architecture/health_monitoring_protocol.md`.
@@ -191,6 +197,41 @@ health_manager.update_component_status(comp_id, HealthStatus.HEALTHY)
 # Set up orchestration and fire events
 orchestrator = MonitoringOrchestrator(registry, health_manager)
 orchestrator.fire_status_event(comp_id, dispatcher=dispatcher)
+```
+
+### Self-Healing Orchestration
+
+The AeroLearn AI platform implements a comprehensive self-healing workflow that enables automatic detection, diagnosis, and recovery from component failures:
+
+- **End-to-End Self-Healing Flow:**
+  1. The ReliabilityManager continuously monitors component health via the health manager
+  2. When issues are detected, it performs protocol-driven diagnosis to identify root causes
+  3. The RecoveryManager is invoked with appropriate recovery strategies
+  4. Recovery actions are executed and tracked through the IntegrationPointRegistry
+  5. Component states and health metrics are automatically updated
+  6. Recovery events are dispatched to all registered listeners
+
+- **Test-Driven Validation:**
+  - Complete self-healing workflow is validated in `/tests/integration/monitoring/test_reliability_and_selfhealing.py`
+  - Tests verify all events, state transitions, metrics updates, and registry interactions
+  - Protocol compliance is enforced for all APIs, enums, and event structures
+
+**Self-Healing API Example:**
+```python
+# Detect and diagnose issues
+reliability_manager = ReliabilityManager(health_manager, registry)
+diagnosis_result = reliability_manager.diagnose_component(component_id)
+
+# Perform recovery
+recovery_manager = RecoveryManager(health_manager, registry)
+recovery_result = recovery_manager.attempt_recovery(
+    component_id, 
+    diagnosis_result.recommended_strategy
+)
+
+# Verify recovery success
+assert recovery_result.success
+assert health_manager.get_component_status(component_id) == HealthStatus.HEALTHY
 ```
 
 ## Registry & Dependency Management
@@ -244,6 +285,7 @@ Refer to `/integrations/registry` for implementation details.
 | Monitoring Orchestration Protocol   | `/docs/architecture/health_monitoring_protocol.md`       | `/app/core/monitoring/orchestration.py`, `/integrations/monitoring/events.py` |
 | Health Metrics Protocol             | `/docs/architecture/health_monitoring_protocol.md`       | `/integrations/monitoring/health_status.py`, `/app/core/monitoring/metrics.py` |
 | Analytics Protocol                  | `/docs/architecture/health_monitoring_protocol.md`       | `/app/core/analytics/advanced.py`, `/app/api/analytics/endpoints.py` |
+| Self-Healing Protocol               | `/docs/architecture/health_monitoring_protocol.md`       | `/app/core/monitoring/reliability.py`, `/app/core/monitoring/recovery.py` |
 
 ## Testing and Verification
 
@@ -255,8 +297,9 @@ All Day 24 delivered components, services, and protocols are supported with comp
 - **Protocol Compliance Tests**: Confirm adherence to documented protocol specifications
 - **Health Metrics Tests**: Validate preservation of health metrics and state propagation
 - **Analytics Tests**: Verify analytics data collection, aggregation, and reporting functionality
+- **Self-Healing Tests**: Validate the complete self-healing workflow including diagnosis, recovery, and state restoration
 
-For detailed test coverage, see `/tests/integration/monitoring/`, `/tests/integration/registry/`, and `/tests/integration/analytics/`.
+For detailed test coverage, see `/tests/integration/monitoring/`, `/tests/integration/registry/`, `/tests/integration/analytics/`, and the dedicated self-healing test suite at `/tests/integration/monitoring/test_reliability_and_selfhealing.py`.
 
 ### Health Metrics and State Propagation Protocol
 

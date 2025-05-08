@@ -83,3 +83,32 @@
 - Testing & review assignments:
 - Documentation assignments:
 - End-of-day summary:
+
+---
+
+## Appendix: Test-Driven & Protocol-First Preparation Guidance
+
+> **This appendix exists to align all Day 25 feature development with strict TDD and protocol-driven project rules.**  
+> *No code, tests, or implementation may begin on any new surface until the following process is satisfied for each functional block below.*
+
+### PREPARATION CHECKLIST FOR EACH DAY 25 FEATURE
+
+1. **Test Skeletons First:**  
+   - Before implementation, create modular/unit test stubs for:
+     - Learning path recommendations (`/tests/unit/core/ai/test_learning_path.py`)
+     - Content optimization suggestions (`/tests/unit/core/ai/test_content_optimization.py`)
+     - Material selection (`/tests/unit/core/ai/test_material_selection.py`)
+     - Teaching insights (`/tests/unit/core/ai/test_teaching_insights.py`)
+     - Cross-course recommendation integration (`/tests/unit/core/ai/test_crosscourse_reco.py`)
+2. **Protocol & API Field Documentation:**  
+   - Before implementation, draft or extend API protocol docs for each workflow in `/docs/architecture/` (e.g., `ai_recommendation_protocol.md`, etc.)
+   - All fields and expected signatures must be defined/documented before use.
+3. **Integration Test Planning:**  
+   - Create outlines for integration tests in `/tests/integration/ai/` for cross-module and cross-content compatibility.
+4. **Live Update of This Plan & Docs:**  
+   - As new APIs, modules, or docs arise from Day 25 work, update `/code_summary.md` and `/docs/architecture/architecture_overview.md` promptly to reflect new surfaces/tests.
+5. **Hygiene:**  
+   - Maintain the environment/import separation and protocol discipline as required by project-wide policy.
+
+**REMINDER:**  
+_Do not begin code/logic implementation for any Day 25 feature outside of this TDD/protocol sequence or outside the boundaries of the original plan and its cited docs._

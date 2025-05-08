@@ -236,13 +236,58 @@ This protocol defines the canonical, tested, and production-ready APIs, interfac
 
 ---
 
-## 8. Data Model & Field Contract Reference
+## 8. Reliability and Self-Healing Protocol
+
+### Class: `ReliabilityManager`
+
+- **API:**
+    - `self_diagnose(reason: str) -> bool`
+        - Checks current health status
+        - Triggers protocol event
+        - Updates registry and metrics if unhealthy
+        - Returns `True` if healthy, `False` otherwise
+
+- **Event Fields:**
+    - `component`: str
+    - `state`: ComponentState
+    - `reason`: str
+    - `timestamp`: float
+
+### Class: `RecoveryManager`
+
+- **API:**
+    - `attempt_recovery(reason: str) -> bool`
+        - If not healthy, sets status to healthy
+        - Updates state/metrics/registry
+        - Emits protocol event
+        - Notifies `IntegrationPointRegistry` via `notify_recovery_action()` if present
+        - Returns `True` if recovery successful, `False` otherwise
+
+- **Event Fields:**
+    - `component`: str
+    - `state`: ComponentState
+    - `reason`: str
+    - `timestamp`: float
+    - `recovery_action`: str
+
+- **Integration Points:**
+    - The recovery workflow MUST notify IntegrationPointRegistry (if present) whenever protocol recovery is triggered
+    - All events (HealthEvent, RecoveryEvent) must include the standard fields as specified above
+
+- **Orchestration and Workflow:**
+    - Orchestrators must chain reliability and recovery flows for self-healing
+    - Implementation validated in `/tests/integration/monitoring/test_reliability_and_selfhealing.py`
+    - Only protocol-documented enums/states are to be used in health/metrics/registry
+
+---
+
+## 9. Data Model & Field Contract Reference
 
 _All API events, payloads, and record fields must contain only the fields described above. No undocumented or extra fields are permitted in protocol-compliant interfaces or responses._
 
 ---
 
-## 9. Extensibility & Implementation Notes
+## 10. Extensibility & Implementation Notes
 
 - All implementations must reside under `app/core/monitoring/` and align exactly with the class/field/API references above.
 - Public API surfaces are final for inter-module consumption unless protocol is amended.
@@ -266,4 +311,7 @@ Please see `/app/core/monitoring/metrics.py` for the full implementation and `/t
 - `/tests/unit/core/monitoring/test_integration_monitor.py`
 - `/tests/unit/core/monitoring/test_integration_point_registry.py`
 
-**This documentation reflects the canonical reference as implemented and tested in Day 24 sessions. For any future changes, update both the test suite and this protocol document together, in accordance with strict TDD and protocol-driven practices.**
+**UPDATE Day25:** Reliability and Self-Healing Protocol has been added and fully test-verified. The ReliabilityManager and RecoveryManager APIs have been implemented and validated according to the protocol specifications. The integration between these components and the existing monitoring infrastructure has been tested in:
+- `/tests/integration/monitoring/test_reliability_and_selfhealing.py`
+
+**This documentation reflects the canonical reference as implemented and tested in Day 25 sessions. For any future changes, update both the test suite and this protocol document together, in accordance with strict TDD and protocol-driven practices.**
