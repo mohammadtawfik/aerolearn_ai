@@ -286,6 +286,8 @@ Refer to `/integrations/registry` for implementation details.
 | Health Metrics Protocol             | `/docs/architecture/health_monitoring_protocol.md`       | `/integrations/monitoring/health_status.py`, `/app/core/monitoring/metrics.py` |
 | Analytics Protocol                  | `/docs/architecture/health_monitoring_protocol.md`       | `/app/core/analytics/advanced.py`, `/app/api/analytics/endpoints.py` |
 | Self-Healing Protocol               | `/docs/architecture/health_monitoring_protocol.md`       | `/app/core/monitoring/reliability.py`, `/app/core/monitoring/recovery.py` |
+| AI Recommendation Protocol          | `/docs/architecture/ai_recommendation_protocol.md`       | `/app/core/ai/learning_path.py`, `/app/core/ai/material_selection.py`, `/app/core/ai/cross_course_recommendation.py` |
+| Content Optimization Protocol       | `/docs/architecture/content_optimization_protocol.md`    | `/app/core/ai/content_optimization.py` |
 
 ## Testing and Verification
 
@@ -319,6 +321,53 @@ For detailed test coverage, see `/tests/integration/monitoring/`, `/tests/integr
 - **Test-Driven Compliance:** TDD tests for every analytics protocol surface are in `/tests/unit/core/analytics/test_advanced.py`, always preceding any implementation.
 - **Protocol Cross-link:** All analytics APIs/fields are specified and mapped to `/docs/architecture/health_monitoring_protocol.md`.
 - **Complete Test/Doc Sync:** As of Day 24 plan closure, all analytics systems, interfaces, and test coverage are synchronized in documentation and implementation.
+- **Teaching Insights Analytics** (in `/app/core/analytics/teaching_insights.py`):
+  - Protocol-driven computation of teaching effectiveness, content impact, engagement-outcome correlation, and actionable recommendations for instructors.
+  - Exposes all protocol APIs and structured data as per `/docs/architecture/health_monitoring_protocol.md` §11.
+  - All analytics methods, fields, and multi-surface report aggregation are TDD tested; status exported to dashboards and API endpoints.
+  - Unit and integration test coverage fully synchronized and green as of Day 25; full documentation/test/code sync policy enforced.
+
+## AI Recommendation Engine
+
+The AeroLearn AI platform includes a protocol-driven recommendation engine that generates personalized learning paths for students:
+
+- **Learning Path Generator** (in `/app/core/ai/learning_path.py`):
+  - Implements the canonical API `generate_learning_path(student, candidate_content, max_length=10, adaptivity=True)`
+  - Returns structured learning paths with sequenced content items, difficulty levels, prerequisites, and justifications
+  - Supports adaptive mode that dynamically adjusts recommendations based on student performance and preferences
+  - Ensures all recommendations include RFC3339 timestamps and proper student identification
+
+- **Personalized Material Selection** (in `/app/core/ai/material_selection.py`):
+  - Detects student learning styles using protocol-compliant detection strategies
+  - Matches content items/styles, adapts filtering and sequencing based on individualized profiles
+  - Protocol and API contract: see `/docs/architecture/ai_recommendation_protocol.md`
+  - Fully test-driven: All required tests implemented and passing (`/tests/unit/core/ai/test_material_selection.py`)
+  - Documentation, code, and test surfaces are strictly synchronized as of Day 25
+
+- **Cross-Course Recommendation Engine** (in `/app/core/ai/cross_course_recommendation.py`):
+  - Aggregates learning data, content, and analytic events across courses for each student or program
+  - Provides unified recommendations, curriculum-wide sequencing, cross-referencing, and optimization suggestions
+  - Implements all contract fields and APIs from `/docs/architecture/ai_recommendation_protocol.md`
+  - Supports holistic learning path generation that spans multiple courses and disciplines
+  - Comprehensive test coverage through unit and integration tests (`/tests/unit/core/ai/test_crosscourse_reco.py`, `/tests/integration/ai/test_crosscourse_reco.py`)
+  - Fully integrated with the AI recommendation system and analytics framework
+
+- **Protocol Compliance:**
+  - All recommendation engine interfaces adhere to `/docs/architecture/ai_recommendation_protocol.md`
+  - Returned data structures follow strict protocol specifications including required fields:
+    - `student_id`: Unique identifier for the target student
+    - `generated_at`: RFC3339 timestamp of recommendation generation
+    - `steps`: Ordered array of learning path steps with content references, difficulty, prerequisites, and justifications
+
+- **Test-Driven Development:**
+  - Comprehensive test suite in `/tests/unit/core/ai/test_learning_path.py` and `/tests/unit/core/ai/test_material_selection.py`
+  - Tests verify all protocol requirements including sequencing logic, adaptivity toggling, max length enforcement, and field validation
+  - No implementation is merged without passing all protocol-specified test cases
+
+- **Integration Points:**
+  - Integrates with the analytics subsystem to incorporate usage patterns into recommendations
+  - Connects with content models to access metadata for intelligent sequencing
+  - Interfaces with student progress tracking to tailor recommendations to individual learning journeys
 
 ## Future Evolution
 
@@ -335,7 +384,42 @@ For detailed protocol requirements and implementation specifics, always crossche
 - [Service Health Protocol (API)](/docs/api/service_health_protocol.md)
 - [Analytics Protocol (API)](/docs/api/analytics_protocol.md)
 
-## End-of-Day 24 Architecture Summary [UPDATED]
+## End-of-Day 25 Architecture Summary [UPDATED]
 - Advanced Usage Analytics framework is fully implemented, TDD tested (unit+integration), and doc-synced with protocols and `/code_summary.md`
 - All analytics API endpoints expose only protocol/documented fields, privacy and test-verified
+- Teaching Insights Analytics subsystem is fully implemented with protocol-driven instructor recommendations and effectiveness metrics
 - No analytics task or documentation mismatches remain open as of this cycle
+- Learning Path Recommendation Engine is fully implemented with protocol compliance and comprehensive test coverage
+- AI recommendation capabilities now support personalized, adaptive learning paths with proper sequencing and justifications
+- Content Optimization Engine is fully implemented with protocol compliance and comprehensive test coverage
+- Personalized Material Selection subsystem is fully implemented with learning style detection and content matching capabilities
+- Cross-Course Recommendation Engine is fully implemented with curriculum-wide recommendation capabilities
+- All AI recommendation components are now synchronized across documentation, implementation, and test coverage
+
+## AI Content Optimization Engine
+
+The AeroLearn AI platform includes a protocol-driven engine for automated content improvement:
+
+- **Content Optimization Engine** (in `/app/core/ai/content_optimization.py`):
+  - Implements the canonical API `suggest_content_optimizations(content_item, templates=None, context=None)`
+  - Suggests, explains, and previews improvements for educational content (clarity, engagement, etc.)
+  - Returns protocol-specified dictionary with:
+    - `content_id`: Unique identifier for the content being optimized
+    - `suggestions`: Array of improvement suggestions (each with template, before/after text, explanation)
+    - `overall_analysis`: Content quality scores, tags, and preview
+    - `generated_at`: RFC3339 timestamp of optimization generation
+
+- **Protocol Compliance:**
+  - All optimization engine interfaces adhere to `/docs/architecture/content_optimization_protocol.md`
+  - Returned data structures follow strict protocol specifications including required fields
+  - Supports template-driven optimization strategies that can be extended or customized
+
+- **Test-Driven Development:**
+  - Comprehensive test suite in `/tests/unit/core/ai/test_content_optimization.py`
+  - Tests verify all protocol requirements including no-op behavior, template application, preview generation, analytics integration, and timestamp compliance
+  - No implementation is merged without passing all protocol-specified test cases
+
+- **Extensibility:**
+  - Protocol, code, and test suite evolve together with every feature or template extension
+  - All changes are documented in `/docs/architecture/content_optimization_protocol.md`
+  - Integration with analytics system to track optimization effectiveness

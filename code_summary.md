@@ -2,7 +2,7 @@
 
 *Generated on code_summary.md*
 
-Total Python files: 445
+Total Python files: 458
 
 ## Table of Contents
 
@@ -55,7 +55,11 @@ Total Python files: 445
 │   │   │   ├── semantic_search.py
 │   │   │   ├── concept_extraction.py
 │   │   │   ├── resource_discovery.py
-│   │   │   └── prompt_engineering.py
+│   │   │   ├── prompt_engineering.py
+│   │   │   ├── learning_path.py
+│   │   │   ├── content_optimization.py
+│   │   │   ├── material_selection.py
+│   │   │   └── cross_course_recommendation.py
 │   │   ├── api
 │   │   │   ├── api_client.py
 │   │   │   ├── deepseek_client.py
@@ -159,7 +163,8 @@ Total Python files: 445
 │   │   │   └── migration_planner.py
 │   │   ├── analytics
 │   │   │   ├── advanced.py
-│   │   │   └── __init__.py
+│   │   │   ├── __init__.py
+│   │   │   └── teaching_insights.py
 │   │   └── __init__.py
 │   ├── ui
 │   │   ├── common
@@ -315,7 +320,11 @@ Total Python files: 445
 │   │   │   │   └── test_batch_controller.py
 │   │   │   ├── ai
 │   │   │   │   ├── test_conversation.py
-│   │   │   │   └── __init__.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── test_learning_path.py
+│   │   │   │   ├── test_content_optimization.py
+│   │   │   │   ├── test_material_selection.py
+│   │   │   │   └── test_crosscourse_reco.py
 │   │   │   ├── monitoring
 │   │   │   │   ├── test_notification_center.py
 │   │   │   │   ├── test_metrics.py
@@ -341,7 +350,8 @@ Total Python files: 445
 │   │   │   │   └── test_reliability_and_selfhealing.py
 │   │   │   ├── analytics
 │   │   │   │   ├── test_advanced.py
-│   │   │   │   └── __init__.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── test_teaching_insights.py
 │   │   │   ├── __init__.py
 │   │   │   └── test_integration_health.py
 │   │   ├── ui
@@ -407,6 +417,10 @@ Total Python files: 445
 │   │   │   └── test_doc_extraction.py
 │   │   ├── analytics
 │   │   │   ├── test_endpoints.py
+│   │   │   ├── __init__.py
+│   │   │   └── test_teaching_insights_integration.py
+│   │   ├── ai
+│   │   │   ├── test_crosscourse_reco.py
 │   │   │   └── __init__.py
 │   │   ├── __init__.py
 │   │   ├── test_event_bus.py
@@ -709,13 +723,13 @@ implementin...
 
 Key file relationships (files with most dependencies):
 
-- **integrations\monitoring\component_status_adapter.py** depends on: app\core\monitoring\metrics.py, integrations\registry\component_registry.py
+- **integrations\monitoring\component_status_adapter.py** depends on: integrations\registry\component_registry.py, app\core\monitoring\metrics.py
 - **app\core\monitoring\metrics.py** depends on: integrations\registry\component_registry.py
 - **app\models\course.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **integrations\monitoring\integration_health.py** depends on: integrations\events\event_types.py, integrations\registry\component_registry.py
+- **integrations\monitoring\integration_health.py** depends on: integrations\registry\component_registry.py, integrations\events\event_types.py
 - **app\models\assessment.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
-- **app\core\auth\authentication.py** depends on: integrations\events\event_types.py, integrations\events\event_bus.py
-- **app\models\content.py** depends on: app\models\course.py, integrations\events\event_bus.py, integrations\events\event_types.py
+- **app\core\auth\authentication.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py
+- **app\models\content.py** depends on: integrations\events\event_bus.py, integrations\events\event_types.py, app\models\course.py
 
 
 ## Detailed Code Analysis
@@ -5439,6 +5453,24 @@ Handles template-based prompt generation with support for variables, context, an
 
 
 
+### app\core\analytics\teaching_insights.py
+
+**Description:**
+
+TeachingInsightsAnalytics: Protocol-Driven Analytics for Professor Teaching Insights
+Implements all APIs as defined in /docs/architecture/health_monitoring_protocol.md section 11.
+
+**Classes:**
+
+- `TeachingInsightsAnalytics`
+
+
+  Analytics module for professor teaching insights, content impact, engagement correlation, 
+
+  Methods: `__init__()`, `record_teaching_effectiveness()`, `compute_content_impact()`, `correlate_engagement()`, `generate_teaching_recommendations()`, ... (2 more)
+
+
+
 ### app\ui\common\test_component_architecture.py
 
 **Classes:**
@@ -5674,6 +5706,24 @@ Typical usage:
   Unified search interface combining keyword and semantic strategies,
 
   Methods: `__init__()`, `search()`, `search_legacy()`
+
+
+
+### app\core\ai\cross_course_recommendation.py
+
+**Description:**
+
+CrossCourseRecommendationEngine: Protocol-Driven Cross-Course Recommendation
+Implements all APIs as defined in /docs/architecture/ai_recommendation_protocol.md section 5.
+
+**Classes:**
+
+- `CrossCourseRecommendationEngine`
+
+
+  Cross-Course Recommendation, Aggregation, and Curriculum Optimization Engine
+
+  Methods: `__init__()`, `aggregate_cross_course_data()`, `generate_cross_course_recommendations()`, `cross_reference_related_content()`, `suggest_curriculum_optimizations()`, ... (1 more)
 
 
 
@@ -9350,6 +9400,66 @@ Shows standard widget pattern for extension.
 
 
 
+### tests\unit\core\ai\test_learning_path.py
+
+**Functions:**
+
+- `validate_learning_path_output(output, student_id, max_length)`
+
+- `test_simple_recommendation_protocol_contract()`
+
+  Test protocol contract for minimal input.
+
+- `test_adaptive_path_changes_for_adaptivity_toggle()`
+
+  Adaptive mode should alter the selected path or ordering when enabled.
+
+- `test_path_respects_max_length()`
+
+  Output never exceeds max_length, even if more candidates are available.
+
+- `test_justification_and_metadata_present()`
+
+  Each path step should provide justification and required metadata fields.
+
+- `test_path_for_unsatisfiable_prerequisites()`
+
+  Unreachable content must not appear if dependencies are not met.
+
+- `test_output_timestamp_format()`
+
+
+
+### tests\unit\core\ai\test_material_selection.py
+
+**Functions:**
+
+- `validate_material_selection_output(result, student_id, expected_len)`
+
+- `test_style_filter_and_basic_contract()`
+
+  Selection returns only items matching required learning style, correct fields, ordered/reasoned.
+
+- `test_exclude_completed_and_explicit_exclusions()`
+
+  Completed and explicitly excluded materials are not present in result.
+
+- `test_priority_tags_changes_order_or_score()`
+
+  Materials with priority tags should get higher ranking/score.
+
+- `test_length_cap()`
+
+  Enforces max_items and orders sequence integers.
+
+- `test_reason_field_explanation()`
+
+  Every selected material must have a non-empty rationale string.
+
+- `test_timestamp_rfc3339()`
+
+
+
 ### tests\unit\core\monitoring\test_pattern_detection.py
 
 **Classes:**
@@ -9358,6 +9468,26 @@ Shows standard widget pattern for extension.
 
 
   Methods: `test_activity_sequence_analysis()`, `test_resource_utilization_patterns()`, `test_study_habit_identification()`, `test_learning_style_classification()`
+
+
+
+### tests\unit\core\analytics\test_teaching_insights.py
+
+**Functions:**
+
+- `insights()`
+
+- `test_record_teaching_effectiveness(insights)`
+
+- `test_compute_content_impact(insights)`
+
+- `test_correlate_engagement(insights)`
+
+- `test_generate_teaching_recommendations(insights)`
+
+- `test_get_teaching_insights_report(insights)`
+
+- `test_clear(insights)`
 
 
 
@@ -9731,6 +9861,46 @@ Update this list in sync with the protocol document.
 - `test_upload_retries_on_error(qapp, dummy_file, monkeypatch)`
 
 - `test_upload_failed_emits_error(qapp, dummy_file, monkeypatch)`
+
+
+
+### tests\unit\core\ai\test_content_optimization.py
+
+**Functions:**
+
+- `validate_suggestion_output(result, content_id, require_suggestions)`
+
+- `test_basic_contract_and_templates(content_item, templates, context)`
+
+  Field contract and at least one suggestion (if templates present).
+
+- `test_no_op_when_content_already_optimized()`
+
+  If body is already optimal for requested templates/goals, must return empty suggestion list.
+
+- `test_field_types_and_analysis_present()`
+
+- `test_preview_html_present_if_supported()`
+
+- `test_timestamp_rfc3339()`
+
+
+
+### tests\unit\core\ai\test_crosscourse_reco.py
+
+**Functions:**
+
+- `reco_engine()`
+
+- `test_aggregate_cross_course_data(reco_engine)`
+
+- `test_generate_cross_course_recommendations(reco_engine)`
+
+- `test_cross_reference_related_content(reco_engine)`
+
+- `test_suggest_curriculum_optimizations(reco_engine)`
+
+- `test_clear(reco_engine)`
 
 
 
@@ -10363,6 +10533,22 @@ Test plan:
 
 
 
+### tests\integration\analytics\test_teaching_insights_integration.py
+
+**Functions:**
+
+- `multi_insights()`
+
+- `test_multi_course_professor_aggregation(multi_insights)`
+
+- `test_protocol_integration_surface(multi_insights)`
+
+- `test_teaching_and_content_impact_data_flow(multi_insights)`
+
+- `test_report_timestamp_validity(multi_insights)`
+
+
+
 ### tests\ui\test_course_structure_editor.py
 
 **Functions:**
@@ -10493,6 +10679,36 @@ Unit tests for RelationshipNavigator, which provides recommendations based on th
   Create a Python __init__.py file.
 
 - `generate_project_structure()`
+
+
+
+### app\core\ai\learning_path.py
+
+**Functions:**
+
+- `generate_learning_path(student, candidate_content)`
+
+  Generates an ordered recommendation of content (lessons/modules/quizzes) as a personalized path for the given student.
+
+
+
+### app\core\ai\content_optimization.py
+
+**Functions:**
+
+- `suggest_content_optimizations(content_item)`
+
+  Generate protocol-compliant optimization suggestions for the provided content.
+
+
+
+### app\core\ai\material_selection.py
+
+**Functions:**
+
+- `select_personalized_materials(student, candidate_content)`
+
+  Protocol-compliant material selection engine.
 
 
 
@@ -10889,6 +11105,18 @@ When all modules are implemented and stable, public API symbols can be re-expose
 - `test_resource_constraint_analysis(registry)`
 
 - `registry()`
+
+
+
+### tests\integration\ai\test_crosscourse_reco.py
+
+**Functions:**
+
+- `reco_engine()`
+
+- `test_full_cross_course_workflow(reco_engine)`
+
+- `test_cross_reference_and_optimization(reco_engine)`
 
 
 
@@ -11939,6 +12167,18 @@ Integration tests package initialization.
 
 
 
+### tests\integration\ai\__init__.py
+
+**Description:**
+
+AeroLearn AI - Aerospace Engineering Education Platform
+Created: 2025-04-24
+
+This module is part of the AeroLearn AI project.
+Integration tests package initialization.
+
+
+
 ### tests\core\__init__.py
 
 
@@ -12027,115 +12267,139 @@ This module is part of the AeroLearn AI project.
 
 ## AI-Enhanced Analysis
 
-Here are the additional architectural sections to add to the summary:
+Here's the architectural enhancement to add to the summary:
 
+```markdown
 ## Architectural Insights
 
 ### 1. High-Level Architectural Overview
 The system follows a layered event-driven architecture with three primary planes:
 
-**Core Planes**:
-1. **Application Core** (app/):
-   - Domain Models (Course, Assessment, Content)
-   - Business Logic (Authentication, Metrics, Monitoring)
-   - Data Persistence (SQLAlchemy models)
+```
+Monitoring Plane
+├── Component Registry (Service Discovery)
+├── Health Dashboard (State Management)
+├── Metrics Pipeline (Telemetry Processing)
+└── Event Bus (Cross-Component Communication)
 
-2. **Integration Hub** (integrations/):
-   - Component Registry (Dependency Tracking)
-   - Event Bus (Pub/Sub System)
-   - Health Monitoring (Status Propagation)
-   - Metrics Collection (Performance Analysis)
+Application Plane
+├── Course Management (Domain Models)
+├── AI/ML Services (Content Processing)
+├── Authentication (IAM Services)
+└── Assessment Engine (Grading System)
 
-3. **Cross-Cutting Services**:
-   - Service Health Dashboard (Cascading Status)
-   - Component Status Adapter (Protocol Bridge)
-   - Metrics Manager (Alerting System)
+Integration Plane
+├── Adapter Pattern Implementations
+├── Protocol Compliance Layers
+└── Dependency Tracking System
+```
 
-Key architectural flows:
-- Event-driven component status propagation
-- Metric collection -> Alert generation -> Health dashboard updates
-- Registry -> Tracker -> Adapter -> Dashboard chain
-- Authentication events -> Metrics -> Monitoring pipeline
+Key architectural characteristics:
+- Event-driven communication via EventBus (pub-sub pattern)
+- Component-oriented design with explicit dependency management
+- Protocol-first approach for service health monitoring
+- Hybrid synchronous/asynchronous operation handling
+- Metrics-driven observability pipeline
 
 ### 2. Identified Design Patterns
-
-| Pattern               | Implementation Examples                          | Purpose                                      |
-|-----------------------|--------------------------------------------------|---------------------------------------------|
-| Singleton             | SystemMetricsManager, EventBus                  | Global access to monitoring services        |
-| Adapter               | ComponentStatusAdapter                          | Bridge registry and monitoring systems      |
-| Observer              | EventBus subscribers                            | Decoupled event notification                |
-| Registry              | ComponentRegistry                               | Central dependency tracking                 |
-| Strategy              | AlertLevel/MetricType enums                     | Flexible metrics handling                   |
-| Factory               | EventTypes.create_* methods                     | Standardized event object creation          |
-| Decorator             | @property in StatusTrackers                     | Controlled access to internal state         |
-| Protocol              | ServiceHealthProtocol implementation            | Component status transition validation      |
+| Pattern             | Implementation Examples                          | Purpose                                      |
+|---------------------|--------------------------------------------------|----------------------------------------------|
+| Adapter             | ComponentStatusAdapter, SimpleStatusTracker     | Bridge between registry and monitoring       |
+| Observer            | EventBus, StatusListener registration           | Decoupled event notifications                |
+| Singleton           | SystemMetricsManager, EventBus                  | Single instance resource management          |
+| Strategy            | ComponentStatusTracker implementations          | Interchangeable status handling algorithms   |
+| Decorator           | @property methods in EnhancedComponentStatusTracker | Dynamic behavior extension                 |
+| Registry            | ComponentRegistry, IntegrationPointRegistry      | Central component/service catalog            |
+| Factory             | make_registry(), make_tracker() functions        | Flexible object creation                     |
 
 ### 3. Refactoring Opportunities
+**Structural Improvements:**
+1. ComponentStatusAdapter (458 LOC) could be split into:
+   - StatusPropagationService
+   - CallbackDispatcher
+   - RegistryBridge
+   
+2. Remove duplicate AlertLevel imports in component_status_adapter.py
 
-1. **Component State Consolidation**
-   - Current Issue: ComponentState enum has overlapping values (RUNNING/HEALTHY, DEGRADED/IMPAIRED)
-   - Recommendation: Consolidate to 5 core states: HEALTHY, DEGRADED, FAILED, RECOVERING, UNKNOWN
+**Code Quality:**
+1. Introduce interface segregation for:
+   ```python
+   class IStatusProvider(ABC):
+       @abstractmethod
+       def get_status() -> ComponentStatus: ...
+       
+   class IHealthDashboard(ABC):
+       @abstractmethod
+       def register_callback() -> bool: ...
+   ```
 
-2. **Dashboard Constructor Complexity**
-   - Problem: ServiceHealthDashboard has 3 initialization patterns
-   - Fix: Implement factory methods for different creation scenarios
+2. Reduce tight coupling between ServiceHealthDashboard and ComponentRegistry through event-based communication
 
-3. **Metrics Duplication**
-   - Issue: Similar metric collection in SystemMetricsManager and PerformanceAnalyzer
-   - Solution: Create unified MetricCollector interface
-
-4. **Event Type Safety**
-   - Current Risk: String-based event types in EventType enum
-   - Improvement: Implement typed event hierarchy with validation
-
-5. **Circular Dependencies**
-   - Hotspot: ComponentStatusAdapter ↔ ServiceHealthDashboard
-   - Resolution: Introduce interface layer for status notifications
+**Performance:**
+1. Implement caching in:
+   - ServiceHealthDashboard.get_dependents()
+   - ComponentRegistry.analyze_dependency_impact()
+   
+2. Add batch operations for:
+   - Metrics reporting
+   - Status updates
 
 ### 4. Critical Path Analysis
-
-**Key Execution Paths**:
-1. Component Registration Flow:
-   Component → Registry → StatusTracker → Dashboard → Metrics
+**Key Operational Flow:**
+1. Component Status Update Path:
+   ```
+   Component → StatusAdapter → HealthDashboard → MetricsManager → EventBus
+              ↳ Registry Sync              ↳ Alert Evaluation
+  ```
 
 2. Event Processing Critical Path:
-   EventBus → Subscribers → MetricsManager → AlertSystem
+   ```
+   EventEmitter → EventBus → [Filtering] → Subscribers → 
+     ↳ Database Commit      ↳ Metrics Collection     ↳ UI Updates
+  ```
 
-3. Authentication Sequence:
-   AuthService → CredentialManager → SessionStore → EventBus
+**Performance Bottlenecks:**
+1. Cascading status updates with O(n²) complexity in worst-case dependency graphs
+2. Synchronous callback execution in EventBus._notify_subscriber_threadsafe()
+3. Lack of pagination in get_all_component_statuses() for large deployments
 
-4. Course Enrollment Flow:
-   EnrollmentRequest → CourseModel → EventBus → Metrics → Dashboard
-
-**Performance Bottlenecks**:
-- Cascade status updates in ServiceHealthDashboard
-- Synchronous event persistence in EventBus
-- Recursive dependency resolution in ComponentRegistry
-
-### 5. Class/Module Relationships
+### 5. Component Relationships
 
 ```mermaid
 graph TD
-    CR[ComponentRegistry] -->|feeds| CST[ComponentStatusTracker]
-    CST -->|updates| SHD[ServiceHealthDashboard]
-    SHD -->|notifies| CSA[ComponentStatusAdapter]
-    CSA -->|pushes| EB[EventBus]
-    EB -->|triggers| MM[SystemMetricsManager]
-    MM -->|alerts| IH[IntegrationHealth]
-    IH -->|updates| CR
+    CR[ComponentRegistry] -->|Registers| CSA[ComponentStatusAdapter]
+    CSA -->|Updates| SHD[ServiceHealthDashboard]
+    SHD -->|Publishes| EB[EventBus]
+    EB -->|Notifies| MM[SystemMetricsManager]
+    MM -->|Stores| MET[MetricStore]
+    CR -->|Tracks| CT[Component Types]
+    CT -->|Includes| APP[App Models]
+    CT -->|Includes| INT[Integrations]
     
-    classDef integration fill:#e6f3ff,stroke:#4a90e2
-    classDef core fill:#e8f5e9,stroke:#43a047
-    classDef model fill:#fbe9e7,stroke:#ff7043
+    classDef integration fill:#e6f3ff,stroke:#4a90e2;
+    classDef core fill:#ffe6e6,stroke:#ff4d4d;
+    classDef model fill:#e6ffe6,stroke:#4dff4d;
     
-    class CR,CST,SHD,CSA,EB,MM,IH integration
-    class Course,Assessment,Content model
-    class Authentication,Metrics core
+    class CR,CSA,SHD,EB,MM integration;
+    class MET,CT core;
+    class APP,INT model;
 ```
 
-**Key Dependencies**:
-- ComponentRegistry maintains dependency graph used by ServiceHealthDashboard
-- EventTypes.py serves as central schema for all event-driven components
-- SystemMetricsManager aggregates data from both app/core and integrations
-- Authentication service acts as gateway for all user interaction flows
-- Course model serves as central hub for content relationships
+**Key Module Dependencies:**
+- `component_status_adapter.py` depends on:
+  - ComponentRegistry (direct dependency)
+  - SystemMetricsManager (metric reporting)
+  - EventTypes (event payload definitions)
+  
+- `metrics.py` consumes:
+  - ComponentState from registry
+  - HealthDashboard statuses
+  - EventBus notifications
+
+- All domain models (Course, Assessment) integrate with:
+  - EventBus for state changes
+  - Registry for component discovery
+  - Metrics for operational telemetry
+```
+
+This addition provides architectural context while maintaining focus on the technical implementation details revealed in the code analysis. Would you like me to expand on any particular section?

@@ -16,6 +16,8 @@ _AeroLearn AI – Monitoring, Health, and Compatibility Modules Scope_
 7. Real-Time Compatibility Monitoring Protocol
 8. Data Model & Field Contract Reference
 9. Extensibility & Implementation Notes
+10. Reliability and Self-Healing Protocol
+11. Teaching Insights Analytics Protocol
 
 ---
 
@@ -315,3 +317,55 @@ Please see `/app/core/monitoring/metrics.py` for the full implementation and `/t
 - `/tests/integration/monitoring/test_reliability_and_selfhealing.py`
 
 **This documentation reflects the canonical reference as implemented and tested in Day 25 sessions. For any future changes, update both the test suite and this protocol document together, in accordance with strict TDD and protocol-driven practices.**
+
+---
+
+## 11. Teaching Insights Analytics Protocol
+
+### Class: `TeachingInsightsAnalytics`
+
+- **API:**
+    - `record_teaching_effectiveness(professor_id: str, course_id: str, metrics: Dict)`  
+        *Records teaching effectiveness analytics for a given professor and course.*
+    - `compute_content_impact(content_id: str) -> Dict`  
+        *Returns analytics for content impact: usage, engagement delta, outcome correlation.*
+    - `correlate_engagement(student_id: str, content_ids: List[str]) -> Dict`  
+        *Analyzes engagement with content and correlates with outcomes.*
+    - `generate_teaching_recommendations(professor_id: str, analytics_scope: Dict = None) -> List[Dict]`  
+        *Suggests actionable teaching improvements based on analytics and best practices.*
+    - `get_teaching_insights_report(professor_id: str, course_id: str) -> Dict`  
+        *Returns protocol-compliant, aggregated teaching insight analytics (all fields below).*
+    - `clear()`
+
+- **TeachingEffectivenessRecord Fields:**
+    - `professor_id`: str
+    - `course_id`: str
+    - `effectiveness_score`: float (0..1)
+    - `engagement_score`: float (0..1)
+    - `recommendations`: List[str]
+    - `timestamp`: int (UTC)
+
+- **ContentImpactRecord Fields:**
+    - `content_id`: str
+    - `impact_score`: float (0..1)
+    - `student_engagement`: Dict[str, float]  # map of student_id to engagement score
+    - `outcome_correlation`: float (Pearson r, -1..1)
+    - `timestamp`: int (UTC)
+
+- **TeachingInsightsReport Fields:**
+    - `professor_id`: str
+    - `course_id`: str
+    - `teaching_history`: List[TeachingEffectivenessRecord]
+    - `content_impact`: List[ContentImpactRecord]
+    - `engagement_correlations`: Dict[str, float]  # content_id → correlation metric
+    - `recommendations`: List[str]
+    - `generated_at`: int (UTC)
+
+- **Test-Driven Scenarios (TDD Requirements):**
+    - All new APIs in this section require modular/unit/integration test coverage as follows:
+        - `/tests/unit/core/analytics/test_teaching_insights.py` (`TeachingInsightsAnalytics` method/field contract, analytics accuracy, report structure, edge cases)
+        - `/tests/integration/analytics/test_teaching_insights_integration.py` (multi-component, multi-course/professor aggregation, protocol integration)
+    - No implementation is permitted outside the explicit API/data contract above. All changes/additions must also update `/code_summary.md` and `/docs/architecture/architecture_overview.md` per project policy.
+
+**Status (Day 26):**  
+All Teaching Insights Analytics protocol methods, data fields, and report formats are implemented in `/app/core/analytics/teaching_insights.py` and covered by both unit and integration tests. Documentation, tests, and implementation are fully synchronized as of this cycle closure.
