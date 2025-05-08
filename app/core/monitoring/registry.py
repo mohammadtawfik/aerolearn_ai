@@ -1,7 +1,15 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from datetime import datetime, timezone
 
 from integrations.monitoring.health_status import ComponentState, StatusRecord
+
+class ComponentEntity:
+    """Entity representing a registered component, for protocol-compliant attribute access."""
+    def __init__(self, component_id: str, description: str = None, version: str = None, **kwargs):
+        self.component_id = component_id
+        self.description = description
+        self.version = version
+        self.metadata = kwargs
 
 class MonitoringComponentRegistry:
     """
@@ -60,6 +68,26 @@ class MonitoringComponentRegistry:
 
     def get_component_history(self, component_id: str) -> List[StatusRecord]:
         return self._history.get(component_id, [])
+        
+    def get_component(self, component_id: str) -> Any:
+        """
+        Protocol API: Return the component entity by ID, or None.
+        """
+        if component_id not in self._components:
+            return None
+            
+        component_data = self._components[component_id]
+        return ComponentEntity(
+            component_id=component_id,
+            description=component_data.get("description"),
+            version=component_data.get("version")
+        )
+        
+    def get_registered_component_ids(self):
+        """
+        Protocol API: Enumerate all registered component IDs.
+        """
+        return list(self._components.keys())
 
     def clear(self):
         self._components.clear()

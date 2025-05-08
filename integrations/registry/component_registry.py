@@ -33,6 +33,7 @@ class ComponentRegistry:
         self.components = self._components  # public alias (required by dashboard/tests)
         self._dependency_graph = DependencyGraph()
         self._registration_order = []  # Preserve registration order for deterministic operations
+        self._id_counter = 0  # Counter for generating unique component IDs
         
     def _extract_id(self, component_or_id):
         """
@@ -56,31 +57,61 @@ class ComponentRegistry:
             return component_or_id.get('component_id', None)
         return None
 
-    def register_component(self, component):
+    def register_component(self, component=None, name=None, description=None, version=None, component_type=None):
         """
         Register a component with the registry.
+        
+        Protocol supports two registration modes:
+        1. Object-based: Pass a component object with .component_id attribute
+           - Returns the Component object itself.
+        2. Name-based: Pass name and optional attributes to create a new component
+           - Returns the new component's ID (str), per protocol.
         
         Args:
             component: Component object with .component_id attribute (protocol), 
                 or dict with 'component_id' key (auto-wrapped for legacy/test compatibility).
+            name: String name for the component (used when creating a new component)
+            description: Optional description for the component
+            version: Optional version string
+            component_type: Optional component type identifier
             
         Returns:
-            The Component instance if registration succeeds
+            Component object for object-based registration, str component_id for name-based
             
         Raises:
             ValueError: If component is not protocol-compliant or lacks component_id
             ValueError: If component.component_id already exists
         """
+        # Name-based registration (protocol-compliant)
+        if component is None and name is not None:
+            self._id_counter += 1
+            component_id = f"component_{self._id_counter}"
+            component = Component(
+                component_id=component_id,
+                name=name,
+                description=description,
+                version=version,
+                component_type=component_type,
+                state=None  # default state
+            )
+            # Store component in all relevant data structures
+            self._components[component_id] = component
+            self._dependency_graph.add_node(component_id)
+            self._registration_order.append(component_id)  # Track registration order
+            # Return component_id (str) for name-based registration per protocol
+            return component_id
         # Convert dict to protocol object before extracting id
-        if isinstance(component, dict):
+        elif isinstance(component, dict):
             if 'component_id' not in component:
                 raise ValueError("Dict component must have a 'component_id' key per protocol")
             # Convert to protocol Component
             component = Component(
                 component_id=component['component_id'],
+                name=component.get('name'),
                 state=component.get('state'),
                 version=component.get('version'),
-                component_type=component.get('component_type')
+                component_type=component.get('component_type'),
+                description=component.get('description')
             )
             
         component_id = self._extract_id(component)
@@ -99,6 +130,8 @@ class ComponentRegistry:
         self._components[component_id] = component
         self._dependency_graph.add_node(component_id)
         self._registration_order.append(component_id)  # Track registration order
+        
+        # For object-based registration, return the component object
         return component
 
     def unregister_component(self, component_or_id):

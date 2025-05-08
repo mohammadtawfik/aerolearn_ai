@@ -705,6 +705,21 @@ This bypasses the singleton pattern for testing and dependency injection.
 :param registry: The component registry to use
 :return: A new ServiceHealthDashboard instance
 
+### `app/core/monitoring/dashboard.py` — `ServiceHealthDashboard`
+
+Protocol-compliant implementation of ServiceHealthDashboard.
+
+See: /docs/architecture/service_health_protocol.md
+
+### `app/core/monitoring/registry.py` — `ComponentEntity`
+
+Entity representing a registered component, for protocol-compliant attribute access.
+
+### `app/core/monitoring/registry.py` — `MonitoringComponentRegistry`
+
+Protocol-compliant monitoring registry for dashboards/integration tests.
+Allows registration, status update, state/history retrieval, and TDD reset.
+
 ### `app/core/extraction/structured_data_extractor.py` — `StructuredDataExtractor`
 
 Extracts tabular data from PDF, DOCX, and PPTX files.
@@ -879,6 +894,18 @@ Registry and manager for system/project milestones.
 - Set/query dependencies (dependency graph)
 - Calculate and retrieve milestone progress
 - Audit history, protocol-compliant error/cycle protection, risk
+
+### `app/core/analytics/advanced.py` — `UsageAnalytics`
+
+Protocol-compliant UsageAnalytics implementation.
+Implements:
+    - track_activity(user_id, event, feature, timestamp)
+    - query_activities(user_id=None)
+    - aggregate_usage(user_id=None)
+    - feature_usage_report()
+    - query_sessions(user_id=None)
+    - clear()
+Docs: /docs/architecture/health_monitoring_protocol.md
 
 ### `integrations/interfaces/base_interface.py` — `InterfaceVersion`
 
@@ -1180,6 +1207,14 @@ Protocol-conformant Component as required by:
 Provides unique identification, state management, and dependency tracking
 for registration, health monitoring, and analytics.
 
+Fields:
+  - component_id (str): Unique component identifier
+  - name (str): Human-readable name of component
+  - description (Optional[str]): Description of the component (purpose/type)
+  - version (Optional[str]): Optional version string
+  - component_type (Optional[str]): Type/category string
+  - state (ComponentState): Current component state
+
 ### `integrations/registry/dependency_graph.py` — `DependencyGraph`
 
 Internal dependency management for components with ordered traversal support
@@ -1405,13 +1440,8 @@ information. It can also persist transactions to external storage.
 
 ### `integrations/monitoring/component_status_adapter.py` — `SimpleStatusTracker`
 
-Simple status tracker implementation that follows the Service Health Protocol.
-Used for test environments and as a lightweight alternative to EnhancedComponentStatusTracker.
-
-Implements the core status tracking functionality required by the protocol:
-- Component status updates
-- Status cascading based on dependency graph
-- Status retrieval
+Minimalist status tracker implementation that follows the Service Health Protocol.
+Only implements the core requirements: transition validation and status storage.
 
 ### `integrations/monitoring/component_status_adapter.py` — `SimpleComponentStatusProvider`
 
@@ -1425,6 +1455,8 @@ are immediately reflected.
 
 Represents the operational status of a monitored component.
 Guarantees that error_message is never None.
+Protocol-compliant status container for status callbacks.
+Exposes .state for compatibility with all test and monitoring code.
 
 ### `integrations/monitoring/component_status_adapter.py` — `EnhancedComponentStatusTracker`
 
@@ -1452,10 +1484,10 @@ Create a new ComponentRegistry instance.
 Create a new status tracker instance.
 
 Args:
-    registry: Optional ComponentRegistry instance to use for dependency tracking
+    registry: Optional ComponentRegistry instance to use
     
 Returns:
-    SimpleStatusTracker instance for lightweight usage or testing
+    SimpleStatusTracker instance
 
 ### `integrations/monitoring/component_status_adapter.py` — `clear_all_status_tracking`
 
@@ -1509,7 +1541,14 @@ Get the default instance of the component registry
 Dashboard for monitoring component health with explicit dependency injection.
 Implements the Service Health Protocol as documented in /docs/architecture/service_health_protocol.md
 
-Always uses a status tracker, never directly a registry.
+Protocol-compliant and backward-compatible constructor:
+- ServiceHealthDashboard(registry)                    # preferred protocol/documented usage
+- ServiceHealthDashboard(status_tracker, registry)    # legacy/support usage where a custom tracker is needed
+- ServiceHealthDashboard()                            # fallback, uses fresh singleton registry & tracker
+
+Per /docs/architecture/health_monitoring_protocol.md and tests/unit/monitoring/test_health_monitoring_protocol.py
+
+Protocol-compliant: supports register_status_callback + reset_for_test
 
 ### `integrations/monitoring/component_status_adapter.py` — `unregister_from_status_tracker`
 
@@ -1536,6 +1575,7 @@ Protocol-compliant with Service Health Protocol as documented in /docs/architect
 
 Reset all component state for SYSTEM_STATUS_TRACKER (TDD integration)
 This function is called by test frameworks to ensure clean state between tests.
+Protocol-compliant method required by health monitoring protocol.
 
 ### `integrations/monitoring/component_status_adapter.py` — `get_default_adapter`
 
@@ -1555,6 +1595,75 @@ Args:
     
 Returns:
     True if the update was successful, False otherwise
+
+### `integrations/monitoring/health_status.py` — `HealthStatus`
+
+Protocol-compliant health status enum representing component states.
+
+### `integrations/monitoring/health_status.py` — `ComponentState`
+
+Canonical protocol-compliant component state enum used by dashboards, registry, monitoring systems, etc.
+
+### `integrations/monitoring/health_status.py` — `HealthMetricType`
+
+Protocol-compliant metric types for health monitoring.
+
+### `integrations/monitoring/health_status.py` — `HealthMetric`
+
+Protocol-compliant health metric representation.
+Represents a single health metric (e.g., CPU_USAGE, MEMORY_USAGE, ERROR_RATE, etc.)
+
+### `integrations/monitoring/health_status.py` — `StatusRecord`
+
+Protocol model for a status record, per service_health_protocol.md
+
+### `integrations/monitoring/health_provider.py` — `HealthProvider`
+
+Abstract base class for protocol-driven health/monitoring providers.
+Fulfills project modularization, TDD, and protocol documentation requirements.
+
+### `integrations/monitoring/events.py` — `HealthEvent`
+
+Entity representing a health/monitoring event.
+
+### `integrations/monitoring/events.py` — `HealthEventDispatcher`
+
+Dispatcher that manages listener registration and event firing.
+
+### `integrations/monitoring/events.py` — `register_health_event_listener`
+
+Protocol-driven API: Registers listener callback with the specified dispatcher instance.
+
+If only one argument is provided, it's treated as a listener for the global dispatcher
+for backward compatibility.
+
+### `integrations/monitoring/events.py` — `get_dispatcher`
+
+Returns the global dispatcher instance for testing and external access.
+
+### `integrations/monitoring/integration_health_manager.py` — `IntegrationHealth`
+
+Protocol/root class for orchestration required in TDD/protocol. To be fully realized in later steps.
+
+### `integrations/monitoring/integration_health_manager.py` — `IntegrationHealthManager`
+
+Protocol-compliant implementation for the main IntegrationHealth orchestration module.
+See /docs/architecture/health_monitoring_protocol.md for all method contracts.
+
+### `integrations/monitoring/integration_monitor.py` — `ComponentState`
+
+Possible states for a monitored component.
+
+### `integrations/monitoring/integration_monitor.py` — `IntegrationMonitor`
+
+Protocol-driven monitor for integration points.
+Registers components, updates/queries health state and metrics.
+Tracks transactions and failures for analysis. Protocol/test complete.
+
+### `integrations/monitoring/integration_point_registry.py` — `IntegrationPointRegistry`
+
+Registry for integration points with ability to register, lookup and enumerate all points.
+Protocol/docco-compliant.
 
 ### `integrations/week2/orchestrator.py` — `Week2Orchestrator`
 
@@ -1606,154 +1715,155 @@ Main orchestrator for Week 2 integration efforts.
 ## Documentation Index Crosscheck
 
 ### ❗ Missing in Scan (Listed in doc_index.md, not found in scan):
-- docs/user_guides/student_dashboard_features.md
-- docs/api/tagging_system.md
-- docs/development/day10_done_criteria.md
-- docs/development/day21_plan.md
-- docs/README.md
-- docs/api/vector_db_api.md
-- docs/development/day20_plan.md
-- docs/development/day16_plan.md
-- docs/development/day22_plan.md
-- docs/api/metadata_schema_and_extension_points.md
-- docs/ui/interactive_elements_guidelines.md
-- docs/development/student_course_navigator.md
-- docs/api/week2_api.md
-- docs/development/user_management_plan.md
-- docs/architecture/dependency_maps.md
-- docs/api/feature_development_tracker.md
-- docs/api/student_dashboard_widgets.md
-- docs/architecture/health_monitoring.md
-- docs/development/integration_test_documentation.md
-- docs/user_guides/external_integration.md
-- docs/api/resource_allocation_api.md
-- docs/development/day23_plan.md
-- docs/development/tdd_docs_awareness_protocol.md
-- docs/architecture/service_health_protocol.md
-- docs/api/batch_operations.md
-- docs/api/batch_content_metadata_api.md
-- docs/development/day15_plan.md
-- docs/api/prompt_templates.md
-- docs/api/feedback_format_specifications.md
-- docs/architecture/health_monitoring_protocol.md
-- docs/ui/multi_format_content_viewer.md
-- docs/api/grading_rule_specifications.md
-- docs/development/tdd_workflow_guidelines.md
-- docs/generated/index.md
-- docs/development/day27_plan.md
-- docs/user_guides/advanced_ai_integration_workflows.md
-- docs/user_guides/semantic_search.md
-- docs/api/interventions_api.md
-- docs/api/notification_api.md
-- docs/architecture/vector_db.md
-- docs/architecture/week2_integration.md
-- docs/ui/professor_upload_widget_user.md
-- docs/architecture/project_roadmap.md
-- docs/ui/ui_testing_and_performance_benchmarks.md
-- docs/development/pytest-qt-pyqt6-fix.md
-- docs/development/day19_plan.md
-- docs/development/day24_plan.md
-- docs/user_guides/week2_features.md
-- docs/api/content_similarity_api.md
-- docs/api/search_api.md
-- docs/ui/student_dashboard_widget_api.md
-- docs/development/advanced_ai_integration_workflows.md
-- docs/architecture/system_monitoring.md
-- docs/architecture/compatibility_impact_analysis.md
-- docs/user_guides/course_organization_features.md
-- docs/doc_index.md
-- docs/development/day18_plan.md
-- docs/development/day17_plan.md
-- docs/development/day28_plan.md
 - docs/api/batch_content_metadata_examples.md
-- docs/api/assessment_delivery_workflow.md
-- docs/ui/professor_upload_widget_api.md
-- docs/development/day30_plan.md
-- docs/api/resource_discovery_api.md
-- docs/development/day13_plan.md
-- docs/user_guides/conversation_usage.md
-- docs/architecture/integration_architecture.md
-- docs/reports/week2_progress_report.md
-- docs/development/integration_test_patterns.md
-- docs/ui/content_viewer_extension.md
-- docs/architecture/admin_security.md
-- docs/architecture/analytics_integration.md
-- docs/development/day29_plan.md
-- docs/architecture/knowledge_graph.md
-- docs/api/course_enrollment_api.md
-- docs/integration_framework.md
-- docs/user_guides/prompt_engineering.md
-- docs/development/day31_plan.md
-- docs/index.md
-- docs/user_guides/admin_workflows.md
-- docs/generated/README.md
-- docs/api/user_management_api.md
-- docs/user_guides/admin_course_mgmt.md
-- docs/api/manual_grading_procedures.md
-- docs/architecture/dependency_tracking_protocol.md
-- docs/user_guides/admin_user_mgmt.md
-- docs/development/sprint_plan.md
-- docs/architecture/conversation_architecture.md
-- docs/development/change_simulation_process.md
-- docs/user_guides/content_analysis_workflows.md
-- docs/architecture/architecture_overview.md
+- docs/ui/interactive_elements_guidelines.md
 - docs/ui/note_taking_features.md
-- docs/reports/test_coverage_report.md
-- docs/architecture/course_structure.md
-- docs/ui/navigator_customization.md
-- docs/architecture/course_organization_integration.md
-- docs/api/progress_metrics.md
-- docs/development/day25_plan.md
-- docs/development/day14_plan.md
-- docs/architecture/content_similarity.md
-- docs/development/day18_changelog.md
-- docs/development/test_coverage_notes_day18.md
-- docs/user_guides/enrollment_workflow.md
-- docs/user_guides/concept_relationships.md
-- docs/api/course_management_api.md
-- docs/content_management_integration.md
+- docs/development/integration_health_modularization_plan.md
+- docs/architecture/system_monitoring.md
+- docs/architecture/health_monitoring.md
+- docs/api/week2_api.md
+- docs/architecture/project_roadmap.md
+- docs/development/sprint_plan.md
 - docs/user_guides/content_extraction.md
-- docs/development/day11_done_criteria.md
-- docs/development/day26_plan.md
-- docs/api/milestone_tracker.md
-- docs/reports/security_review_report.md
-- docs/development/day12_plan.md
+- docs/ui/content_viewer_extension.md
+- docs/development/integration_test_patterns.md
+- docs/development/day14_plan.md
+- docs/development/day16_plan.md
+- docs/user_guides/content_analysis_workflows.md
+- docs/development/day19_plan.md
+- docs/api/course_management_api.md
+- docs/architecture/architecture_overview.md
+- docs/api/progress_metrics.md
+- docs/api/user_management_api.md
+- docs/api/interventions_api.md
+- docs/architecture/dependency_tracking_protocol.md
+- docs/development/student_course_navigator.md
+- docs/api/metadata_schema_and_extension_points.md
+- docs/development/day24_plan.md
+- docs/architecture/content_similarity.md
+- docs/development/day17_plan.md
 - docs/api/service_health_protocol.md
+- docs/api/search_api.md
+- docs/development/day29_plan.md
+- docs/architecture/health_monitoring_protocol.md
+- docs/development/day31_plan.md
+- docs/generated/index.md
+- docs/architecture/knowledge_graph.md
+- docs/development/pytest-qt-pyqt6-fix.md
+- docs/api/milestone_tracker.md
+- docs/development/day12_plan.md
+- docs/api/vector_db_api.md
+- docs/api/manual_grading_procedures.md
+- docs/ui/professor_upload_widget_api.md
+- docs/architecture/admin_security.md
+- docs/development/day26_plan.md
+- docs/development/day18_plan.md
+- docs/development/day20_plan.md
+- docs/development/advanced_ai_integration_workflows.md
+- docs/architecture/compatibility_impact_analysis.md
+- docs/development/day18_changelog.md
+- docs/architecture/vector_db.md
 - docs/user_guides/testing_procedures.md
-- docs/architecture/content_type_registry.md
+- docs/architecture/course_structure.md
+- docs/development/change_simulation_process.md
+- docs/user_guides/prompt_engineering.md
+- docs/architecture/analytics_integration.md
+- docs/development/day13_plan.md
+- docs/development/integration_test_documentation.md
+- docs/api/batch_content_metadata_api.md
+- docs/development/test_coverage_notes_day18.md
+- docs/development/tdd_docs_awareness_protocol.md
 - docs/api/upload_system_api.md
+- docs/api/notification_api.md
+- docs/development/tdd_workflow_guidelines.md
+- docs/architecture/content_type_registry.md
+- docs/ui/professor_upload_widget_user.md
+- docs/development/day25_plan.md
+- docs/reports/test_coverage_report.md
+- docs/user_guides/semantic_search.md
+- docs/api/feedback_format_specifications.md
+- docs/user_guides/admin_course_mgmt.md
+- docs/user_guides/admin_user_mgmt.md
+- docs/README.md
+- docs/api/tagging_system.md
+- docs/development/user_management_plan.md
+- docs/ui/student_dashboard_widget_api.md
+- docs/api/assessment_delivery_workflow.md
+- docs/user_guides/external_integration.md
+- docs/content_management_integration.md
+- docs/index.md
+- docs/user_guides/course_organization_features.md
+- docs/reports/week2_progress_report.md
+- docs/api/resource_allocation_api.md
+- docs/development/day15_plan.md
+- docs/user_guides/student_dashboard_features.md
+- docs/api/feature_development_tracker.md
+- docs/development/day11_done_criteria.md
+- docs/architecture/service_health_protocol.md
+- docs/api/content_similarity_api.md
+- docs/generated/README.md
+- docs/user_guides/advanced_ai_integration_workflows.md
+- docs/api/prompt_templates.md
+- docs/development/day22_plan.md
+- docs/integration_framework.md
+- docs/architecture/integration_architecture.md
+- docs/development/day23_plan.md
+- docs/api/grading_rule_specifications.md
+- docs/development/day28_plan.md
+- docs/api/course_enrollment_api.md
+- docs/development/day10_done_criteria.md
+- docs/reports/security_review_report.md
+- docs/ui/multi_format_content_viewer.md
+- docs/ui/navigator_customization.md
+- docs/architecture/conversation_architecture.md
+- docs/architecture/week2_integration.md
+- docs/doc_index.md
+- docs/api/student_dashboard_widgets.md
+- docs/api/resource_discovery_api.md
+- docs/user_guides/concept_relationships.md
+- docs/development/day21_plan.md
+- docs/development/day27_plan.md
+- docs/architecture/course_organization_integration.md
+- docs/user_guides/week2_features.md
+- docs/architecture/dependency_maps.md
+- docs/user_guides/conversation_usage.md
+- docs/development/day30_plan.md
+- docs/user_guides/enrollment_workflow.md
+- docs/user_guides/admin_workflows.md
+- docs/api/batch_operations.md
+- docs/ui/ui_testing_and_performance_benchmarks.md
 
 ### ⚠️ Unmatched in Index (Found in scan/output, not listed in doc_index.md):
-- api/upload_system_api.md
-- api/assessment_delivery_workflow.md
-- api/manual_grading_procedures.md
-- api/resource_allocation_api.md
-- api/metadata_schema_and_extension_points.md
-- architecture/service_health_protocol.md
-- api/resource_discovery_api.md
-- architecture/dependency_tracking_protocol.md
-- api/grading_rule_specifications.md
-- api/course_management_api.md
-- api/prompt_templates.md
-- api/search_api.md
-- api/milestone_tracker.md
-- api/vector_db_api.md
 - api/service_health_protocol.md
-- api/user_management_api.md
-- api/week2_api.md
-- api/course_enrollment_api.md
 - api/content_similarity_api.md
-- api/feedback_format_specifications.md
-- api/batch_content_metadata_api.md
+- api/grading_rule_specifications.md
+- api/milestone_tracker.md
 - api/interventions_api.md
-- architecture/health_monitoring_protocol.md
-- api/feature_development_tracker.md
-- api/batch_content_metadata_examples.md
-- api/batch_operations.md
-- api/student_dashboard_widgets.md
-- api/progress_metrics.md
 - api/tagging_system.md
+- api/batch_content_metadata_api.md
+- api/batch_content_metadata_examples.md
+- api/assessment_delivery_workflow.md
+- api/upload_system_api.md
+- api/course_enrollment_api.md
+- api/resource_discovery_api.md
+- api/resource_allocation_api.md
+- api/student_dashboard_widgets.md
+- api/search_api.md
+- api/user_management_api.md
+- architecture/health_monitoring_protocol.md
+- api/prompt_templates.md
+- api/batch_operations.md
+- api/course_management_api.md
+- api/feature_development_tracker.md
+- api/progress_metrics.md
+- api/week2_api.md
+- api/manual_grading_procedures.md
+- api/vector_db_api.md
+- api/metadata_schema_and_extension_points.md
 - api/notification_api.md
+- architecture/dependency_tracking_protocol.md
+- api/feedback_format_specifications.md
+- architecture/service_health_protocol.md
 
 ### Errors and Undocumented Sections:
 - Undocumented: app/core/auth/credential_manager.py::CredentialManager
@@ -1815,6 +1925,21 @@ Main orchestrator for Week 2 integration efforts.
 - Undocumented: app/core/monitoring/resource_registry.py::ResourceAssignment
 - Undocumented: app/core/monitoring/resource_registry.py::Resource
 - Undocumented: app/core/monitoring/ServiceHealthDashboard_Class.py::ComponentStatus
+- Undocumented: app/core/monitoring/error_logging.py::ErrorSeverity
+- Undocumented: app/core/monitoring/error_logging.py::ErrorEntry
+- Undocumented: app/core/monitoring/error_logging.py::ErrorLogger
+- Undocumented: app/core/monitoring/usage_analytics.py::ActivityEvent
+- Undocumented: app/core/monitoring/usage_analytics.py::SessionRecord
+- Undocumented: app/core/monitoring/usage_analytics.py::UsageAnalytics
+- Undocumented: app/core/monitoring/health_check.py::HealthStatus
+- Undocumented: app/core/monitoring/health_check.py::Component
+- Undocumented: app/core/monitoring/health_check.py::HealthCheckAPI
+- Undocumented: app/core/monitoring/alert_notification.py::AlertLevel
+- Undocumented: app/core/monitoring/alert_notification.py::AlertRule
+- Undocumented: app/core/monitoring/alert_notification.py::AlertNotification
+- Undocumented: app/core/monitoring/integration_failure_detection.py::IntegrationMonitor
+- Undocumented: app/core/monitoring/compatibility_monitoring.py::CompatibilityMonitor
+- Undocumented: app/core/monitoring/orchestration.py::MonitoringOrchestrator
 - Undocumented: app/core/extraction/structured_data_extractor.py::StructuredDataExtractionError
 - Undocumented: app/core/extraction/text_extractor.py::TextExtractionError
 - Undocumented: app/core/extraction/multimedia_metadata_extractor.py::MultimediaMetadataExtractionError

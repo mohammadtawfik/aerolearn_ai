@@ -1,0 +1,40 @@
+flowchart TD
+  subgraph Core_Monitoring_Modules
+    A[HealthStatus.py\n- HealthStatus\n- HealthMetric\n- HealthMetricType]
+    B[HealthProvider.py\n- HealthProvider(ABC)]
+    C[Events.py\n- HealthEvent\n- HealthEventDispatcher]
+    D[IntegrationMonitor.py\n- IntegrationMonitor]
+    E[IntegrationHealthManager.py\n- IntegrationHealthManager\n- Orchestration]
+    F[IntegrationPointRegistry.py\n- IntegrationPointRegistry]
+  end
+  subgraph App_Monitoring_Orchestration
+    G[ServiceHealthDashboard]
+    H[MonitoringComponentRegistry]
+    I[MonitoringOrchestrator]
+  end
+  Tests[Unit/Integration Tests\n(/tests/unit/core/monitoring/\n/tests/integration/monitoring/)]
+  Docs[Protocol/Docs\n- /docs/architecture/*protocol.md]
+
+  B --> A
+  A --> C
+  C --> E
+  D --> E
+  F --> E
+  E --> G
+  E --> H
+  G --> I
+  H --> I
+  Tests --> G
+  Tests --> H
+  Tests --> I
+  Tests --> D
+  Tests --> E
+  Docs --> A
+  Docs --> B
+  Docs --> C
+  Docs --> D
+  Docs --> E
+  Docs --> F
+  Docs --> G
+  Docs --> H
+  Docs --> I

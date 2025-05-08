@@ -23,6 +23,22 @@ class HealthStatus(Enum):
     def __str__(self):
         return self.value
 
+class ComponentState(Enum):
+    """
+    Canonical protocol-compliant component state enum used by dashboards, registry, monitoring systems, etc.
+    """
+    INITIALIZING = "INITIALIZING"
+    RUNNING = "RUNNING"
+    STOPPED = "STOPPED"
+    DEGRADED = "DEGRADED"
+    ERROR = "ERROR"
+    FAILED = "FAILED"
+    HEALTHY = "HEALTHY"
+    UNKNOWN = "UNKNOWN"
+
+    def __str__(self):
+        return self.value
+
 class HealthMetricType(Enum):
     """
     Protocol-compliant metric types for health monitoring.

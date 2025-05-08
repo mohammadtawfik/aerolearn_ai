@@ -164,8 +164,15 @@ This protocol defines the canonical, tested, and production-ready APIs, interfac
 ### Class: `IntegrationMonitor`
 
 - **API:**
+    - `register_component(component_id)`
+    - `set_metrics(component_id, metric_record)`
+        - **Updated**: Each call to `set_metrics` now appends the new metric_record to per-component historical metrics, so `get_metrics_history(component_id)` returns every version in set order (test-driven, compliance required).
+    - `get_metrics_history(component_id)`
+        - Returns a list of metric dicts, with each dict corresponding to a call of `set_metrics`. Older doc versions recorded only the previous value; now, each value, in order, is saved to history as specified by test and implementation.
     - `monitor_integration(integration)`
-    - `record_transaction(integration, status: str, duration: int)`
+    - `record_transaction(integration, status: str, duration: int, details=None)`
+    - `get_transactions(integration)`
+        - **New API**: Returns list of all transaction records for the integration (per TDD/test compliance).
     - `get_failure_trace(integration) -> List[Dict]`
     - `detect_failure_patterns(integration) -> Dict`
     - `get_health_score(integration) -> float`
@@ -178,6 +185,7 @@ This protocol defines the canonical, tested, and production-ready APIs, interfac
     - `duration`: int | None (None in simulated)
     - `timestamp`: float
     - `fail_type`: str (optional; only present if simulated/injected)
+    - `details`: dict (optional; additional transaction metadata)
 
 - **Pattern Fields:**
     - `pattern`: "repeated_failure" | "occasional_failure" | None
@@ -185,6 +193,23 @@ This protocol defines the canonical, tested, and production-ready APIs, interfac
 
 - **Health Score:**
     - Value between 0 and 1 (ratio of successful transactions to total)
+
+### Class: `IntegrationPointRegistry`
+
+- **API:**
+    - `register_point(point_id, value=None)`
+        - **Updated**: Accepts `value` as optional. If omitted, metadata is `None`. Repeated calls with the same point_id update the associated value and do NOT duplicate the id in the registry.
+    - `get_point(point_id)`
+        - **New API**: Returns the value/metadata for the named integration point; required by tests and covered by implementation.
+    - `get_all_points()`
+        - **New API**: Returns all points as a `{point_id: value}` dictionary.
+    - `list_points()`
+        - Returns list of all registered point ids in order of registration, deduplicated.
+    - Legacy compatibility: `lookup`, `get_all`, and `get_all_keys` retained.
+
+- **Behavioral Notes:**
+    - Registering a point with the same id multiple times will always update the value but will never result in duplicate ids being returned from `list_points` or key queries.
+    - If `register_point` is called with just an id and no value, the value will default to `None` (test and backward compatibility).
 
 ---
 
@@ -237,4 +262,8 @@ _All API events, payloads, and record fields must contain only the fields descri
 
 Please see `/app/core/monitoring/metrics.py` for the full implementation and `/tests/unit/core/monitoring/test_service_health_dashboard.py` for the reference implementation and protocol coverage.
 
-**This documentation reflects the canonical reference as implemented and tested in Day 23 sessions. For any future changes, update both the test suite and this protocol document together, in accordance with strict TDD and protocol-driven practices.**
+**UPDATE Day24:** IntegrationMonitor and IntegrationPointRegistry APIs have been updated and fully test-verified. Every API, signature, and logic note above matches canonical test expectations as implemented in:
+- `/tests/unit/core/monitoring/test_integration_monitor.py`
+- `/tests/unit/core/monitoring/test_integration_point_registry.py`
+
+**This documentation reflects the canonical reference as implemented and tested in Day 24 sessions. For any future changes, update both the test suite and this protocol document together, in accordance with strict TDD and protocol-driven practices.**

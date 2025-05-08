@@ -23,3 +23,10 @@ class HealthProvider(ABC):
         Abstract protocol method to register a status/event listener.
         """
         pass
+
+    @abstractmethod
+    def get_metrics(self):
+        """
+        Return health metrics (list or dict as specified in protocol).
+        """
+        pass
